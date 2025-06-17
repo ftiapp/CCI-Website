@@ -1,0 +1,148 @@
+export const locales = ['th', 'en'];
+export const defaultLocale = 'th';
+
+export function getLocale(pathname) {
+  const locale = pathname.split('/')[1];
+  return locales.includes(locale) ? locale : defaultLocale;
+}
+
+export function getTranslations(locale) {
+  return translations[locale] || translations[defaultLocale];
+}
+
+export const translations = {
+  th: {
+    common: {
+      title: 'การลงทะเบียนสัมมนา CCI',
+      subtitle: 'องค์กรคาร์บอนเครดิต',
+      next: 'ถัดไป',
+      back: 'ย้อนกลับ',
+      submit: 'ส่งข้อมูล',
+      required: 'จำเป็นต้องกรอก',
+      success: 'สำเร็จ',
+      error: 'เกิดข้อผิดพลาด',
+      loading: 'กำลังโหลด...',
+      language: 'ภาษา',
+      duplicateName: 'ชื่อและนามสกุลนี้มีในระบบแล้ว กรุณาใช้ชื่อหรือนามสกุลอื่น',
+      systemError: 'เกิดข้อผิดพลาดในระบบ กรุณาลองใหม่อีกครั้ง',
+    },
+    nav: {
+      home: 'หน้าหลัก',
+      schedule: 'กำหนดการ',
+      register: 'ลงทะเบียน',
+    },
+    footer: {
+      quickLinks: 'ลิงก์ด่วน',
+      contactUs: 'ติดต่อเรา',
+      allRightsReserved: 'สงวนลิขสิทธิ์',
+    },
+    home: {
+      welcome: 'ยินดีต้อนรับสู่การลงทะเบียนสัมมนา CCI',
+      description: 'งานสัมมนาเกี่ยวกับคาร์บอนเครดิตและการพัฒนาอย่างยั่งยืน',
+      registerButton: 'ลงทะเบียนเข้าร่วมงาน',
+      scheduleButton: 'ดูกำหนดการ',
+    },
+    schedule: {
+      title: 'กำหนดการสัมมนา',
+      morning: 'ช่วงเช้า',
+      afternoon: 'ช่วงบ่าย',
+      time: 'เวลา',
+      topic: 'หัวข้อ',
+      speaker: 'วิทยากร',
+      room: 'ห้อง',
+      description: 'รายละเอียด',
+    },
+    registration: {
+      title: 'ลงทะเบียนเข้าร่วมงาน',
+      personalInfo: 'ข้อมูลส่วนตัว',
+      organizationInfo: 'ข้อมูลองค์กร',
+      attendanceInfo: 'ข้อมูลการเข้าร่วม',
+      confirmation: 'ยืนยันข้อมูล',
+      firstName: 'ชื่อ',
+      lastName: 'นามสกุล',
+      email: 'อีเมล',
+      phone: 'เบอร์โทรศัพท์',
+      organizationName: 'ชื่อองค์กร',
+      organizationType: 'ประเภทองค์กร',
+      transportationType: 'วิธีการเดินทาง',
+      attendanceType: 'รูปแบบการเข้าร่วม',
+      attendanceMorning: 'เข้าร่วมช่วงเช้า (พิธีเปิด)',
+      attendanceAfternoon: 'เข้าร่วมช่วงบ่าย (เลือกห้องสัมมนา)',
+      attendanceFullDay: 'เข้าร่วมตลอดทั้งวัน (พิธีเปิด + สัมมนา)',
+      selectRoom: 'เลือกห้องสัมมนา',
+      registrationSuccess: 'ลงทะเบียนสำเร็จ',
+      registrationId: 'รหัสลงทะเบียน',
+      thankYou: 'ขอบคุณสำหรับการลงทะเบียน',
+      confirmationMessage: 'กรุณาตรวจสอบข้อมูลให้ถูกต้องก่อนยืนยัน',
+      invalidEmail: 'กรุณากรอกอีเมลให้ถูกต้อง',
+      invalidPhone: 'กรุณากรอกเบอร์โทรศัพท์ให้ถูกต้อง',
+    },
+  },
+  en: {
+    common: {
+      title: 'CCI Seminar Registration',
+      subtitle: 'Carbon Credit Organization',
+      next: 'Next',
+      back: 'Back',
+      submit: 'Submit',
+      required: 'Required',
+      success: 'Success',
+      error: 'Error',
+      loading: 'Loading...',
+      language: 'Language',
+      duplicateName: 'This name is already registered. Please use a different name.',
+      systemError: 'System error occurred. Please try again.',
+    },
+    nav: {
+      home: 'Home',
+      schedule: 'Schedule',
+      register: 'Register',
+    },
+    footer: {
+      quickLinks: 'Quick Links',
+      contactUs: 'Contact Us',
+      allRightsReserved: 'All Rights Reserved',
+    },
+    home: {
+      welcome: 'Welcome to CCI Seminar Registration',
+      description: 'Seminar on carbon credit and sustainable development',
+      registerButton: 'Register Now',
+      scheduleButton: 'View Schedule',
+    },
+    schedule: {
+      title: 'Seminar Schedule',
+      morning: 'Morning Session',
+      afternoon: 'Afternoon Session',
+      time: 'Time',
+      topic: 'Topic',
+      speaker: 'Speaker',
+      room: 'Room',
+      description: 'Description',
+    },
+    registration: {
+      title: 'Register for the Seminar',
+      personalInfo: 'Personal Information',
+      organizationInfo: 'Organization Information',
+      attendanceInfo: 'Attendance Information',
+      confirmation: 'Confirmation',
+      firstName: 'First Name',
+      lastName: 'Last Name',
+      email: 'Email',
+      phone: 'Phone Number',
+      organizationName: 'Organization Name',
+      organizationType: 'Organization Type',
+      transportationType: 'Transportation Method',
+      attendanceType: 'Attendance Type',
+      attendanceMorning: 'Morning Session (Opening Ceremony)',
+      attendanceAfternoon: 'Afternoon Session (Select Seminar Room)',
+      attendanceFullDay: 'Full Day (Opening Ceremony + Seminar)',
+      selectRoom: 'Select Seminar Room',
+      registrationSuccess: 'Registration Successful',
+      registrationId: 'Registration ID',
+      thankYou: 'Thank you for registering',
+      confirmationMessage: 'Please verify your information before confirming',
+      invalidEmail: 'Please enter a valid email',
+      invalidPhone: 'Please enter a valid phone number',
+    },
+  },
+};

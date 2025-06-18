@@ -142,8 +142,10 @@ export async function registerParticipant(participantData) {
     car_type,
     car_type_other,
     car_passenger_type,
-    is_attending_morning,
-    is_attending_afternoon,
+    location_type,
+    bangkok_district_id,
+    province_id,
+    attendance_type,
     selected_room_id 
   } = participantData;
 
@@ -166,8 +168,9 @@ export async function registerParticipant(participantData) {
     (uuid, first_name, last_name, email, phone, organization_name, 
     organization_type_id, transportation_type_id, transportation_category, 
     public_transport_type, public_transport_other, car_type, car_type_other, 
-    car_passenger_type, is_attending_morning, is_attending_afternoon, selected_room_id) 
-    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+    car_passenger_type, location_type, bangkok_district_id, province_id, 
+    attendance_type, selected_room_id) 
+    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
     [
       uuid, 
       first_name, 
@@ -183,8 +186,10 @@ export async function registerParticipant(participantData) {
       car_type,
       car_type_other,
       car_passenger_type,
-      is_attending_morning,
-      is_attending_afternoon,
+      location_type,
+      bangkok_district_id,
+      province_id,
+      attendance_type,
       selected_room_id
     ]
   );

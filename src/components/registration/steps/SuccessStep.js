@@ -4,6 +4,7 @@ import { getTranslations } from '@/i18n';
 import { CheckCircleIcon } from '@heroicons/react/24/outline';
 import Button from '@/components/ui/Button';
 import Link from 'next/link';
+import EventTicket from '@/components/ui/EventTicket';
 
 export default function SuccessStep({ 
   locale, 
@@ -94,95 +95,38 @@ export default function SuccessStep({
   };
   
   return (
-    <div className="text-center">
-      <div className="flex justify-center mb-6">
-        <div className="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center">
-          <CheckCircleIcon className="w-10 h-10 text-green-600" />
-        </div>
-      </div>
-      
-      <h2 className="text-2xl font-prompt font-bold text-earth-900 mb-2">
-        {t.registration.registrationSuccess}
-      </h2>
-      
-      <p className="text-earth-700 mb-8">
-        {t.registration.thankYou}
-      </p>
-      
-      <div className="bg-earth-50 rounded-lg p-6 border border-earth-200 mb-8 text-left">
-        <div className="mb-6">
-          <p className="text-sm text-earth-600">{t.registration.registrationId}</p>
-          <p className="text-xl font-prompt font-bold text-beige-700">{registrationId}</p>
+    <div className="max-w-4xl mx-auto">
+      <div className="text-center mb-8">
+        <div className="flex justify-center mb-6">
+          <div className="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center">
+            <CheckCircleIcon className="w-10 h-10 text-green-600" />
+          </div>
         </div>
         
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          <div>
-            <p className="text-sm text-earth-600">{t.registration.firstName}</p>
-            <p className="font-medium text-earth-800">{formData.firstName}</p>
-          </div>
-          
-          <div>
-            <p className="text-sm text-earth-600">{t.registration.lastName}</p>
-            <p className="font-medium text-earth-800">{formData.lastName}</p>
-          </div>
-          
-          <div>
-            <p className="text-sm text-earth-600">{t.registration.attendanceType}</p>
-            <p className="font-medium text-earth-800">{getAttendanceTypeLabel()}</p>
-          </div>
-          
-          {(formData.attendanceType === 'afternoon' || formData.attendanceType === 'full_day') && selectedRoom && (
-            <div>
-              <p className="text-sm text-earth-600">{t.registration.selectRoom}</p>
-              <p className="font-medium text-earth-800">
-                {locale === 'th' ? selectedRoom.name_th : selectedRoom.name_en}
-              </p>
-            </div>
-          )}
-          
-          <div>
-            <p className="text-sm text-earth-600">{t.registration.organizationName}</p>
-            <p className="font-medium text-earth-800">{formData.organizationName}</p>
-          </div>
-          
-          <div>
-            <p className="text-sm text-earth-600">{t.registration.organizationType}</p>
-            <p className="font-medium text-earth-800">
-              {selectedOrgType ? 
-                (locale === 'th' ? selectedOrgType.name_th : selectedOrgType.name_en) : 
-                ''}
-            </p>
-          </div>
-          
-          <div className="col-span-2 mt-2">
-            <p className="text-sm text-earth-600">{locale === 'th' ? 'วิธีการเดินทาง' : 'Transportation Method'}</p>
-            <p className="font-medium text-earth-800">{getTransportationCategoryLabel()}</p>
-            
-            {formData.transportation_category === 'public' && (
-              <div className="mt-1 pl-4 border-l-2 border-beige-200">
-                <p className="text-sm text-earth-600">{locale === 'th' ? 'ประเภทขนส่งมวลชน' : 'Public Transportation Type'}</p>
-                <p className="font-medium text-earth-800">{getPublicTransportTypeLabel()}</p>
-              </div>
-            )}
-            
-            {formData.transportation_category === 'private' && (
-              <div className="mt-1 pl-4 border-l-2 border-beige-200">
-                <div className="mb-1">
-                  <p className="text-sm text-earth-600">{locale === 'th' ? 'ประเภทรถ' : 'Car Type'}</p>
-                  <p className="font-medium text-earth-800">{getCarTypeLabel()}</p>
-                </div>
-                
-                <div>
-                  <p className="text-sm text-earth-600">{locale === 'th' ? 'ประเภทผู้เดินทาง' : 'Passenger Type'}</p>
-                  <p className="font-medium text-earth-800">{getPassengerTypeLabel()}</p>
-                </div>
-              </div>
-            )}
-          </div>
-        </div>
+        <h2 className="text-2xl font-prompt font-bold text-earth-900 mb-2">
+          {t.registration.registrationSuccess}
+        </h2>
+        
+        <p className="text-earth-700 mb-8">
+          {t.registration.thankYou}
+        </p>
       </div>
       
-      <div className="flex justify-center">
+      {/* Event Ticket (Movie Ticket Style) */}
+      <div className="mb-10">
+        <EventTicket 
+          registrationId={registrationId}
+          firstName={formData?.firstName}
+          lastName={formData?.lastName}
+          phone={formData?.phone}
+          attendanceType={formData?.attendanceType}
+          selectedRoom={selectedRoom}
+          locale={locale}
+        />
+      </div>
+      
+      {/* Action Buttons */}
+      <div className="flex justify-center mt-8">
         <Link href={`/${locale}/schedule`}>
           <Button variant="outline" className="mr-4">
             {t.schedule.title}

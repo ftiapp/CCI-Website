@@ -3,9 +3,50 @@
 import { getTranslations } from '@/i18n';
 import RadioGroup from '@/components/ui/RadioGroup';
 import Select from '@/components/ui/Select';
-import { CalendarIcon, DocumentTextIcon } from '@heroicons/react/24/outline';
-import { useState } from 'react';
+import { CalendarIcon, DocumentTextIcon, XMarkIcon } from '@heroicons/react/24/outline';
+import { useState, useEffect } from 'react';
 import ScheduleClient from '@/components/schedule/ScheduleClient';
+
+// Component to render schedule content inside modal or below the form
+function ScheduleModalContent({ scheduleData, locale }) {
+  // Extract event date (use the first item's date)
+  const eventDate = scheduleData.length > 0 ? scheduleData[0].event_date : null;
+  
+  // Group schedule by morning/afternoon
+  const morningSchedule = scheduleData.filter(item => item.is_morning);
+  const afternoonSchedule = scheduleData.filter(item => !item.is_morning);
+  
+  // Group afternoon schedule by room
+  const afternoonByRoom = {};
+  afternoonSchedule.forEach(item => {
+    if (!afternoonByRoom[item.room_id]) {
+      afternoonByRoom[item.room_id] = [];
+    }
+    afternoonByRoom[item.room_id].push(item);
+  });
+  
+  // Prepare translations for client component
+  const translations = {
+    title: locale === 'th' ? 'กำหนดการ' : 'Schedule',
+    morning: locale === 'th' ? 'ช่วงเช้า' : 'Morning',
+    afternoon: locale === 'th' ? 'ช่วงบ่าย' : 'Afternoon',
+    time: locale === 'th' ? 'เวลา' : 'Time',
+    topic: locale === 'th' ? 'หัวข้อ' : 'Topic',
+    speaker: locale === 'th' ? 'วิทยากร' : 'Speaker',
+    room: locale === 'th' ? 'ห้อง' : 'Room',
+    description: locale === 'th' ? 'รายละเอียด' : 'Description'
+  };
+
+  return (
+    <ScheduleClient
+      morningSchedule={morningSchedule}
+      afternoonByRoom={afternoonByRoom}
+      locale={locale}
+      translations={translations}
+      eventDate={eventDate}
+    />
+  );
+}
 
 export default function AttendanceInfoStep({ 
   locale, 
@@ -15,10 +56,32 @@ export default function AttendanceInfoStep({
   handleRadioChange,
   seminarRooms
 }) {
-  const [showSchedule, setShowSchedule] = useState(false);
+  const [isScheduleModalOpen, setIsScheduleModalOpen] = useState(false);
+  const [scheduleData, setScheduleData] = useState([]);
+  const [isLoading, setIsLoading] = useState(false);
+  
   // Make sure locale is properly awaited before using it with getTranslations
   const t = getTranslations(locale || 'th');
   
+  // Fetch schedule data when modal is opened
+  const fetchScheduleData = async () => {
+    setIsLoading(true);
+    try {
+      const response = await fetch('/api/schedule');
+      const result = await response.json();
+      if (result.success) {
+        setScheduleData(result.data);
+      } else {
+        throw new Error(result.error || 'Failed to fetch schedule data');
+      }
+    } catch (error) {
+      console.error('Error fetching schedule data:', error);
+      setScheduleData([]);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
   // Format seminar rooms for select options
   const roomOptions = seminarRooms
     .filter(room => room.id > 1) // Filter out main conference room
@@ -45,20 +108,11 @@ export default function AttendanceInfoStep({
   
   return (
     <div>
-      <div className="flex justify-between items-center mb-6">
+      <div className="mb-6">
         <h2 className="text-xl font-prompt font-semibold text-earth-800 flex items-center">
           <CalendarIcon className="w-5 h-5 mr-2 text-beige-600" />
           {t.registration.attendanceInfo}
         </h2>
-        
-        <button
-          type="button"
-          onClick={() => setShowSchedule(true)}
-          className="flex items-center px-4 py-2 bg-beige-100 hover:bg-beige-200 text-earth-800 rounded-md transition-colors"
-        >
-          <DocumentTextIcon className="w-4 h-4 mr-2" />
-          {locale === 'th' ? 'ดูกำหนดการ' : 'View Schedule'}
-        </button>
       </div>
       
       <RadioGroup
@@ -86,114 +140,60 @@ export default function AttendanceInfoStep({
       )}
       
       {/* Schedule Modal */}
-      {showSchedule && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center p-4">
-          <div className="bg-white rounded-lg shadow-xl max-w-4xl w-full max-h-[90vh] overflow-auto">
-            <div className="p-6 border-b border-earth-200">
-              <div className="flex justify-between items-center">
-                <h3 className="text-xl font-prompt font-semibold text-earth-800">
-                  {locale === 'th' ? 'กำหนดการงานสัมมนา' : 'Seminar Schedule'}
-                </h3>
-                <button
-                  onClick={() => setShowSchedule(false)}
-                  className="text-earth-500 hover:text-earth-700"
-                >
-                  <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-                  </svg>
-                </button>
-              </div>
-            </div>
-            
-            <div className="p-6">
-              {/* แสดงวันที่จัดงาน */}
-              <div className="mb-6 text-center">
-                <h3 className="text-lg font-prompt font-semibold text-earth-800">
-                  {seminarRooms.length > 0 && seminarRooms[0].event_date && (
-                    locale === 'th' ? 
-                      `วันที่ ${new Date(seminarRooms[0].event_date).toLocaleDateString('th-TH', { year: 'numeric', month: 'long', day: 'numeric' })}` : 
-                      `${new Date(seminarRooms[0].event_date).toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' })}`
-                  )}
-                </h3>
-              </div>
-              
-              {/* ภาคเช้า */}
-              <div className="mb-6">
-                <h4 className="font-prompt font-medium text-lg text-earth-800 mb-2">
-                  {locale === 'th' ? 'ภาคเช้า' : 'Morning Session'}
-                </h4>
-                <div className="bg-beige-50 p-4 rounded-md border border-beige-200">
-                  <ul className="space-y-3">
-                    {seminarRooms
-                      .filter(item => item.is_morning === 1)
-                      .map(item => {
-                        const timeStart = new Date(`2000-01-01T${item.start_time}`).toLocaleTimeString(locale === 'th' ? 'th-TH' : 'en-US', { hour: '2-digit', minute: '2-digit' });
-                        const timeEnd = new Date(`2000-01-01T${item.end_time}`).toLocaleTimeString(locale === 'th' ? 'th-TH' : 'en-US', { hour: '2-digit', minute: '2-digit' });
-                        return (
-                          <li key={item.id} className="flex">
-                            <span className="text-beige-700 font-medium w-24">{timeStart} - {timeEnd}</span>
-                            <div className="flex-1">
-                              <span className="text-earth-800">{locale === 'th' ? item.title_th : item.title_en}</span>
-                              {item.speaker_th && (
-                                <div className="text-sm text-earth-600 mt-1">
-                                  {locale === 'th' ? `วิทยากร: ${item.speaker_th}` : `Speaker: ${item.speaker_en}`}
-                                </div>
-                              )}
-                            </div>
-                          </li>
-                        );
-                      })}
-                  </ul>
-                </div>
-              </div>
-              
-              {/* ภาคบ่าย */}
-              <div>
-                <h4 className="font-prompt font-medium text-lg text-earth-800 mb-2">
-                  {locale === 'th' ? 'ภาคบ่าย' : 'Afternoon Session'}
-                </h4>
-                <div className="bg-beige-50 p-4 rounded-md border border-beige-200">
-                  <ul className="space-y-3">
-                    {seminarRooms
-                      .filter(item => item.is_morning === 0)
-                      .map(item => {
-                        const timeStart = new Date(`2000-01-01T${item.start_time}`).toLocaleTimeString(locale === 'th' ? 'th-TH' : 'en-US', { hour: '2-digit', minute: '2-digit' });
-                        const timeEnd = new Date(`2000-01-01T${item.end_time}`).toLocaleTimeString(locale === 'th' ? 'th-TH' : 'en-US', { hour: '2-digit', minute: '2-digit' });
-                        return (
-                          <li key={item.id} className="flex">
-                            <span className="text-beige-700 font-medium w-24">{timeStart} - {timeEnd}</span>
-                            <div className="flex-1">
-                              <span className="text-earth-800">{locale === 'th' ? item.title_th : item.title_en}</span>
-                              {item.room_name_th && (
-                                <div className="text-sm text-beige-700 mt-1">
-                                  {locale === 'th' ? `ห้อง: ${item.room_name_th}` : `Room: ${item.room_name_en}`}
-                                </div>
-                              )}
-                              {item.speaker_th && (
-                                <div className="text-sm text-earth-600 mt-1">
-                                  {locale === 'th' ? `วิทยากร: ${item.speaker_th}` : `Speaker: ${item.speaker_en}`}
-                                </div>
-                              )}
-                            </div>
-                          </li>
-                        );
-                      })}
-                  </ul>
-                </div>
-              </div>
-            </div>
-            
-            <div className="p-4 border-t border-earth-200 bg-earth-50 flex justify-end">
-              <button
-                onClick={() => setShowSchedule(false)}
-                className="px-4 py-2 bg-beige-600 hover:bg-beige-700 text-white rounded-md transition-colors"
+      {isScheduleModalOpen && (
+        <div className="fixed inset-0 z-50 overflow-auto bg-black bg-opacity-50 flex items-center justify-center p-4">
+          <div className="bg-white rounded-lg shadow-xl w-full max-w-6xl max-h-[90vh] overflow-auto">
+            <div className="sticky top-0 z-10 flex justify-between items-center p-4 border-b bg-white">
+              <h3 className="text-xl font-prompt font-semibold text-earth-800">
+                {locale === 'th' ? 'กำหนดการ' : 'Schedule'}
+              </h3>
+              <button 
+                onClick={() => setIsScheduleModalOpen(false)}
+                className="p-2 rounded-full hover:bg-gray-100"
               >
-                {locale === 'th' ? 'ปิด' : 'Close'}
+                <XMarkIcon className="w-5 h-5 text-gray-500" />
               </button>
+            </div>
+            
+            <div className="p-4">
+              {isLoading ? (
+                <div className="flex justify-center items-center py-12">
+                  <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-beige-600"></div>
+                </div>
+              ) : scheduleData.length > 0 ? (
+                <ScheduleModalContent scheduleData={scheduleData} locale={locale} />
+              ) : (
+                <p className="text-center py-8 text-gray-500">
+                  {locale === 'th' ? 'ไม่พบข้อมูลกำหนดการ' : 'No schedule data found'}
+                </p>
+              )}
             </div>
           </div>
         </div>
       )}
+      
+      {/* Schedule section displayed below the form */}
+      <div className="mt-12 pt-8 border-t border-gray-200">
+        <h3 className="text-xl font-prompt font-semibold text-earth-800 mb-6 flex items-center">
+          <CalendarIcon className="w-5 h-5 mr-2 text-beige-600" />
+          {locale === 'th' ? 'กำหนดการ' : 'Schedule'}
+        </h3>
+        
+        {isLoading ? (
+          <div className="flex justify-center items-center py-12">
+            <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-beige-600"></div>
+          </div>
+        ) : scheduleData.length > 0 ? (
+          <ScheduleModalContent scheduleData={scheduleData} locale={locale} />
+        ) : (
+          <button
+            onClick={fetchScheduleData}
+            className="w-full py-4 border-2 border-dashed border-beige-300 rounded-lg text-beige-600 hover:bg-beige-50 transition-colors"
+          >
+            {locale === 'th' ? 'คลิกเพื่อดูกำหนดการ' : 'Click to view schedule'}
+          </button>
+        )}
+      </div>
     </div>
   );
 }

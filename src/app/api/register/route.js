@@ -5,6 +5,9 @@ export async function POST(request) {
   try {
     const data = await request.json();
     
+    // Debug log
+    console.log('Registration data received:', data);
+    
     // Validate required fields
     const requiredFields = [
       'firstName', 
@@ -13,7 +16,8 @@ export async function POST(request) {
       'phone', 
       'organizationName', 
       'organizationTypeId', 
-      'transportation_category', 
+      'transport_type', 
+      'location_type',
       'attendanceType'
     ];
     
@@ -26,37 +30,54 @@ export async function POST(request) {
       }
     }
     
-    // Validate selectedRoomId for afternoon or full_day attendance
-    if ((data.attendanceType === 'afternoon' || data.attendanceType === 'full_day') && !data.selectedRoomId) {
+    // Validate selectedRoomId for afternoon attendance only
+    if (data.attendanceType === 'afternoon' && !data.selectedRoomId) {
       return NextResponse.json(
         { error: 'Missing required field: selectedRoomId' },
         { status: 400 }
       );
     }
     
-    // Additional validation for transportation fields
-    if (data.transportation_category === 'public' && !data.public_transport_type) {
+    // Validate location fields
+    if (data.location_type === 'bangkok' && !data.bangkok_district_id) {
       return NextResponse.json(
-        { error: 'Missing required field: public_transport_type' },
+        { error: 'Missing required field: bangkok_district_id' },
         { status: 400 }
       );
     }
     
-    if (data.transportation_category === 'private') {
-      if (!data.car_type) {
+    if (data.location_type === 'province' && !data.province_id) {
+      return NextResponse.json(
+        { error: 'Missing required field: province_id' },
+        { status: 400 }
+      );
+    }
+    
+    // Additional validation for transportation fields
+    if (data.transport_type === 'public' && !data.public_transport_id) {
+      return NextResponse.json(
+        { error: 'Missing required field: public_transport_id' },
+        { status: 400 }
+      );
+    }
+    
+    if (data.transport_type === 'private') {
+      if (!data.fuel_type) {
         return NextResponse.json(
-          { error: 'Missing required field: car_type' },
+          { error: 'Missing required field: fuel_type' },
           { status: 400 }
         );
       }
       
-      if (!data.car_passenger_type) {
+      if (!data.passenger_type) {
         return NextResponse.json(
-          { error: 'Missing required field: car_passenger_type' },
+          { error: 'Missing required field: passenger_type' },
           { status: 400 }
         );
       }
     }
+    
+    // Walking is valid without additional fields
     
     // Prepare registration data
     const registrationData = {
@@ -66,15 +87,18 @@ export async function POST(request) {
       phone: data.phone,
       organization_name: data.organizationName,
       organization_type_id: parseInt(data.organizationTypeId),
-      transportation_type_id: parseInt(data.transportationTypeId) || null,
-      transportation_category: data.transportation_category,
-      public_transport_type: data.transportation_category === 'public' ? data.public_transport_type : null,
-      public_transport_other: data.transportation_category === 'public' && data.public_transport_type === 'other' ? data.public_transport_other : null,
-      car_type: data.transportation_category === 'private' ? data.car_type : null,
-      car_type_other: data.transportation_category === 'private' && data.car_type === 'other' ? data.car_type_other : null,
-      car_passenger_type: data.transportation_category === 'private' ? data.car_passenger_type : null,
-      is_attending_morning: data.attendanceType === 'morning' || data.attendanceType === 'full_day',
-      is_attending_afternoon: data.attendanceType === 'afternoon' || data.attendanceType === 'full_day',
+      // For walking, use a default transportation_type_id of 1 (assuming 1 is a valid ID for public transportation)
+      transportation_type_id: data.transport_type === 'walking' ? 1 : (data.private_vehicle_id ? parseInt(data.private_vehicle_id) : (data.public_transport_id ? parseInt(data.public_transport_id) : 1)),
+      transportation_category: data.transport_type === 'walking' ? 'public' : data.transport_type, // Map 'walking' to 'public' category
+      public_transport_type: data.transport_type === 'public' ? data.public_transport_id : (data.transport_type === 'walking' ? 'walking' : null),
+      public_transport_other: data.transport_type === 'public' && data.public_transport_id === '999' ? data.public_transport_other : null,
+      car_type: data.transport_type === 'private' ? data.fuel_type : null,
+      car_type_other: data.transport_type === 'private' && data.fuel_type === 'other' ? data.fuel_type_other : null,
+      car_passenger_type: data.transport_type === 'private' ? data.passenger_type : null,
+      location_type: data.location_type,
+      bangkok_district_id: data.location_type === 'bangkok' ? parseInt(data.bangkok_district_id) : null,
+      province_id: data.location_type === 'province' ? parseInt(data.province_id) : null,
+      attendance_type: data.attendanceType,
       selected_room_id: data.selectedRoomId ? parseInt(data.selectedRoomId) : null
     };
     

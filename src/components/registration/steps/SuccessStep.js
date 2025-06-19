@@ -14,7 +14,8 @@ export default function SuccessStep({
   formData,
   organizationTypes,
   transportationTypes,
-  seminarRooms
+  seminarRooms,
+  isTicketPage = false
 }) {
   // Make sure locale is properly awaited before using it with getTranslations
   const t = getTranslations(locale || 'th');
@@ -746,29 +747,33 @@ export default function SuccessStep({
             {locale === 'th' ? 'ดาวน์โหลด QR' : 'Download QR'}
           </Button>
           
-          <Button 
-            onClick={sendEmail} 
-            variant="outline" 
-            className="flex items-center w-full sm:w-auto min-w-[160px] border-blue-200 hover:border-blue-300 hover:bg-blue-50"
-            disabled={sending || emailSent}
-          >
-            <EnvelopeIcon className="w-5 h-5 mr-2 text-blue-600" />
-            {emailSent 
-              ? (locale === 'th' ? 'ส่งอีเมลแล้ว' : 'Email Sent') 
-              : (locale === 'th' ? 'ส่งอีเมล' : 'Send Email')}
-          </Button>
-          
-          <Button 
-            onClick={sendSMS} 
-            variant="outline" 
-            className="flex items-center w-full sm:w-auto min-w-[160px] border-purple-200 hover:border-purple-300 hover:bg-purple-50"
-            disabled={sending || smsSent}
-          >
-            <DevicePhoneMobileIcon className="w-5 h-5 mr-2 text-purple-600" />
-            {smsSent 
-              ? (locale === 'th' ? 'ส่ง SMS แล้ว' : 'SMS Sent') 
-              : (locale === 'th' ? 'ส่ง SMS' : 'Send SMS')}
-          </Button>
+          {!isTicketPage && (
+            <>
+              <Button 
+                onClick={sendEmail} 
+                variant="outline" 
+                className="flex items-center w-full sm:w-auto min-w-[160px] border-blue-200 hover:border-blue-300 hover:bg-blue-50"
+                disabled={sending || emailSent}
+              >
+                <EnvelopeIcon className="w-5 h-5 mr-2 text-blue-600" />
+                {emailSent 
+                  ? (locale === 'th' ? 'ส่งอีเมลแล้ว' : 'Email Sent') 
+                  : (locale === 'th' ? 'ส่งอีเมล' : 'Send Email')}
+              </Button>
+              
+              <Button 
+                onClick={sendSMS} 
+                variant="outline" 
+                className="flex items-center w-full sm:w-auto min-w-[160px] border-purple-200 hover:border-purple-300 hover:bg-purple-50"
+                disabled={sending || smsSent}
+              >
+                <DevicePhoneMobileIcon className="w-5 h-5 mr-2 text-purple-600" />
+                {smsSent 
+                  ? (locale === 'th' ? 'ส่ง SMS แล้ว' : 'SMS Sent') 
+                  : (locale === 'th' ? 'ส่ง SMS' : 'Send SMS')}
+              </Button>
+            </>
+          )}
         </div>
         
         {/* Share Section */}

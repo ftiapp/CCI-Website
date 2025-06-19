@@ -79,6 +79,7 @@ export default function TicketPage({ params }) {
           organizationTypes={registrationData.organizationTypes || []}
           transportationTypes={registrationData.transportationTypes || []}
           seminarRooms={registrationData.seminarRooms || []}
+          isTicketPage={true}
         />
       )}
     </div>

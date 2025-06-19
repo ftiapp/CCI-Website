@@ -1,6 +1,6 @@
 'use client';
 
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import QRCode from 'react-qr-code';
 import { CheckCircleIcon } from '@heroicons/react/24/solid';
 
@@ -16,6 +16,66 @@ export default function EventTicket({
   selectedRoom,
   locale
 }) {
+  // State for schedule data
+  const [scheduleData, setScheduleData] = useState([]);
+  const [morningTimeInfo, setMorningTimeInfo] = useState('08.30 - 12.00');
+  const [afternoonTimeInfo, setAfternoonTimeInfo] = useState('13.00 - 16.30');
+  
+  // Fetch schedule data on component mount
+  useEffect(() => {
+    const fetchScheduleData = async () => {
+      try {
+        const response = await fetch('/api/schedule');
+        if (response.ok) {
+          const responseData = await response.json();
+          
+          // Check if the data is in the expected format
+          if (responseData && responseData.data && Array.isArray(responseData.data)) {
+            const scheduleArray = responseData.data;
+            setScheduleData(scheduleArray);
+            
+            // Calculate morning time range
+            const morningSchedule = scheduleArray.filter(item => item.is_morning);
+            if (morningSchedule.length > 0) {
+              const sortedSessions = [...morningSchedule].sort((a, b) => 
+                a.time_start.localeCompare(b.time_start)
+              );
+              const firstSession = sortedSessions[0];
+              const lastSession = sortedSessions[sortedSessions.length - 1];
+              
+              const startTime = firstSession.time_start?.substring(0, 5);
+              const endTime = lastSession.time_end?.substring(0, 5);
+              if (startTime && endTime) {
+                setMorningTimeInfo(`${startTime} - ${endTime}`);
+              }
+            }
+            
+            // Calculate afternoon time range for selected room
+            if (selectedRoom) {
+              const roomSchedule = scheduleArray.filter(item => 
+                item.room_id === selectedRoom.id && !item.is_morning
+              );
+              
+              if (roomSchedule.length > 0) {
+                const firstSession = roomSchedule[0];
+                const startTime = firstSession.time_start?.substring(0, 5);
+                const endTime = firstSession.time_end?.substring(0, 5);
+                if (startTime && endTime) {
+                  setAfternoonTimeInfo(`${startTime} - ${endTime}`);
+                }
+              }
+            }
+          } else {
+            console.error('Schedule data is not in expected format:', responseData);
+          }
+        }
+      } catch (error) {
+        console.error('Error fetching schedule data:', error);
+      }
+    };
+    
+    fetchScheduleData();
+  }, [selectedRoom]);
   // Format phone number for display (000-000-XXXX)
   const formatPhone = (phoneNumber) => {
     if (!phoneNumber) return '';
@@ -28,15 +88,15 @@ export default function EventTicket({
     return phoneNumber;
   };
 
-  // Get attendance type label
+  // Get attendance type label with actual time information
   const getAttendanceTypeLabel = () => {
     switch (attendanceType) {
       case 'morning':
-        return locale === 'th' ? 'ช่วงเช้า (08.30 - 12.00 น.)' : 'Morning (08.30 - 12.00)';
+        return locale === 'th' ? `ช่วงเช้า (${morningTimeInfo} น.)` : `Morning (${morningTimeInfo})`;
       case 'afternoon':
-        return locale === 'th' ? 'ช่วงบ่าย (13.00 - 16.30 น.)' : 'Afternoon (13.00 - 16.30)';
+        return locale === 'th' ? `ช่วงบ่าย (${afternoonTimeInfo} น.)` : `Afternoon (${afternoonTimeInfo})`;
       case 'full_day':
-        return locale === 'th' ? 'เต็มวัน (08.30 - 16.30 น.)' : 'Full Day (08.30 - 16.30)';
+        return locale === 'th' ? `เต็มวัน (${morningTimeInfo} - ${afternoonTimeInfo.split(' - ')[1]} น.)` : `Full Day (${morningTimeInfo} - ${afternoonTimeInfo.split(' - ')[1]})`;
       default:
         return '';
     }
@@ -103,7 +163,7 @@ export default function EventTicket({
                   )}
                 </div>
                 <span className={`text-sm ${isMorningAttendance ? 'text-earth-800 font-medium' : 'text-earth-500'}`}>
-                  {locale === 'th' ? 'ช่วงเช้า (08.30 - 12.00 น.)' : 'Morning (08.30 - 12.00)'}
+                  {locale === 'th' ? `ช่วงเช้า (${morningTimeInfo} น.)` : `Morning (${morningTimeInfo})`}
                 </span>
               </div>
               
@@ -116,7 +176,7 @@ export default function EventTicket({
                   )}
                 </div>
                 <span className={`text-sm ${isAfternoonAttendance ? 'text-earth-800 font-medium' : 'text-earth-500'}`}>
-                  {locale === 'th' ? 'ช่วงบ่าย (13.00 - 16.30 น.)' : 'Afternoon (13.00 - 16.30)'}
+                  {locale === 'th' ? `ช่วงบ่าย (${afternoonTimeInfo} น.)` : `Afternoon (${afternoonTimeInfo})`}
                 </span>
               </div>
               
@@ -125,6 +185,9 @@ export default function EventTicket({
                   <p className="text-xs text-earth-600">{locale === 'th' ? 'ห้องสัมมนา:' : 'Seminar Room:'}</p>
                   <p className="text-sm font-medium text-earth-800">
                     {locale === 'th' ? selectedRoom.name_th : selectedRoom.name_en}
+                    <span className="text-xs text-earth-600 ml-1">
+                      ({afternoonTimeInfo})
+                    </span>
                   </p>
                 </div>
               )}

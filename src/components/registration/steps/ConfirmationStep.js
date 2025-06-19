@@ -2,6 +2,7 @@
 
 import { getTranslations } from '@/i18n';
 import { CheckCircleIcon, UserIcon, BuildingOfficeIcon, MapPinIcon, CalendarIcon } from '@heroicons/react/24/outline';
+import { useState, useEffect } from 'react';
 
 export default function ConfirmationStep({ 
   locale, 
@@ -14,8 +15,27 @@ export default function ConfirmationStep({
   errors,
   handleChange
 }) {
+  const [scheduleData, setScheduleData] = useState([]);
+  
   // Make sure locale is properly awaited before using it with getTranslations
   const t = getTranslations(locale || 'th');
+  
+  // Fetch schedule data when component mounts
+  useEffect(() => {
+    const fetchScheduleData = async () => {
+      try {
+        const response = await fetch('/api/schedule');
+        const result = await response.json();
+        if (result.success) {
+          setScheduleData(result.data);
+        }
+      } catch (error) {
+        console.error('Error fetching schedule data:', error);
+      }
+    };
+    
+    fetchScheduleData();
+  }, []);
   
   // Debug: Log form data to console (remove in production)
   console.log('Confirmation Step - Form Data:', formData);
@@ -165,6 +185,40 @@ export default function ConfirmationStep({
   const selectedRoom = formData.selectedRoomId ? 
     seminarRooms?.find(room => room.id.toString() === formData.selectedRoomId?.toString()) : 
     null;
+    
+  // Find schedule for selected room
+  const selectedRoomSchedule = scheduleData.filter(item => 
+    selectedRoom && item.room_id === selectedRoom.id && !item.is_morning
+  );
+  
+  // Get formatted time for selected room
+  const getSelectedRoomTimeInfo = () => {
+    if (selectedRoomSchedule.length > 0) {
+      const firstSession = selectedRoomSchedule[0];
+      const startTime = firstSession.time_start?.substring(0, 5);
+      const endTime = firstSession.time_end?.substring(0, 5);
+      return startTime && endTime ? `${startTime} - ${endTime}` : '';
+    }
+    return '';
+  };
+  
+  // Get morning session time
+  const getMorningTimeInfo = () => {
+    const morningSchedule = scheduleData.filter(item => item.is_morning);
+    if (morningSchedule.length > 0) {
+      // Find first and last sessions
+      const sortedSessions = [...morningSchedule].sort((a, b) => 
+        a.time_start.localeCompare(b.time_start)
+      );
+      const firstSession = sortedSessions[0];
+      const lastSession = sortedSessions[sortedSessions.length - 1];
+      
+      const startTime = firstSession.time_start?.substring(0, 5);
+      const endTime = lastSession.time_end?.substring(0, 5);
+      return startTime && endTime ? `${startTime} - ${endTime}` : '';
+    }
+    return '';
+  };
   
   // Get attendance type label
   const getAttendanceTypeLabel = () => {
@@ -273,79 +327,73 @@ export default function ConfirmationStep({
           </div>
         </SectionCard>
 
-        {/* 3. Location & Transportation Information */}
+        {/* 3. Location Information */}
         <SectionCard 
           icon={MapPinIcon} 
-          title={locale === 'th' ? 'ข้อมูลสถานที่และการเดินทาง' : 'Location & Transportation Information'}
+          title={locale === 'th' ? 'ข้อมูลสถานที่' : 'Location Information'}
         >
-          <div className="space-y-6">
-            {/* Location Information */}
-            <div>
-              <h4 className="font-medium text-earth-800 mb-4 text-base flex items-center">
-                <span className="text-lg mr-2">📍</span>
-                {locale === 'th' ? 'ข้อมูลสถานที่' : 'Location Information'}
-              </h4>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <InfoItem 
+              label={locale === 'th' ? 'เดินทางมาจาก' : 'Traveling from'}
+              value={getLocationTypeLabel()}
+            />
+            
+            {formData.location_type === 'bangkok' && (
+              <InfoItem 
+                label={locale === 'th' ? 'เขต' : 'District'}
+                value={getBangkokDistrictLabel()}
+              />
+            )}
+            
+            {formData.location_type === 'province' && (
+              <InfoItem 
+                label={locale === 'th' ? 'จังหวัด' : 'Province'}
+                value={getProvinceLabel()}
+              />
+            )}
+          </div>
+        </SectionCard>
+        
+        {/* 4. Transportation Information */}
+        <SectionCard 
+          icon={(props) => (
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" {...props}>
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7h8m-8 5h8m-4 5h4M6 3v18M18 3v18" />
+            </svg>
+          )}
+          title={locale === 'th' ? 'ข้อมูลการเดินทาง' : 'Transportation Information'}
+        >
+          <div className="space-y-4">
+            <InfoItem 
+              label={locale === 'th' ? 'วิธีการเดินทาง' : 'Transportation Method'}
+              value={getTransportationCategoryLabel()}
+            />
+            
+            {formData.transport_type === 'public' && (
+              <div className="grid grid-cols-1 gap-4">
+                <InfoItem 
+                  label={locale === 'th' ? 'ประเภทขนส่งมวลชน' : 'Public Transportation Type'}
+                  value={getPublicTransportTypeLabel()}
+                />
+              </div>
+            )}
+            
+            {formData.transport_type === 'private' && (
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <InfoItem 
-                  label={locale === 'th' ? 'เดินทางมาจาก' : 'Traveling from'}
-                  value={getLocationTypeLabel()}
+                  label={locale === 'th' ? 'ประเภทพาหนะ' : 'Vehicle Type'}
+                  value={getPrivateVehicleTypeLabel()}
                 />
-                
-                {formData.location_type === 'bangkok' && (
-                  <InfoItem 
-                    label={locale === 'th' ? 'เขต' : 'District'}
-                    value={getBangkokDistrictLabel()}
-                  />
-                )}
-                
-                {formData.location_type === 'province' && (
-                  <InfoItem 
-                    label={locale === 'th' ? 'จังหวัด' : 'Province'}
-                    value={getProvinceLabel()}
-                  />
-                )}
-              </div>
-            </div>
-            
-            {/* Transportation Information */}
-            <div>
-              <h4 className="font-medium text-earth-800 mb-4 text-base flex items-center">
-                <span className="text-lg mr-2">🚗</span>
-                {locale === 'th' ? 'ข้อมูลการเดินทาง' : 'Transportation Information'}
-              </h4>
-              <div className="space-y-4">
                 <InfoItem 
-                  label={locale === 'th' ? 'วิธีการเดินทาง' : 'Transportation Method'}
-                  value={getTransportationCategoryLabel()}
+                  label={locale === 'th' ? 'ประเภทเชื้อเพลิง' : 'Fuel Type'}
+                  value={getFuelTypeLabel()}
                 />
-                
-                {formData.transport_type === 'public' && (
-                  <div className="grid grid-cols-1 gap-4">
-                    <InfoItem 
-                      label={locale === 'th' ? 'ประเภทขนส่งมวลชน' : 'Public Transportation Type'}
-                      value={getPublicTransportTypeLabel()}
-                    />
-                  </div>
-                )}
-                
-                {formData.transport_type === 'private' && (
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                    <InfoItem 
-                      label={locale === 'th' ? 'ประเภทพาหนะ' : 'Vehicle Type'}
-                      value={getPrivateVehicleTypeLabel()}
-                    />
-                    <InfoItem 
-                      label={locale === 'th' ? 'ประเภทเชื้อเพลิง' : 'Fuel Type'}
-                      value={getFuelTypeLabel()}
-                    />
-                    <InfoItem 
-                      label={locale === 'th' ? 'ประเภทผู้เดินทาง' : 'Passenger Type'}
-                      value={getPassengerTypeLabel()}
-                    />
-                  </div>
-                )}
+                <InfoItem 
+                  label={locale === 'th' ? 'ประเภทผู้เดินทาง' : 'Passenger Type'}
+                  value={getPassengerTypeLabel()}
+                />
               </div>
-            </div>
+            )}
           </div>
         </SectionCard>
         
@@ -360,11 +408,24 @@ export default function ConfirmationStep({
               value={getAttendanceTypeLabel()}
             />
             
-            {(formData.attendanceType === 'afternoon' || formData.attendanceType === 'full_day') && selectedRoom && (
+            {formData.attendanceType === 'morning' && (
               <InfoItem 
-                label={t.registration.selectRoom}
-                value={locale === 'th' ? selectedRoom.name_th : selectedRoom.name_en}
+                label={locale === 'th' ? 'เวลา' : 'Time'}
+                value={getMorningTimeInfo() || (locale === 'th' ? '09.00-12.00' : '09:00-12:00')}
               />
+            )}
+            
+            {(formData.attendanceType === 'afternoon' || formData.attendanceType === 'full_day') && selectedRoom && (
+              <>
+                <InfoItem 
+                  label={t.registration.selectRoom}
+                  value={locale === 'th' ? selectedRoom.name_th : selectedRoom.name_en}
+                />
+                <InfoItem 
+                  label={locale === 'th' ? 'เวลา' : 'Time'}
+                  value={getSelectedRoomTimeInfo() || (locale === 'th' ? '13.30-16.30' : '13:30-16:30')}
+                />
+              </>
             )}
           </div>
         </SectionCard>

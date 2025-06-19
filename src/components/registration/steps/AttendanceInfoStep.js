@@ -82,13 +82,35 @@ export default function AttendanceInfoStep({
     }
   };
 
-  // Format seminar rooms for select options
+  // Fetch schedule data when component mounts
+  useEffect(() => {
+    fetchScheduleData();
+  }, []);
+  
+  // Format seminar rooms for select options with time information
   const roomOptions = seminarRooms
     .filter(room => room.id > 1) // Filter out main conference room
-    .map(room => ({
-      value: room.id.toString(),
-      label: locale === 'th' ? room.name_th : room.name_en
-    }));
+    .map(room => {
+      // Find schedule for this room
+      const roomSchedule = scheduleData.filter(item => 
+        item.room_id === room.id && !item.is_morning
+      );
+      
+      // Format time if schedule exists for this room
+      let timeInfo = '';
+      if (roomSchedule.length > 0) {
+        const firstSession = roomSchedule[0];
+        // Format time as HH:MM - HH:MM
+        const startTime = firstSession.time_start.substring(0, 5);
+        const endTime = firstSession.time_end.substring(0, 5);
+        timeInfo = ` (${startTime} - ${endTime})`;
+      }
+      
+      return {
+        value: room.id.toString(),
+        label: (locale === 'th' ? room.name_th : room.name_en) + timeInfo
+      };
+    });
   
   // Attendance type options
   const attendanceOptions = [

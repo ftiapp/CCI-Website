@@ -1,12 +1,15 @@
 'use server';
 
 import { NextResponse } from 'next/server';
-import { getSeminarRoomById } from '@/lib/db';
+import { getSeminarRoomById, getSchedule } from '@/lib/db';
 
 export async function POST(request) {
   try {
     const data = await request.json();
     const { phone, firstName, lastName, registrationId, eventDate, locale, attendanceType, selectedRoomId } = data;
+    
+    // Fetch schedule data to get accurate times
+    const scheduleData = await getSchedule();
     
     if (!phone || !firstName || !lastName || !registrationId) {
       return NextResponse.json(
@@ -29,15 +32,54 @@ export async function POST(request) {
     // Base URL with fallback
     const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || 'https://cci.fti.or.th';
     
-    // Get attendance type label
+    // Get morning session time range
+    const getMorningTimeInfo = () => {
+      const morningSchedule = scheduleData.filter(item => item.is_morning);
+      if (morningSchedule.length > 0) {
+        // Find first and last sessions
+        const sortedSessions = [...morningSchedule].sort((a, b) => 
+          a.time_start.localeCompare(b.time_start)
+        );
+        const firstSession = sortedSessions[0];
+        const lastSession = sortedSessions[sortedSessions.length - 1];
+        
+        const startTime = firstSession.time_start?.substring(0, 5);
+        const endTime = lastSession.time_end?.substring(0, 5);
+        return startTime && endTime ? `${startTime} - ${endTime}` : '08.30 - 12.00';
+      }
+      return '08.30 - 12.00';
+    };
+    
+    // Get afternoon session time range for a specific room
+    const getAfternoonTimeInfo = (roomId) => {
+      if (!roomId) return '13.00 - 16.30';
+      
+      const roomSchedule = scheduleData.filter(item => 
+        item.room_id === parseInt(roomId) && !item.is_morning
+      );
+      
+      if (roomSchedule.length > 0) {
+        const firstSession = roomSchedule[0];
+        const startTime = firstSession.time_start?.substring(0, 5);
+        const endTime = firstSession.time_end?.substring(0, 5);
+        return startTime && endTime ? `${startTime} - ${endTime}` : '13.00 - 16.30';
+      }
+      
+      return '13.00 - 16.30';
+    };
+    
+    // Get attendance type label with accurate time information
     const getAttendanceTypeLabel = () => {
+      const morningTime = getMorningTimeInfo();
+      const afternoonTime = getAfternoonTimeInfo(selectedRoomId);
+      
       switch (attendanceType) {
         case 'morning':
-          return locale === 'th' ? 'ช่วงเช้า (08.30 - 12.00 น.)' : 'Morning (08.30 - 12.00)';
+          return locale === 'th' ? `ช่วงเช้า (${morningTime} น.)` : `Morning (${morningTime})`;
         case 'afternoon':
-          return locale === 'th' ? 'ช่วงบ่าย (13.00 - 16.30 น.)' : 'Afternoon (13.00 - 16.30)';
+          return locale === 'th' ? `ช่วงบ่าย (${afternoonTime} น.)` : `Afternoon (${afternoonTime})`;
         case 'full_day':
-          return locale === 'th' ? 'เต็มวัน (08.30 - 16.30 น.)' : 'Full Day (08.30 - 16.30)';
+          return locale === 'th' ? `เต็มวัน (${morningTime} - ${afternoonTime.split(' - ')[1]} น.)` : `Full Day (${morningTime} - ${afternoonTime.split(' - ')[1]})`;
         default:
           return '';
       }
@@ -49,9 +91,10 @@ export async function POST(request) {
       try {
         const room = await getSeminarRoomById(selectedRoomId);
         if (room) {
+          const roomTime = getAfternoonTimeInfo(selectedRoomId);
           roomInfo = locale === 'th' 
-            ? `\nห้องสัมมนา: ${room.name_th} (13.00 - 16.30 น.)`
-            : `\nSeminar Room: ${room.name_en} (13.00 - 16.30)`;
+            ? `\nห้องสัมมนา: ${room.name_th} (${roomTime} น.)`
+            : `\nSeminar Room: ${room.name_en} (${roomTime})`;
         }
       } catch (error) {
         console.error('Error fetching seminar room:', error);

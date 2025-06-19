@@ -1,8 +1,10 @@
 'use client';
 
 import { useState } from 'react';
+import { motion, AnimatePresence } from 'framer-motion';
 import { useRouter } from 'next/navigation';
-import { AnimatePresence } from 'framer-motion';
+import toast from 'react-hot-toast';
+import ProcessingModal from '@/components/ui/ProcessingModal';
 import StepTransition from '@/components/motion/StepTransition';
 import { StaggerContainer, StaggerItem } from '@/components/motion/StaggerContainer';
 import FadeIn from '@/components/motion/FadeIn';
@@ -15,7 +17,6 @@ import ConfirmationStep from '@/components/registration/steps/ConfirmationStep';
 import SuccessStep from '@/components/registration/steps/SuccessStep';
 import Button from '@/components/ui/Button';
 import { isValidEmail, isValidPhone } from '@/lib/utils';
-import toast from 'react-hot-toast';
 
 export default function RegistrationForm({ 
   locale, 
@@ -70,6 +71,9 @@ export default function RegistrationForm({
   const [isSuccess, setIsSuccess] = useState(false);
   const [registrationId, setRegistrationId] = useState('');
   
+  // Processing state for modal
+  const [isProcessing, setIsProcessing] = useState(false);
+  
   // Handle form field changes
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -113,6 +117,40 @@ export default function RegistrationForm({
         newErrors.phone = t.common.required;
       } else if (!isValidPhone(formData.phone)) {
         newErrors.phone = t.registration.invalidPhone;
+      }
+      
+      // Check for duplicate name flag
+      if (errors._hasDuplicateName) {
+        // Show toast notification for duplicate name
+        toast.error(
+          locale === 'th' 
+            ? `ขออภัย พบข้อมูลซ้ำซ้อนในระบบ คุณ ${formData.firstName} ${formData.lastName} ได้ทำการลงทะเบียนแล้ว` 
+            : `Registration Error: Duplicate entry detected. ${formData.firstName} ${formData.lastName} has already been registered in the system.`,
+          {
+            duration: 5000,
+            position: 'top-right',
+            style: {
+              borderRadius: '10px',
+              background: '#333',
+              color: '#fff',
+              padding: '16px',
+              fontFamily: 'prompt, sans-serif',
+              fontWeight: '500',
+            },
+            icon: '⚠️',
+          }
+        );
+        
+        // Clear the form fields
+        setTimeout(() => {
+          setFormData(prev => ({
+            ...prev,
+            firstName: '',
+            lastName: ''
+          }));
+        }, 100);
+        
+        return false;
       }
     } else if (currentStep === 1) {
       // Organization info validation
@@ -180,8 +218,39 @@ export default function RegistrationForm({
       }
     }
     
+    // Store errors in state
     setErrors(newErrors);
-    return Object.keys(newErrors).length === 0;
+    
+    // If there are errors, show a toast notification
+    if (Object.keys(newErrors).length > 0) {
+      // Get the first error message to display
+      const firstErrorKey = Object.keys(newErrors)[0];
+      const errorMessage = newErrors[firstErrorKey];
+      
+      // Create a more formal error message prefix
+      const errorPrefix = locale === 'th' ? 'ข้อผิดพลาด: ' : 'Validation Error: ';
+      
+      toast.error(
+        `${errorPrefix}${errorMessage}`,
+        {
+          duration: 4000,
+          position: 'top-right',
+          style: {
+            borderRadius: '10px',
+            background: '#333',
+            color: '#fff',
+            padding: '16px',
+            fontFamily: 'prompt, sans-serif',
+            fontWeight: '500',
+          },
+          icon: '⚠️',
+        }
+      );
+      
+      return false;
+    }
+    
+    return true;
   };
   
   // Handle next step
@@ -201,6 +270,10 @@ export default function RegistrationForm({
   // Handle form submission
   const handleSubmit = async () => {
     try {
+      // Show processing modal
+      setIsProcessing(true);
+      
+      // Register the participant
       const response = await fetch('/api/register', {
         method: 'POST',
         headers: {
@@ -213,20 +286,138 @@ export default function RegistrationForm({
       
       if (!response.ok) {
         if (data.error === 'duplicate_name') {
-          toast.error(t.common.duplicateName);
+          toast.error(
+            locale === 'th' 
+              ? `ขออภัย พบข้อมูลซ้ำซ้อนในระบบ คุณ ${formData.firstName} ${formData.lastName} ได้ทำการลงทะเบียนแล้ว` 
+              : `Registration Error: Duplicate entry detected. ${formData.firstName} ${formData.lastName} has already been registered in the system.`,
+            {
+              duration: 5000,
+              position: 'top-right',
+              style: {
+                borderRadius: '10px',
+                background: '#333',
+                color: '#fff',
+                padding: '16px',
+                fontFamily: 'prompt, sans-serif',
+                fontWeight: '500',
+              },
+              icon: '⚠️',
+            }
+          );
         } else {
-          toast.error(t.common.systemError);
+          toast.error(
+            locale === 'th' 
+              ? 'ขออภัย เกิดข้อผิดพลาดในระบบ กรุณาลองใหม่อีกครั้ง' 
+              : 'System Error: Please try again later.',
+            {
+              duration: 5000,
+              position: 'top-right',
+              style: {
+                borderRadius: '10px',
+                background: '#333',
+                color: '#fff',
+                padding: '16px',
+                fontFamily: 'prompt, sans-serif',
+                fontWeight: '500',
+              },
+              icon: '⚠️',
+            }
+          );
         }
+        setIsProcessing(false);
         return;
       }
       
-      // Set success state and registration ID
+      // Store registration ID
+      const registrationId = data.uuid;
+      setRegistrationId(registrationId);
+      
+      // Send SMS notification
+      try {
+        const smsResponse = await fetch('/api/send-sms', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            phone: formData.phone,
+            firstName: formData.firstName,
+            lastName: formData.lastName,
+            registrationId,
+            attendanceType: formData.attendanceType,
+            selectedRoomId: formData.selectedRoomId,
+            locale
+          }),
+        });
+        
+        if (!smsResponse.ok) {
+          console.error('SMS API error:', await smsResponse.text());
+          // We'll continue with the registration process even if SMS fails
+          // but we'll log it for debugging purposes
+        }
+      } catch (smsError) {
+        console.error('SMS sending error:', smsError);
+        // Continue with the registration process even if SMS fails
+      }
+      
+      // Send email notification
+      try {
+        // Find selected seminar room (if applicable)
+        const selectedRoom = formData.selectedRoomId ? 
+          seminarRooms.find(room => room.id.toString() === formData.selectedRoomId) : 
+          null;
+        
+        const emailResponse = await fetch('/api/send-email', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            email: formData.email,
+            firstName: formData.firstName,
+            lastName: formData.lastName,
+            registrationId,
+            attendanceType: formData.attendanceType,
+            selectedRoom,
+            locale
+          }),
+        });
+        
+        if (!emailResponse.ok) {
+          console.error('Email API error:', await emailResponse.json());
+          // We'll continue with the registration process even if email fails
+          // but we'll log it for debugging purposes
+        }
+      } catch (emailError) {
+        console.error('Email sending error:', emailError);
+        // Continue with the registration process even if email fails
+      }
+      
+      // Set success state
       setIsSuccess(true);
-      setRegistrationId(data.uuid);
+      setIsProcessing(false);
       
     } catch (error) {
       console.error('Registration error:', error);
-      toast.error(t.common.systemError);
+      toast.error(
+        locale === 'th' 
+          ? 'ขออภัย เกิดข้อผิดพลาดในระบบ กรุณาลองใหม่อีกครั้ง' 
+          : 'System Error: Please try again later.',
+        {
+          duration: 5000,
+          position: 'top-right',
+          style: {
+            borderRadius: '10px',
+            background: '#333',
+            color: '#fff',
+            padding: '16px',
+            fontFamily: 'prompt, sans-serif',
+            fontWeight: '500',
+          },
+          icon: '⚠️',
+        }
+      );
+      setIsProcessing(false);
     }
   };
   
@@ -256,6 +447,7 @@ export default function RegistrationForm({
               formData={formData}
               errors={errors}
               handleChange={handleChange}
+              setErrors={setErrors}
             />
           </StepTransition>
         );
@@ -310,7 +502,17 @@ export default function RegistrationForm({
   };
   
   return (
-    <div>
+    <div className="max-w-3xl mx-auto">
+      {/* Processing Modal */}
+      {isProcessing && (
+        <ProcessingModal 
+          locale={locale} 
+          message={locale === 'th' 
+            ? 'กรุณารอสักครู่ ระบบกำลังประมวลผลข้อมูลการลงทะเบียนและส่งการแจ้งเตือนทาง SMS และอีเมล' 
+            : 'Please wait while we process your registration and send SMS and email notifications'} 
+        />
+      )}
+      
       {!isSuccess && (
         <FadeIn duration={0.7}>
           <StepIndicator 

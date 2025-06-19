@@ -53,13 +53,17 @@ export default function EventTicket({
       <div className="bg-white rounded-xl overflow-hidden shadow-lg border border-earth-200 flex flex-col md:flex-row">
         {/* Left side - QR Code and Registration ID */}
         <div className="bg-beige-50 p-6 flex flex-col items-center justify-center border-b md:border-b-0 md:border-r border-dashed border-earth-300 md:w-1/3">
-          <div className="mb-4 bg-white p-3 rounded-lg shadow-sm">
-            <QRCode 
-              value={registrationId || 'CCI_000000'} 
-              size={150} 
-              level="H"
-              className="mx-auto"
-            />
+          <div className="mb-4 bg-white p-4 rounded-lg shadow-sm qr-code-container" style={{ backgroundColor: 'white', padding: '16px', border: '2px solid white' }}>
+            <div style={{ backgroundColor: 'white', padding: '8px' }}>
+              <QRCode 
+                value={registrationId || 'CCI_000000'} 
+                size={150} 
+                level="H"
+                className="mx-auto"
+                bgColor="#FFFFFF"
+                fgColor="#000000"
+              />
+            </div>
           </div>
           <p className="text-xs text-earth-600 mb-1">{locale === 'th' ? 'รหัสลงทะเบียน' : 'Registration ID'}</p>
           <p className="text-xl font-prompt font-bold text-beige-700">{registrationId || 'CCI_000000'}</p>

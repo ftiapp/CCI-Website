@@ -126,14 +126,16 @@ export default function AttendanceInfoStep({
         className="mb-6"
       />
       
-      {formData.attendanceType === 'afternoon' && (
+      {(formData.attendanceType === 'afternoon' || formData.attendanceType === 'full_day') && (
         <Select
           label={t.registration.selectRoom}
           name="selectedRoomId"
           value={formData.selectedRoomId}
           onChange={handleChange}
           options={roomOptions}
-          placeholder={locale === 'th' ? 'เลือกห้องสัมมนาช่วงบ่าย' : 'Select Afternoon Seminar Room'}
+          placeholder={locale === 'th' ? 
+            (formData.attendanceType === 'full_day' ? 'เลือกห้องสัมมนา' : 'เลือกห้องสัมมนาช่วงบ่าย') : 
+            (formData.attendanceType === 'full_day' ? 'Select Seminar Room' : 'Select Afternoon Seminar Room')}
           required
           error={errors.selectedRoomId}
         />

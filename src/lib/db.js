@@ -56,6 +56,12 @@ export async function getSeminarRooms() {
   return executeQuery('SELECT * FROM CCI_seminar_rooms');
 }
 
+// Get seminar room by ID
+export async function getSeminarRoomById(roomId) {
+  const rooms = await executeQuery('SELECT * FROM CCI_seminar_rooms WHERE id = ?', [roomId]);
+  return rooms.length > 0 ? rooms[0] : null;
+}
+
 // Get all Bangkok districts
 export async function getBangkokDistricts() {
   try {
@@ -212,4 +218,46 @@ export async function getParticipantByUuid(uuid) {
   );
   
   return participants.length > 0 ? participants[0] : null;
+}
+
+// Get registration by ID
+export async function getRegistrationById(registrationId) {
+  const registrations = await executeQuery(
+    `SELECT r.*, ot.name_th as organization_type_th, ot.name_en as organization_type_en,
+    tt.name_th as transportation_type_th, tt.name_en as transportation_type_en,
+    sr.name_th as room_name_th, sr.name_en as room_name_en
+    FROM CCI_registrants r
+    JOIN CCI_organization_types ot ON r.organization_type_id = ot.id
+    LEFT JOIN CCI_transportation_types tt ON r.transportation_type_id = tt.id
+    LEFT JOIN CCI_seminar_rooms sr ON r.selected_room_id = sr.id
+    WHERE r.registration_id = ?`,
+    [registrationId]
+  );
+  
+  if (registrations.length === 0) {
+    return null;
+  }
+  
+  const registration = registrations[0];
+  
+  // Format data to match the form structure
+  return {
+    firstName: registration.first_name,
+    lastName: registration.last_name,
+    email: registration.email,
+    phone: registration.phone,
+    organizationName: registration.organization_name,
+    organizationTypeId: registration.organization_type_id?.toString(),
+    position: registration.position,
+    attendanceType: registration.attendance_type,
+    selectedRoomId: registration.selected_room_id?.toString(),
+    transportation_category: registration.transportation_category,
+    public_transport_type: registration.public_transport_type,
+    public_transport_other: registration.public_transport_other,
+    car_type: registration.car_type,
+    car_type_other: registration.car_type_other,
+    car_passenger_type: registration.car_passenger_type,
+    district: registration.district,
+    province: registration.province
+  };
 }

@@ -5,7 +5,7 @@ import React from 'react';
 /**
  * Loading spinner component with customizable size
  */
-export function LoadingSpinner({ size = 'medium', className = '' }) {
+export default function LoadingSpinner({ size = 'medium', className = '' }) {
   const sizeClasses = {
     small: 'w-5 h-5',
     medium: 'w-8 h-8',

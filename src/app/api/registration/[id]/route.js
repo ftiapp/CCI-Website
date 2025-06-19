@@ -6,7 +6,9 @@ import { getOrganizationTypes, getTransportationTypes, getSeminarRooms } from '@
 
 export async function GET(request, { params }) {
   try {
-    const { id } = params;
+    // Await params before accessing properties as required by Next.js 15.3.3
+    const unwrappedParams = await params;
+    const id = unwrappedParams.id;
     
     if (!id) {
       return NextResponse.json(

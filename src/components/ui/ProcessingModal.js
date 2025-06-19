@@ -1,7 +1,7 @@
 'use client';
 
 import React from 'react';
-import { LoadingSpinner } from '@/components/ui/LoadingSpinner';
+import LoadingSpinner from '@/components/ui/LoadingSpinner';
 
 /**
  * Full-screen modal that prevents user interaction while processing

@@ -1,12 +1,17 @@
 'use client';
 
 import { useEffect, useState } from 'react';
+import { use } from 'react';
 import { getTranslations } from '@/i18n';
 import SuccessStep from '@/components/registration/steps/SuccessStep';
 import LoadingSpinner from '@/components/ui/LoadingSpinner';
 
 export default function TicketPage({ params }) {
-  const { locale, id } = params;
+  // Use React.use() to unwrap params as recommended by Next.js 15.3.3
+  const unwrappedParams = use(params);
+  const locale = unwrappedParams.locale;
+  const id = unwrappedParams.id;
+  
   const [loading, setLoading] = useState(true);
   const [registrationData, setRegistrationData] = useState(null);
   const [error, setError] = useState(null);
@@ -66,14 +71,16 @@ export default function TicketPage({ params }) {
   
   return (
     <div className="container mx-auto px-4 py-12">
-      <SuccessStep
-        locale={locale}
-        registrationId={id}
-        formData={registrationData.formData}
-        organizationTypes={registrationData.organizationTypes || []}
-        transportationTypes={registrationData.transportationTypes || []}
-        seminarRooms={registrationData.seminarRooms || []}
-      />
+      {registrationData && (
+        <SuccessStep
+          locale={locale}
+          registrationId={id}
+          formData={registrationData.formData}
+          organizationTypes={registrationData.organizationTypes || []}
+          transportationTypes={registrationData.transportationTypes || []}
+          seminarRooms={registrationData.seminarRooms || []}
+        />
+      )}
     </div>
   );
 }

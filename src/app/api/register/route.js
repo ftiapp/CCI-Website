@@ -7,6 +7,7 @@ export async function POST(request) {
     
     // Debug log
     console.log('Registration data received:', data);
+    console.log('private_vehicle_other from form:', data.private_vehicle_other);
     
     // Validate required fields
     const requiredFields = [
@@ -89,11 +90,14 @@ export async function POST(request) {
       organization_type_id: parseInt(data.organizationTypeId),
       // For walking, use a default transportation_type_id of 1 (assuming 1 is a valid ID for public transportation)
       transportation_type_id: data.transport_type === 'walking' ? 1 : (data.private_vehicle_id ? parseInt(data.private_vehicle_id) : (data.public_transport_id ? parseInt(data.public_transport_id) : 1)),
-      transportation_category: data.transport_type === 'walking' ? 'public' : data.transport_type, // Map 'walking' to 'public' category
+      transportation_category: data.transport_type, // ใช้ค่า transport_type ที่ส่งมาโดยตรง ไม่แปลงค่า
       public_transport_type: data.transport_type === 'public' ? data.public_transport_id : (data.transport_type === 'walking' ? 'walking' : null),
-      public_transport_other: data.transport_type === 'public' && data.public_transport_id === '999' ? data.public_transport_other : null,
-      car_type: data.transport_type === 'private' ? data.fuel_type : null,
-      car_type_other: data.transport_type === 'private' && data.fuel_type === 'other' ? data.fuel_type_other : null,
+      public_transport_other: data.transport_type === 'public' && (data.public_transport_id == 999 || data.public_transport_id == 99) ? data.public_transport_other : null,
+      car_type: data.transport_type === 'private' ? data.private_vehicle_id : null,
+      car_type_other: data.transport_type === 'private' && data.private_vehicle_id == 99 ? data.private_vehicle_other : null,
+      private_vehicle_other: data.transport_type === 'private' && data.private_vehicle_id == 99 ? data.private_vehicle_other : null,
+      fuel_type: data.transport_type === 'private' ? data.fuel_type : null,
+      fuel_type_other: data.transport_type === 'private' && data.fuel_type == 99 ? data.fuel_type_other : null,
       car_passenger_type: data.transport_type === 'private' ? data.passenger_type : null,
       location_type: data.location_type,
       bangkok_district_id: data.location_type === 'bangkok' ? parseInt(data.bangkok_district_id) : null,
@@ -101,6 +105,21 @@ export async function POST(request) {
       attendance_type: data.attendanceType,
       selected_room_id: data.selectedRoomId ? parseInt(data.selectedRoomId) : null
     };
+    
+    // Debug registrationData
+    console.log('Registration data being sent to registerParticipant:', registrationData);
+    console.log('private_vehicle_other being sent:', registrationData.private_vehicle_other);
+    console.log('public_transport_other being sent:', registrationData.public_transport_other);
+    
+    // ตรวจสอบและแก้ไขข้อมูล private_vehicle_other
+    if (data.transport_type === 'private' && data.private_vehicle_id == 99) {
+      console.log('DEBUG - Found private vehicle other:', data.private_vehicle_other);
+    }
+    
+    // ตรวจสอบและแก้ไขข้อมูล public_transport_other
+    if (data.transport_type === 'public' && (data.public_transport_id == 999 || data.public_transport_id == 99)) {
+      console.log('DEBUG - Found public transport other:', data.public_transport_other);
+    }
     
     // Register participant
     const result = await registerParticipant(registrationData);

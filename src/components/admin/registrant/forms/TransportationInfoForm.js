@@ -22,43 +22,7 @@ export default function TransportationInfoForm({
   const fuelTypeOptions = createFuelTypeOptions(locale);
   const passengerTypeOptions = createPassengerTypeOptions(locale);
 
-  // แสดงข้อมูลการเดินทางที่ผู้ลงทะเบียนเลือกไว้เดิม
-  const getOriginalTransportInfo = () => {
-    let transportInfo = '';
-    
-    if (formData.transportation_category === FORM_CONSTANTS.TRANSPORT_TYPES.PUBLIC) {
-      transportInfo = locale === 'th' ? 'ขนส่งมวลชน' : 'Public Transportation';
-      // หาชื่อประเภทขนส่งมวลชน
-      const publicTransport = publicTransportOptions.find(t => t.id === formData.public_transport_type);
-      if (publicTransport) {
-        transportInfo += ` - ${locale === 'th' ? publicTransport.name_th : publicTransport.name_en}`;
-      } else if (formData.public_transport_other) {
-        transportInfo += ` - ${formData.public_transport_other}`;
-      }
-    } else if (formData.transportation_category === FORM_CONSTANTS.TRANSPORT_TYPES.PRIVATE) {
-      transportInfo = locale === 'th' ? 'พาหนะส่วนตัว' : 'Private Vehicle';
-      // หาชื่อประเภทรถ
-      const privateVehicle = privateVehicleOptions.find(t => t.id === formData.car_type);
-      if (privateVehicle) {
-        transportInfo += ` - ${locale === 'th' ? privateVehicle.name_th : privateVehicle.name_en}`;
-      } else if (formData.car_type_other) {
-        transportInfo += ` - ${formData.car_type_other}`;
-      }
-      
-      // เพิ่มข้อมูลผู้โดยสาร
-      if (formData.car_passenger_type === 'with_others') {
-        transportInfo += locale === 'th' ? ' (เดินทางร่วมกับผู้อื่น)' : ' (Traveling with others)';
-      } else {
-        transportInfo += locale === 'th' ? ' (เดินทางคนเดียว)' : ' (Traveling alone)';
-      }
-    } else if (formData.transportation_category === FORM_CONSTANTS.TRANSPORT_TYPES.WALKING) {
-      transportInfo = locale === 'th' ? 'เดินเท้า' : 'Walking';
-    }
-    
-    return transportInfo;
-  };
-  
-  const originalTransportInfo = getOriginalTransportInfo();
+  // ไม่ต้องแสดงข้อมูลการเดินทางที่ผู้ลงทะเบียนเลือกไว้เดิม
   
   return (
     <div className="bg-gray-50 p-4 rounded-md">
@@ -66,18 +30,7 @@ export default function TransportationInfoForm({
         {locale === 'th' ? 'ข้อมูลการเดินทาง' : 'Transportation Information'}
       </h4>
       
-      {/* แสดงข้อมูลการเดินทางที่ผู้ลงทะเบียนเลือกไว้เดิม */}
-      {originalTransportInfo && (
-        <div className="mb-4 p-3 bg-blue-50 border border-blue-200 rounded-md">
-          <p className="text-sm font-prompt">
-            <span className="font-medium">
-              {locale === 'th' 
-                ? 'ข้อมูลการเดินทางที่ผู้ลงทะเบียนเลือกไว้เดิม:' 
-                : 'Original transportation information:'}
-            </span> {originalTransportInfo}
-          </p>
-        </div>
-      )}
+      {/* ไม่ต้องแสดงข้อมูลการเดินทางที่ผู้ลงทะเบียนเลือกไว้เดิม */}
       
       <div className="grid grid-cols-1 gap-4">
         <div>
@@ -127,7 +80,7 @@ export default function TransportationInfoForm({
               ))}
             </select>
             
-            {formData.public_transport_id === FORM_CONSTANTS.OTHER_OPTION_ID && (
+            {(formData.public_transport_id === FORM_CONSTANTS.OTHER_OPTION_ID || formData.public_transport_id === FORM_CONSTANTS.OTHER_OPTION_ID_ALT || formData.public_transport_id === '99' || formData.public_transport_id === '999') && (
               <div className="mt-2">
                 <label htmlFor="public_transport_other" className="block text-sm font-prompt mb-1">
                   {locale === 'th' ? 'ระบุประเภทขนส่งมวลชน *' : 'Specify public transportation type *'}
@@ -171,7 +124,7 @@ export default function TransportationInfoForm({
                 ))}
               </select>
               
-              {formData.private_vehicle_id === FORM_CONSTANTS.OTHER_OPTION_ID && (
+              {(formData.private_vehicle_id === FORM_CONSTANTS.OTHER_OPTION_ID || formData.private_vehicle_id === FORM_CONSTANTS.OTHER_OPTION_ID_ALT || formData.private_vehicle_id === '99' || formData.private_vehicle_id === '999') && (
                 <div className="mt-2">
                   <label htmlFor="private_vehicle_other" className="block text-sm font-prompt mb-1">
                     {locale === 'th' ? 'ระบุประเภทพาหนะส่วนตัว *' : 'Specify private vehicle type *'}
@@ -190,13 +143,13 @@ export default function TransportationInfoForm({
             </div>
             
             <div className="mb-4">
-              <label htmlFor="fuel_type" className="block text-sm font-prompt mb-1">
+              <label htmlFor="fuel_type_id" className="block text-sm font-prompt mb-1">
                 {locale === 'th' ? 'ประเภทเชื้อเพลิง *' : 'Fuel Type *'}
               </label>
               <select
-                id="fuel_type"
-                name="fuel_type"
-                value={formData.fuel_type}
+                id="fuel_type_id"
+                name="fuel_type_id"
+                value={formData.fuel_type_id}
                 onChange={handleChange}
                 className="w-full p-2 border rounded-md font-prompt"
                 required
@@ -211,7 +164,7 @@ export default function TransportationInfoForm({
                 ))}
               </select>
               
-              {formData.fuel_type === FORM_CONSTANTS.FUEL_TYPES.OTHER && (
+              {(formData.fuel_type_id === FORM_CONSTANTS.FUEL_TYPES.OTHER || formData.fuel_type_id === FORM_CONSTANTS.FUEL_TYPES.OTHER_ID || formData.fuel_type_id === '999' || formData.fuel_type_id === 999 || formData.fuel_type_id === '99' || formData.fuel_type_id === 99) && (
                 <div className="mt-2">
                   <label htmlFor="fuel_type_other" className="block text-sm font-prompt mb-1">
                     {locale === 'th' ? 'ระบุประเภทเชื้อเพลิง *' : 'Specify fuel type *'}

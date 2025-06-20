@@ -4,7 +4,7 @@ import { executeQuery } from '@/lib/db';
 export async function GET() {
   try {
     const transportationTypes = await executeQuery(
-      'SELECT * FROM CCI_transportation_types ORDER BY name_th'
+      'SELECT * FROM CCI_transport_types ORDER BY name_th'
     );
     
     return NextResponse.json({

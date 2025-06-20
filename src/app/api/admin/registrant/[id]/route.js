@@ -16,13 +16,20 @@ export async function GET(request, { params }) {
     const registrants = await executeQuery(
       `SELECT r.*, 
         ot.name_th as organization_type_th, ot.name_en as organization_type_en,
-        tt.name_th as transportation_type_th, tt.name_en as transportation_type_en,
+        t.transport_type,
+        t.public_transport_id,
+        t.public_transport_other,
+        t.private_vehicle_id,
+        t.private_vehicle_other,
+        t.passenger_type,
+        t.fuel_type_id,
+        t.fuel_type_other,
         sr.name_th as room_name_th, sr.name_en as room_name_en,
         bd.name_th as bangkok_district_name_th, bd.name_en as bangkok_district_name_en,
         p.name_th as province_name_th, p.name_en as province_name_en
       FROM CCI_registrants r
       LEFT JOIN CCI_organization_types ot ON r.organization_type_id = ot.id
-      LEFT JOIN CCI_transportation_types tt ON r.transportation_type_id = tt.id
+      LEFT JOIN CCI_transportation t ON r.id = t.registrant_id
       LEFT JOIN CCI_seminar_rooms sr ON r.selected_room_id = sr.id
       LEFT JOIN CCI_bangkok_districts bd ON r.bangkok_district_id = bd.id
       LEFT JOIN CCI_provinces p ON r.province_id = p.id
@@ -88,6 +95,12 @@ export async function PUT(request, { params }) {
       }
     }
     
+    // ตั้งค่า gift_received = 1 โดยอัตโนมัติเมื่อผู้ลงทะเบียนเลือกเดินทางด้วยขนส่งมวลชนหรือเดิน
+    let giftReceived = 0;
+    if (data.transport_type === 'public' || data.transport_type === 'walk') {
+      giftReceived = 1;
+    }
+    
     // Update the registrant data
     await executeQuery(
       `UPDATE CCI_registrants SET
@@ -98,19 +111,13 @@ export async function PUT(request, { params }) {
         organization_name = ?,
         organization_type_id = ?,
         organization_type_other = ?,
-        transportation_type_id = ?,
-        transportation_category = ?,
-        public_transport_type = ?,
-        public_transport_other = ?,
-        car_type = ?,
-        car_type_other = ?,
-        car_passenger_type = ?,
         attendance_type = ?,
         selected_room_id = ?,
         location_type = ?,
         bangkok_district_id = ?,
         province_id = ?,
-        admin_notes = ?
+        admin_notes = ?,
+        gift_received = ?
       WHERE id = ?`,
       [
         data.first_name,
@@ -120,34 +127,95 @@ export async function PUT(request, { params }) {
         data.organization_name,
         data.organization_type_id,
         data.organization_type_other || null,
-        data.transportation_type_id || null,
-        data.transportation_category || null,
-        data.public_transport_type || null,
-        data.public_transport_other || null,
-        data.car_type || null,
-        data.car_type_other || null,
-        data.car_passenger_type || null,
         data.attendance_type,
         data.selected_room_id || null,
         data.location_type || null,
         data.bangkok_district_id || null,
         data.province_id || null,
         data.admin_notes || null,
+        giftReceived,
         id
       ]
     );
+    
+    // Check if transportation data exists for this registrant
+    const existingTransportation = await executeQuery(
+      'SELECT id FROM CCI_transportation WHERE registrant_id = ?',
+      [id]
+    );
+    
+    // Update or insert transportation data
+    if (existingTransportation.length > 0) {
+      // Update existing transportation data
+      await executeQuery(
+        `UPDATE CCI_transportation SET
+          transport_type = ?,
+          public_transport_id = ?,
+          public_transport_other = ?,
+          private_vehicle_id = ?,
+          private_vehicle_other = ?,
+          passenger_type = ?,
+          fuel_type_id = ?,
+          fuel_type_other = ?
+        WHERE registrant_id = ?`,
+        [
+          data.transport_type || null,
+          data.public_transport_id || null,
+          data.public_transport_other || null,
+          data.private_vehicle_id || null,
+          data.private_vehicle_other || null,
+          data.passenger_type || null,
+          data.fuel_type_id || null,
+          data.fuel_type_other || null,
+          id
+        ]
+      );
+    } else if (data.transport_type) {
+      // Insert new transportation data if transport_type is provided
+      await executeQuery(
+        `INSERT INTO CCI_transportation (
+          registrant_id,
+          transport_type,
+          public_transport_id,
+          public_transport_other,
+          private_vehicle_id,
+          private_vehicle_other,
+          passenger_type,
+          fuel_type_id,
+          fuel_type_other
+        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+        [
+          id,
+          data.transport_type || null,
+          data.public_transport_id || null,
+          data.public_transport_other || null,
+          data.private_vehicle_id || null,
+          data.private_vehicle_other || null,
+          data.passenger_type || null,
+          data.fuel_type_id || null,
+          data.fuel_type_other || null
+        ]
+      );
+    }
     
     // Get the updated registrant
     const updatedRegistrant = await executeQuery(
       `SELECT r.*, 
         ot.name_th as organization_type_th, ot.name_en as organization_type_en,
-        tt.name_th as transportation_type_th, tt.name_en as transportation_type_en,
+        t.transport_type,
+        t.public_transport_id,
+        t.public_transport_other,
+        t.private_vehicle_id,
+        t.private_vehicle_other,
+        t.passenger_type,
+        t.fuel_type_id,
+        t.fuel_type_other,
         sr.name_th as room_name_th, sr.name_en as room_name_en,
         bd.name_th as bangkok_district_name_th, bd.name_en as bangkok_district_name_en,
         p.name_th as province_name_th, p.name_en as province_name_en
       FROM CCI_registrants r
       LEFT JOIN CCI_organization_types ot ON r.organization_type_id = ot.id
-      LEFT JOIN CCI_transportation_types tt ON r.transportation_type_id = tt.id
+      LEFT JOIN CCI_transportation t ON r.id = t.registrant_id
       LEFT JOIN CCI_seminar_rooms sr ON r.selected_room_id = sr.id
       LEFT JOIN CCI_bangkok_districts bd ON r.bangkok_district_id = bd.id
       LEFT JOIN CCI_provinces p ON r.province_id = p.id

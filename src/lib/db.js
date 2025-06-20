@@ -109,7 +109,7 @@ export async function getSeminarRoomById(roomId) {
 export async function getBangkokDistricts() {
   try {
     const districts = await executeQuery('SELECT * FROM CCI_bangkok_districts ORDER BY name_th');
-    console.log('Bangkok districts from DB:', districts);
+    // console.log('Bangkok districts from DB:', districts);
     return districts;
   } catch (error) {
     console.error('Error fetching Bangkok districts:', error);
@@ -128,7 +128,7 @@ export async function getBangkokDistricts() {
 export async function getProvinces() {
   try {
     const provinces = await executeQuery('SELECT * FROM CCI_provinces ORDER BY name_th');
-    console.log('Provinces from DB:', provinces);
+    // console.log('Provinces from DB:', provinces);
     return provinces;
   } catch (error) {
     console.error('Error fetching provinces:', error);
@@ -176,28 +176,29 @@ export async function getAfternoonScheduleByRoom(roomId) {
 }
 
 // Register a participant
-export async function registerParticipant(participantData) {
-  const { 
-    first_name, 
-    last_name, 
-    email, 
-    phone, 
-    organization_name, 
-    organization_type_id, 
-    transportation_type_id,
-    transportation_category,
-    public_transport_type,
-    public_transport_other,
-    car_type,
-    car_type_other,
-    car_passenger_type,
-    location_type,
-    bangkok_district_id,
-    province_id,
-    attendance_type,
-    selected_room_id 
-  } = participantData;
-
+export async function registerParticipant({  
+  first_name,
+  last_name,
+  email,
+  phone,
+  organization_name,
+  organization_type_id,
+  location_type,
+  bangkok_district_id,
+  province_id,
+  transportation_category,
+  transportation_type_id,
+  public_transport_type,
+  public_transport_other,
+  car_type,
+  car_type_other,
+  private_vehicle_other,
+  car_passenger_type,
+  fuel_type,
+  fuel_type_other,
+  attendance_type,
+  selected_room_id
+}) {
   // Generate a unique CCI-XXXXXX ID
   const uuid = generateCCIId();
 
@@ -277,48 +278,83 @@ export async function registerParticipant(participantData) {
         }
         
         // แปลงค่าประเภทเชื้อเพลิง
-        // ตรวจสอบจากพารามิเตอร์ที่ส่งมาโดยตรง
-        // ค่า 'electric' ควรอยู่ใน fuel_type_id ไม่ใช่ private_vehicle_id
+        // ใช้ค่าจากฟิลด์ fuel_type ที่ส่งมาจากฟอร์ม
+        if (fuel_type) {
+          try {
+            fuelTypeId = parseInt(fuel_type);
+            if (isNaN(fuelTypeId)) {
+              fuelTypeId = null;
+            }
+          } catch (e) {
+            fuelTypeId = null;
+          }
+        }
+        
+        // เก็บค่าเดิมไว้เผื่อความเข้ากันได้กับโค้ดเก่า
         if (car_type === 'electric') {
-          // ถ้า car_type เป็น 'electric' ให้ย้ายไปเป็น fuel_type_id แทน
           fuelTypeId = 3; // ID สำหรับรถไฟฟ้า
-          // ตั้งค่า privateVehicleId เป็นรถยนต์ส่วนตัว
-          privateVehicleId = 1; // สมมติว่ารถไฟฟ้าเป็นรถยนต์ส่วนตัว
+          privateVehicleId = privateVehicleId || 1;
         } else if (car_type === 'hybrid') {
-          // ถ้า car_type เป็น 'hybrid' ให้ย้ายไปเป็น fuel_type_id แทน
           fuelTypeId = 4; // ID สำหรับรถไฮบริด
-          // ตั้งค่า privateVehicleId เป็นรถยนต์ส่วนตัว
-          privateVehicleId = 1; // สมมติว่ารถไฮบริดเป็นรถยนต์ส่วนตัว
+          privateVehicleId = privateVehicleId || 1;
         } else if (car_type === 'gasoline') {
-          // ถ้า car_type เป็น 'gasoline' ให้ย้ายไปเป็น fuel_type_id แทน
           fuelTypeId = 1; // ID สำหรับรถเบนซิน
-          // ตั้งค่า privateVehicleId เป็นรถยนต์ส่วนตัว
-          privateVehicleId = 1; // สมมติว่ารถเบนซินเป็นรถยนต์ส่วนตัว
+          privateVehicleId = privateVehicleId || 1;
         } else if (car_type === 'diesel') {
-          // ถ้า car_type เป็น 'diesel' ให้ย้ายไปเป็น fuel_type_id แทน
           fuelTypeId = 2; // ID สำหรับรถดีเซล
-          // ตั้งค่า privateVehicleId เป็นรถยนต์ส่วนตัว
-          privateVehicleId = 1; // สมมติว่ารถดีเซลเป็นรถยนต์ส่วนตัว
+          privateVehicleId = privateVehicleId || 1;
         }
       }
       
+      // Debug log สำหรับตรวจสอบข้อมูลก่อนบันทึก
+      console.log('DEBUG - Transportation data before saving:', {
+        registrantId: registrantResult.insertId,
+        transportation_category,
+        public_transport_type: transportation_category === 'public' ? public_transport_type : null,
+        public_transport_other,
+        privateVehicleId,
+        private_vehicle_other: private_vehicle_other,
+        car_type_other: car_type_other,
+        fuelTypeId,
+        fuel_type_other,
+        car_passenger_type
+      });
+      
+      // ตรวจสอบค่าที่จะบันทึกลงในคอลัมน์ private_vehicle_other
+      // ตรวจสอบว่ามีค่าหรือไม่ และไม่ใช่ค่าว่าง
+      const finalPrivateVehicleOther = (private_vehicle_other && private_vehicle_other.trim() !== '') ? 
+                                      private_vehicle_other : 
+                                      (car_type_other && car_type_other.trim() !== '') ? 
+                                      car_type_other : null;
+                                      
+      console.log('DEBUG - Final private_vehicle_other value:', finalPrivateVehicleOther);
+      
+      // ตรวจสอบค่า public_transport_other เช่นเดียวกับ private_vehicle_other
+      const finalPublicTransportOther = (public_transport_other && public_transport_other.trim() !== '') ? 
+                                      public_transport_other : null;
+      console.log('DEBUG - Final public_transport_other value:', finalPublicTransportOther);
+      
       // บันทึกข้อมูลการเดินทาง
-      await executeQuery(
+      const transportationInsertResult = await executeQuery(
         `INSERT INTO CCI_transportation 
         (registrant_id, transport_type, public_transport_id, public_transport_other, 
-        private_vehicle_id, private_vehicle_other, fuel_type_id, passenger_type) 
-        VALUES (?, ?, ?, ?, ?, ?, ?, ?)`,
+        private_vehicle_id, private_vehicle_other, fuel_type_id, fuel_type_other, passenger_type) 
+        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)`,
         [
           registrantResult.insertId, // ใช้ ID ของผู้ลงทะเบียนที่เพิ่งสร้าง
           transportation_category,
           transportation_category === 'public' ? parseInt(public_transport_type) || null : null,
-          public_transport_other,
+          finalPublicTransportOther, // ใช้ค่าที่ตรวจสอบแล้ว
           privateVehicleId,
-          car_type_other,
+          finalPrivateVehicleOther, // ใช้ค่าที่ตรวจสอบแล้ว
           fuelTypeId,
-          car_passenger_type
+          fuel_type_other || null, // เพิ่มการบันทึกข้อมูล fuel_type_other พร้อมตรวจสอบค่า null
+          car_passenger_type || null
         ]
       );
+      
+      // ตรวจสอบผลลัพธ์การบันทึก
+      console.log('Transportation insert result:', transportationInsertResult);
       
       console.log('Transportation data saved successfully');
     } catch (error) {
@@ -334,13 +370,17 @@ export async function registerParticipant(participantData) {
 export async function getParticipantByUuid(uuid) {
   const participants = await executeQuery(
     `SELECT r.*, ot.name_th as organization_type_th, ot.name_en as organization_type_en,
-    tt.name_th as transportation_type_th, tt.name_en as transportation_type_en,
-    sr.name_th as room_name_th, sr.name_en as room_name_en
+    t.transport_type,
+    sr.name_th as room_name_th, sr.name_en as room_name_en,
+    bd.name_th as bangkok_district_name_th, bd.name_en as bangkok_district_name_en,
+    p.name_th as province_name_th, p.name_en as province_name_en
     FROM CCI_registrants r
-    JOIN CCI_organization_types ot ON r.organization_type_id = ot.id
-    LEFT JOIN CCI_transportation_types tt ON r.transportation_type_id = tt.id
+    LEFT JOIN CCI_organization_types ot ON r.organization_type_id = ot.id
+    LEFT JOIN CCI_transportation t ON r.id = t.registrant_id
     LEFT JOIN CCI_seminar_rooms sr ON r.selected_room_id = sr.id
-    WHERE r.uuid = ?`,
+    LEFT JOIN CCI_bangkok_districts bd ON r.bangkok_district_id = bd.id
+    LEFT JOIN CCI_provinces p ON r.province_id = p.id
+    WHERE UPPER(r.uuid) = UPPER(?)`,
     [uuid]
   );
   
@@ -355,7 +395,7 @@ export async function getRegistrationById(registrationId) {
     sr.name_th as room_name_th, sr.name_en as room_name_en
     FROM CCI_registrants r
     JOIN CCI_organization_types ot ON r.organization_type_id = ot.id
-    LEFT JOIN CCI_transportation_types tt ON r.transportation_type_id = tt.id
+    LEFT JOIN CCI_transport_types tt ON r.transportation_type_id = tt.id
     LEFT JOIN CCI_seminar_rooms sr ON r.selected_room_id = sr.id
     WHERE r.registration_id = ?`,
     [registrationId]

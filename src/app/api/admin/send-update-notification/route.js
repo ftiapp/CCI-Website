@@ -21,13 +21,13 @@ export async function POST(request) {
     const registrants = await executeQuery(
       `SELECT r.*, 
         ot.name_th as organization_type_th, ot.name_en as organization_type_en,
-        tt.name_th as transportation_type_th, tt.name_en as transportation_type_en,
+        t.transport_type,
         sr.name_th as room_name_th, sr.name_en as room_name_en,
         bd.name_th as bangkok_district_name_th, bd.name_en as bangkok_district_name_en,
         p.name_th as province_name_th, p.name_en as province_name_en
       FROM CCI_registrants r
       LEFT JOIN CCI_organization_types ot ON r.organization_type_id = ot.id
-      LEFT JOIN CCI_transportation_types tt ON r.transportation_type_id = tt.id
+      LEFT JOIN CCI_transportation t ON r.id = t.registrant_id
       LEFT JOIN CCI_seminar_rooms sr ON r.selected_room_id = sr.id
       LEFT JOIN CCI_bangkok_districts bd ON r.bangkok_district_id = bd.id
       LEFT JOIN CCI_provinces p ON r.province_id = p.id
@@ -51,7 +51,9 @@ export async function POST(request) {
     // Send email notification if requested
     if (channels.includes('email')) {
       try {
-        const emailResponse = await fetch(`${process.env.NEXT_PUBLIC_BASE_URL || ''}/api/send-email`, {
+        // ใช้ URL ที่เป็น absolute URL
+        const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || 'http://localhost:3000';
+        const emailResponse = await fetch(`${baseUrl}/api/send-email`, {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
@@ -139,7 +141,9 @@ export async function POST(request) {
           }
         };
         
-        const smsResponse = await fetch(`${process.env.NEXT_PUBLIC_BASE_URL || ''}/api/send-sms`, {
+        // ใช้ URL ที่เป็น absolute URL เช่นเดียวกับการส่งอีเมล
+        const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || 'http://localhost:3000';
+        const smsResponse = await fetch(`${baseUrl}/api/send-sms`, {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',

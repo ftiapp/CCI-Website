@@ -25,13 +25,13 @@ export async function GET(request) {
     
     if (transportFilter !== 'all') {
       if (transportFilter === 'public') {
-        whereClause += ' AND r.transportation_category = ? AND r.public_transport_type != ?';
-        params.push('public', 'walking');
+        whereClause += ' AND t.transport_type = ? AND (t.public_transport_id IS NOT NULL)';
+        params.push('public');
       } else if (transportFilter === 'walking') {
-        whereClause += ' AND r.public_transport_type = ?';
+        whereClause += ' AND t.transport_type = ?';
         params.push('walking');
       } else if (transportFilter === 'private') {
-        whereClause += ' AND r.transportation_category = ?';
+        whereClause += ' AND t.transport_type = ?';
         params.push('private');
       }
     }
@@ -51,14 +51,18 @@ export async function GET(request) {
     
     // Get total registrations
     const totalRegistrationsResult = await executeQuery(
-      `SELECT COUNT(*) as count FROM CCI_registrants r WHERE 1=1 ${whereClause}`,
+      `SELECT COUNT(*) as count FROM CCI_registrants r
+       LEFT JOIN CCI_transportation t ON r.id = t.registrant_id
+       WHERE 1=1 ${whereClause}`,
       params
     );
     const totalRegistrations = totalRegistrationsResult[0].count;
     
     // Get total checked in
     const totalCheckedInResult = await executeQuery(
-      `SELECT COUNT(*) as count FROM CCI_registrants r WHERE check_in_status = 1 ${whereClause}`,
+      `SELECT COUNT(*) as count FROM CCI_registrants r
+       LEFT JOIN CCI_transportation t ON r.id = t.registrant_id
+       WHERE check_in_status = 1 ${whereClause}`,
       [...params]
     );
     const totalCheckedIn = totalCheckedInResult[0].count;
@@ -66,6 +70,7 @@ export async function GET(request) {
     // Get attendance by type
     const morningAttendeesResult = await executeQuery(
       `SELECT COUNT(*) as count FROM CCI_registrants r 
+       LEFT JOIN CCI_transportation t ON r.id = t.registrant_id
        WHERE (attendance_type = 'morning' OR attendance_type = 'full_day') ${whereClause}`,
       [...params]
     );
@@ -73,6 +78,7 @@ export async function GET(request) {
     
     const afternoonAttendeesResult = await executeQuery(
       `SELECT COUNT(*) as count FROM CCI_registrants r 
+       LEFT JOIN CCI_transportation t ON r.id = t.registrant_id
        WHERE (attendance_type = 'afternoon' OR attendance_type = 'full_day') ${whereClause}`,
       [...params]
     );
@@ -80,6 +86,7 @@ export async function GET(request) {
     
     const fullDayAttendeesResult = await executeQuery(
       `SELECT COUNT(*) as count FROM CCI_registrants r 
+       LEFT JOIN CCI_transportation t ON r.id = t.registrant_id
        WHERE attendance_type = 'full_day' ${whereClause}`,
       [...params]
     );
@@ -90,7 +97,8 @@ export async function GET(request) {
       `SELECT sr.id, sr.name_th, sr.name_en, COUNT(r.id) as count
        FROM CCI_seminar_rooms sr
        LEFT JOIN CCI_registrants r ON sr.id = r.selected_room_id
-       ${whereClause ? `AND ${whereClause.substring(4)}` : ''}
+       LEFT JOIN CCI_transportation t ON r.id = t.registrant_id
+       ${whereClause ? `WHERE ${whereClause.substring(4)}` : ''}
        GROUP BY sr.id
        ORDER BY count DESC`,
       whereClause ? params : []
@@ -114,6 +122,7 @@ export async function GET(request) {
          COUNT(r.id) as count
        FROM CCI_registrants r
        LEFT JOIN CCI_provinces p ON r.province_id = p.id
+       LEFT JOIN CCI_transportation t ON r.id = t.registrant_id
        WHERE 1=1 ${whereClause}
        GROUP BY 
          CASE 
@@ -136,19 +145,20 @@ export async function GET(request) {
     const transportationDistribution = await executeQuery(
       `SELECT 
          CASE 
-           WHEN r.public_transport_type = 'walking' THEN 'walking'
-           WHEN r.transportation_category = 'public' THEN 'public'
-           WHEN r.transportation_category = 'private' THEN 'private'
+           WHEN t.transport_type = 'walking' THEN 'walking'
+           WHEN t.transport_type = 'public' THEN 'public'
+           WHEN t.transport_type = 'private' THEN 'private'
            ELSE 'other'
          END as type,
          COUNT(r.id) as count
        FROM CCI_registrants r
+       LEFT JOIN CCI_transportation t ON r.id = t.registrant_id
        WHERE 1=1 ${whereClause}
        GROUP BY 
          CASE 
-           WHEN r.public_transport_type = 'walking' THEN 'walking'
-           WHEN r.transportation_category = 'public' THEN 'public'
-           WHEN r.transportation_category = 'private' THEN 'private'
+           WHEN t.transport_type = 'walking' THEN 'walking'
+           WHEN t.transport_type = 'public' THEN 'public'
+           WHEN t.transport_type = 'private' THEN 'private'
            ELSE 'other'
          END
        ORDER BY count DESC`,

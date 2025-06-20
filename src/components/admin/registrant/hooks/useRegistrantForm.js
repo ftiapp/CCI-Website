@@ -17,21 +17,13 @@ export default function useRegistrantForm(registrant) {
     province_id: '',
     attendance_type: '',
     selected_room_id: '',
-    // ฟิลด์ข้อมูลการเดินทางจากฐานข้อมูล
-    transportation_type_id: '',
-    transportation_category: '', // 'public', 'private', 'walk'
-    public_transport_type: '',
-    public_transport_other: '',
-    car_type: '',
-    car_type_other: '',
-    car_passenger_type: '',
     // ฟิลด์สำหรับแสดงในฟอร์ม
     transport_type: '', // 'public', 'private', 'walk'
     public_transport_id: '',
     public_transport_other: '',
     private_vehicle_id: '',
     private_vehicle_other: '',
-    fuel_type: '',
+    fuel_type_id: '',
     fuel_type_other: '',
     passenger_type: '',
     admin_notes: ''
@@ -43,38 +35,57 @@ export default function useRegistrantForm(registrant) {
   useEffect(() => {
     if (registrant) {
       try {
+        console.log('Registrant data:', registrant);
+        
         // แปลงข้อมูลการเดินทางจากฐานข้อมูลเป็นรูปแบบที่ใช้ในฟอร์ม
-        // ใช้ค่าที่ผู้ลงทะเบียนเลือกไว้แต่แรก
-        let transportType = '';
+        let transportType = registrant.transport_type || '';
         let publicTransportId = '';
         let privateVehicleId = '';
-        let fuelType = '';
-        let passengerType = '';
+        let fuelTypeId = 1; // ค่าเริ่มต้น (gasoline)
+        let passengerType = 'driver'; // ค่าเริ่มต้น
         
-        // แปลงข้อมูลประเภทการเดินทาง
-        if (registrant.transportation_category) {
-          transportType = registrant.transportation_category; // 'public', 'private', 'walk'
-        }
+        console.log('Transportation data from API:', {
+          transport_type: registrant.transport_type,
+          public_transport_id: registrant.public_transport_id,
+          private_vehicle_id: registrant.private_vehicle_id,
+          fuel_type_id: registrant.fuel_type_id,
+          passenger_type: registrant.passenger_type
+        });
         
         // แปลงข้อมูลขนส่งมวลชน
         if (transportType === 'public') {
-          publicTransportId = registrant.public_transport_type || '';
+          publicTransportId = registrant.public_transport_id || '';
         }
         
         // แปลงข้อมูลพาหนะส่วนตัว
         if (transportType === 'private') {
           // ประเภทรถ
-          privateVehicleId = registrant.car_type || '';
+          privateVehicleId = registrant.private_vehicle_id || '';
           
           // ประเภทเชื้อเพลิง
-          fuelType = registrant.car_type || 'gasoline';
+          // แปลงค่า fuel_type_id จากตัวเลขเป็น string ที่ใช้ในฟอร์ม
+          console.log('Fuel type ID from API (raw):', registrant.fuel_type_id);
+          console.log('Fuel type other from API:', registrant.fuel_type_other);
+          
+          // แปลงค่าตาม ID
+          if (registrant.fuel_type_id === 1 || registrant.fuel_type_id === '1') {
+            fuelTypeId = 'gasoline';
+          } else if (registrant.fuel_type_id === 2 || registrant.fuel_type_id === '2') {
+            fuelTypeId = 'diesel';
+          } else if (registrant.fuel_type_id === 3 || registrant.fuel_type_id === '3') {
+            fuelTypeId = 'electric';
+          } else if (registrant.fuel_type_id === 4 || registrant.fuel_type_id === '4') {
+            fuelTypeId = 'hybrid';
+          } else if (registrant.fuel_type_id === 99 || registrant.fuel_type_id === '99' || registrant.fuel_type_id === 999 || registrant.fuel_type_id === '999') {
+            fuelTypeId = 'other';
+          } else {
+            fuelTypeId = 'gasoline'; // ค่าเริ่มต้น
+          }
+          
+          console.log('Fuel type ID after conversion:', fuelTypeId);
           
           // ผู้โดยสาร
-          if (registrant.car_passenger_type === 'with_others') {
-            passengerType = 'carpool';
-          } else {
-            passengerType = 'alone';
-          }
+          passengerType = registrant.passenger_type || 'driver';
         }
 
         setFormData({
@@ -93,25 +104,24 @@ export default function useRegistrantForm(registrant) {
           attendance_type: registrant.attendance_type || '',
           selected_room_id: registrant.selected_room_id || '',
           
-          // ข้อมูลการเดินทางจากฐานข้อมูล
-          transportation_type_id: registrant.transportation_type_id || '',
-          transportation_category: registrant.transportation_category || '',
-          public_transport_type: registrant.public_transport_type || '',
-          public_transport_other: registrant.public_transport_other || '',
-          car_type: registrant.car_type || '',
-          car_type_other: registrant.car_type_other || '',
-          car_passenger_type: registrant.car_passenger_type || '',
-          
-          // แปลงข้อมูลสำหรับแสดงในฟอร์ม
+          // ข้อมูลการเดินทาง
           transport_type: transportType,
           public_transport_id: publicTransportId,
           public_transport_other: registrant.public_transport_other || '',
           private_vehicle_id: privateVehicleId,
-          private_vehicle_other: registrant.car_type_other || '',
-          fuel_type: fuelType,
-          fuel_type_other: '',
+          private_vehicle_other: registrant.private_vehicle_other || registrant.car_type_other || '',
+          fuel_type_id: fuelTypeId,
+          fuel_type_other: registrant.fuel_type_other || '',
           passenger_type: passengerType,
           admin_notes: registrant.admin_notes || ''
+        });
+        
+        console.log('Form data set:', {
+          transport_type: transportType,
+          public_transport_id: publicTransportId,
+          private_vehicle_id: privateVehicleId,
+          fuel_type_id: fuelTypeId,
+          passenger_type: passengerType
         });
       } catch (error) {
         toast.error('เกิดข้อผิดพลาดในการโหลดข้อมูลผู้ลงทะเบียน', {

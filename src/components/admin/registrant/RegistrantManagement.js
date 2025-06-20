@@ -76,9 +76,35 @@ export default function RegistrantManagement() {
     setCurrentPage(page);
   };
 
-  const handleEditRegistrant = (registrant) => {
-    setEditingRegistrant(registrant);
-    setShowForm(true);
+  const handleEditRegistrant = async (registrantId) => {
+    try {
+      setLoading(true);
+      // ดึงข้อมูลผู้ลงทะเบียน
+      const response = await fetch(`/api/admin/registrant/${registrantId}`);
+      const data = await response.json();
+      
+      if (data.success) {
+        // ดึงข้อมูลหมายเหตุ
+        const notesResponse = await fetch(`/api/admin/notes?uuid=${data.registrant.uuid}`);
+        const notesData = await notesResponse.json();
+        
+        // รวมข้อมูลผู้ลงทะเบียนและหมายเหตุ
+        const registrantWithNotes = {
+          ...data.registrant,
+          admin_notes: notesData.success && notesData.data ? notesData.data.admin_notes || '' : ''
+        };
+        
+        setEditingRegistrant(registrantWithNotes);
+        setShowForm(true);
+      } else {
+        toast.error(data.error || 'ไม่สามารถดึงข้อมูลผู้ลงทะเบียนได้');
+      }
+    } catch (error) {
+      console.error('Error fetching registrant:', error);
+      toast.error('เกิดข้อผิดพลาดในการดึงข้อมูลผู้ลงทะเบียน');
+    } finally {
+      setLoading(false);
+    }
   };
 
   const handleDeleteRegistrant = (registrant) => {
@@ -124,6 +150,7 @@ export default function RegistrantManagement() {
 
   const handleFormSubmit = async (formData, sendNotification) => {
     try {
+      // บันทึกข้อมูลผู้ลงทะเบียน
       const response = await fetch(`/api/admin/registrant/${formData.id}`, {
         method: 'PUT',
         headers: {
@@ -138,7 +165,28 @@ export default function RegistrantManagement() {
       const data = await response.json();
       
       if (data.success) {
-        toast.success('อัปเดตข้อมูลผู้ลงทะเบียนสำเร็จ');
+        // บันทึกข้อมูลหมายเหตุ
+        if (formData.admin_notes !== undefined) {
+          const notesResponse = await fetch('/api/admin/notes', {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+              uuid: formData.uuid,
+              admin_notes: formData.admin_notes
+            }),
+          });
+          
+          const notesData = await notesResponse.json();
+          if (!notesData.success) {
+            console.error('Error saving admin notes:', notesData.error);
+          }
+        }
+        
+        toast.success('อัปเดตข้อมูลผู้ลงทะเบียนสำเร็จ', {
+          className: 'font-prompt'
+        });
         setShowForm(false);
         
         // Show notification modal if user wants to send notification
@@ -157,7 +205,9 @@ export default function RegistrantManagement() {
         // Refresh registrant list
         fetchRegistrants();
       } else {
-        toast.error(data.error || 'ไม่สามารถอัปเดตข้อมูลได้');
+        toast.error(data.error || 'ไม่สามารถอัปเดตข้อมูลได้', {
+          className: 'font-prompt'
+        });
       }
     } catch (error) {
       console.error('Error updating registrant:', error);

@@ -4,7 +4,8 @@
  * Constants used in the Registrant forms
  */
 export const FORM_CONSTANTS = {
-  OTHER_OPTION_ID: 999,
+  OTHER_OPTION_ID: 99,
+  OTHER_OPTION_ID_ALT: 999,
   LOCATION_TYPES: {
     BANGKOK: 'bangkok',
     PROVINCE: 'province'
@@ -15,7 +16,8 @@ export const FORM_CONSTANTS = {
     WALKING: 'walking'
   },
   FUEL_TYPES: {
-    OTHER: 'other'
+    OTHER: 'other',
+    OTHER_ID: 999
   }
 };
 

@@ -70,7 +70,7 @@ export async function GET(request) {
         r.registration_date
       FROM CCI_registrants r
       LEFT JOIN CCI_organization_types ot ON r.organization_type_id = ot.id
-      LEFT JOIN CCI_transportation_types tt ON r.transportation_type_id = tt.id
+      LEFT JOIN CCI_transport_types tt ON r.transportation_type_id = tt.id
       LEFT JOIN CCI_seminar_rooms sr ON r.selected_room_id = sr.id
       LEFT JOIN CCI_bangkok_districts bd ON r.bangkok_district_id = bd.id
       LEFT JOIN CCI_provinces p ON r.province_id = p.id

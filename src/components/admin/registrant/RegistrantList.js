@@ -50,6 +50,22 @@ export default function RegistrantList({
         return 'ไม่ระบุ';
     }
   };
+  
+  // Function to check if transportation type is public or walking
+  const isEligibleForGift = (transportType) => {
+    if (!transportType) return false;
+    const lowerType = transportType.toLowerCase();
+    return lowerType.includes('public') || 
+           lowerType.includes('bus') || 
+           lowerType.includes('train') || 
+           lowerType.includes('walk') || 
+           lowerType.includes('เดิน') || 
+           lowerType.includes('ขนส่งมวลชน') || 
+           lowerType.includes('รถเมล์') || 
+           lowerType.includes('รถไฟ') || 
+           lowerType.includes('bts') || 
+           lowerType.includes('mrt');
+  };
 
   // Function to get attendance type text
   const getAttendanceTypeText = (type) => {
@@ -173,7 +189,14 @@ export default function RegistrantList({
                       {registrant.uuid}
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900 font-prompt">
-                      {registrant.first_name} {registrant.last_name}
+                      <div className="flex items-center">
+                        <span>{registrant.first_name} {registrant.last_name}</span>
+                        {isEligibleForGift(registrant.transport_type) && (
+                          <span className="ml-2 px-2 py-0.5 text-xs font-bold rounded bg-red-600 text-white">
+                            SOUVENIR
+                          </span>
+                        )}
+                      </div>
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500 font-prompt">
                       <div>{registrant.email}</div>
@@ -204,7 +227,7 @@ export default function RegistrantList({
                     <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
                       <div className="flex justify-end space-x-2">
                         <button
-                          onClick={() => onEdit(registrant)}
+                          onClick={() => onEdit(registrant.id)}
                           className="text-blue-600 hover:text-blue-900"
                           title="แก้ไข"
                         >

@@ -20,8 +20,15 @@ console.log('Database connection config:', {
   // Not logging password for security
 });
 
-// Create a connection pool
-const pool = mysql.createPool(dbConfig);
+// Create a connection pool with enhanced settings for reliability
+const pool = mysql.createPool({
+  ...dbConfig,
+  waitForConnections: true,
+  connectionLimit: 10,
+  queueLimit: 0,
+  enableKeepAlive: true,
+  keepAliveInitialDelay: 0, // milliseconds
+});
 
 // Generate a unique CCI-XXXXXX format ID
 export function generateCCIId() {
@@ -30,15 +37,51 @@ export function generateCCIId() {
   return `CCI-${randomPart}`;
 }
 
-// Execute a database query
+// Execute a database query with connection retry
 export async function executeQuery(query, params = []) {
-  try {
-    const [results] = await pool.execute(query, params);
-    return results;
-  } catch (error) {
-    console.error('Database query error:', error);
-    throw error;
+  let retries = 3;
+  let lastError;
+  
+  while (retries > 0) {
+    try {
+      // Get a connection from the pool
+      const connection = await pool.getConnection();
+      
+      try {
+        // Execute the query
+        const [results] = await connection.execute(query, params);
+        // Release the connection back to the pool
+        connection.release();
+        return results;
+      } catch (error) {
+        // Release the connection even if there's an error
+        connection.release();
+        throw error;
+      }
+    } catch (error) {
+      lastError = error;
+      console.error(`Database query error (${retries} retries left):`, error);
+      
+      // If it's a connection issue, retry after a delay
+      if (error.code === 'PROTOCOL_CONNECTION_LOST' || 
+          error.code === 'ECONNREFUSED' || 
+          error.code === 'PROTOCOL_ENQUEUE_AFTER_FATAL_ERROR') {
+        retries--;
+        if (retries > 0) {
+          console.log(`Retrying database connection in 1 second... (${retries} attempts left)`);
+          // Wait for 1 second before retrying
+          await new Promise(resolve => setTimeout(resolve, 1000));
+          continue;
+        }
+      } else {
+        // For other errors, don't retry
+        break;
+      }
+    }
   }
+  
+  // If we've exhausted all retries or it's not a connection error
+  throw lastError;
 }
 
 // Get all organization types
@@ -48,7 +91,7 @@ export async function getOrganizationTypes() {
 
 // Get all transportation types
 export async function getTransportationTypes() {
-  return executeQuery('SELECT * FROM CCI_transportation_types');
+  return executeQuery('SELECT * FROM CCI_transport_types');
 }
 
 // Get all seminar rooms
@@ -169,14 +212,17 @@ export async function registerParticipant(participantData) {
   }
 
   // Insert the participant
-  await executeQuery(
+  // ตรวจสอบว่าจะได้รับของที่ระลึกอัตโนมัติหรือไม่
+  // ถ้าเดินทางด้วยขนส่งมวลชนหรือเดิน จะได้รับของที่ระลึกอัตโนมัติ
+  const autoGiftReceived = transportation_category === 'public' || transportation_category === 'walking' ? 1 : 0;
+  
+  // ลงทะเบียนผู้เข้าร่วมในตาราง CCI_registrants (ไม่รวมข้อมูลการเดินทาง)
+  const registrantResult = await executeQuery(
     `INSERT INTO CCI_registrants 
     (uuid, first_name, last_name, email, phone, organization_name, 
-    organization_type_id, transportation_type_id, transportation_category, 
-    public_transport_type, public_transport_other, car_type, car_type_other, 
-    car_passenger_type, location_type, bangkok_district_id, province_id, 
-    attendance_type, selected_room_id) 
-    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+    organization_type_id, location_type, bangkok_district_id, province_id, 
+    attendance_type, selected_room_id, gift_received) 
+    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
     [
       uuid, 
       first_name, 
@@ -184,21 +230,102 @@ export async function registerParticipant(participantData) {
       email, 
       phone, 
       organization_name, 
-      organization_type_id, 
-      transportation_type_id, 
-      transportation_category,
-      public_transport_type,
-      public_transport_other,
-      car_type,
-      car_type_other,
-      car_passenger_type,
+      organization_type_id,
       location_type,
       bangkok_district_id,
       province_id,
       attendance_type,
-      selected_room_id
+      selected_room_id,
+      autoGiftReceived
     ]
   );
+  
+  // ถ้ามีข้อมูลการเดินทาง ให้บันทึกในตาราง CCI_transportation
+  if (transportation_type_id) {
+    try {
+      // แปลงค่าข้อมูลให้ถูกต้องตามประเภทข้อมูล
+      let privateVehicleId = null;
+      let fuelTypeId = null;
+      
+      // ถ้าเป็นการเดินทางด้วยพาหนะส่วนตัว
+      if (transportation_category === 'private') {
+        // แยกประเภทรถ (car_type) และประเภทเชื้อเพลิง (fuel_type)
+        
+        // แปลงค่าประเภทรถ
+        if (car_type) {
+          try {
+            privateVehicleId = parseInt(car_type);
+            if (isNaN(privateVehicleId)) {
+              // ถ้าไม่ใช่ตัวเลข ให้แปลงตามชื่อ
+              switch(car_type) {
+                case 'personal_car':
+                  privateVehicleId = 1; // ID สำหรับรถยนต์ส่วนตัว
+                  break;
+                case 'motorcycle':
+                  privateVehicleId = 2; // ID สำหรับรถจักรยานยนต์
+                  break;
+                case 'taxi':
+                  privateVehicleId = 3; // ID สำหรับแท็กซี่/แกร็บ/อูเบอร์
+                  break;
+                default:
+                  privateVehicleId = null;
+              }
+            }
+          } catch (e) {
+            privateVehicleId = null;
+          }
+        }
+        
+        // แปลงค่าประเภทเชื้อเพลิง
+        // ตรวจสอบจากพารามิเตอร์ที่ส่งมาโดยตรง
+        // ค่า 'electric' ควรอยู่ใน fuel_type_id ไม่ใช่ private_vehicle_id
+        if (car_type === 'electric') {
+          // ถ้า car_type เป็น 'electric' ให้ย้ายไปเป็น fuel_type_id แทน
+          fuelTypeId = 3; // ID สำหรับรถไฟฟ้า
+          // ตั้งค่า privateVehicleId เป็นรถยนต์ส่วนตัว
+          privateVehicleId = 1; // สมมติว่ารถไฟฟ้าเป็นรถยนต์ส่วนตัว
+        } else if (car_type === 'hybrid') {
+          // ถ้า car_type เป็น 'hybrid' ให้ย้ายไปเป็น fuel_type_id แทน
+          fuelTypeId = 4; // ID สำหรับรถไฮบริด
+          // ตั้งค่า privateVehicleId เป็นรถยนต์ส่วนตัว
+          privateVehicleId = 1; // สมมติว่ารถไฮบริดเป็นรถยนต์ส่วนตัว
+        } else if (car_type === 'gasoline') {
+          // ถ้า car_type เป็น 'gasoline' ให้ย้ายไปเป็น fuel_type_id แทน
+          fuelTypeId = 1; // ID สำหรับรถเบนซิน
+          // ตั้งค่า privateVehicleId เป็นรถยนต์ส่วนตัว
+          privateVehicleId = 1; // สมมติว่ารถเบนซินเป็นรถยนต์ส่วนตัว
+        } else if (car_type === 'diesel') {
+          // ถ้า car_type เป็น 'diesel' ให้ย้ายไปเป็น fuel_type_id แทน
+          fuelTypeId = 2; // ID สำหรับรถดีเซล
+          // ตั้งค่า privateVehicleId เป็นรถยนต์ส่วนตัว
+          privateVehicleId = 1; // สมมติว่ารถดีเซลเป็นรถยนต์ส่วนตัว
+        }
+      }
+      
+      // บันทึกข้อมูลการเดินทาง
+      await executeQuery(
+        `INSERT INTO CCI_transportation 
+        (registrant_id, transport_type, public_transport_id, public_transport_other, 
+        private_vehicle_id, private_vehicle_other, fuel_type_id, passenger_type) 
+        VALUES (?, ?, ?, ?, ?, ?, ?, ?)`,
+        [
+          registrantResult.insertId, // ใช้ ID ของผู้ลงทะเบียนที่เพิ่งสร้าง
+          transportation_category,
+          transportation_category === 'public' ? parseInt(public_transport_type) || null : null,
+          public_transport_other,
+          privateVehicleId,
+          car_type_other,
+          fuelTypeId,
+          car_passenger_type
+        ]
+      );
+      
+      console.log('Transportation data saved successfully');
+    } catch (error) {
+      console.error('Error saving transportation data:', error);
+      // ไม่ต้อง throw error เพื่อให้การลงทะเบียนยังสำเร็จแม้ว่าการบันทึกข้อมูลการเดินทางจะล้มเหลว
+    }
+  }
 
   return { uuid };
 }

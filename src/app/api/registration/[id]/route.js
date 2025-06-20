@@ -43,12 +43,15 @@ export async function GET(request, { params }) {
       position: registration.position,
       attendanceType: registration.attendance_type,
       selectedRoomId: registration.selected_room_id?.toString(),
-      transportation_category: registration.transportation_category,
-      public_transport_type: registration.public_transport_type,
+      // Transportation data with updated field names
+      transport_type: registration.transport_type || registration.transportation_category,
+      public_transport_id: registration.public_transport_id?.toString() || registration.public_transport_type?.toString(),
       public_transport_other: registration.public_transport_other,
-      car_type: registration.car_type,
-      car_type_other: registration.car_type_other,
-      car_passenger_type: registration.car_passenger_type,
+      private_vehicle_id: registration.private_vehicle_id?.toString() || registration.car_type?.toString(),
+      private_vehicle_other: registration.private_vehicle_other || registration.car_type_other,
+      fuel_type: registration.fuel_type?.toString(),
+      fuel_type_other: registration.fuel_type_other,
+      passenger_type: registration.passenger_type?.toString() || registration.car_passenger_type?.toString(),
       district: registration.district,
       province: registration.province
     };

@@ -18,6 +18,20 @@ const OrganizationInfoSection = ({ formData, organizationTypes, t, locale }) => 
   const selectedOrgType = organizationTypes?.find(
     type => type.id.toString() === formData.organizationTypeId?.toString()
   );
+  
+  // Check if "Other" organization type is selected (ID 99)
+  const isOtherOrgType = formData.organizationTypeId?.toString() === '99';
+  
+  // Get the organization type display value
+  let orgTypeDisplayValue = '';
+  if (selectedOrgType) {
+    orgTypeDisplayValue = locale === 'th' ? selectedOrgType.name_th : selectedOrgType.name_en;
+    
+    // If "Other" is selected and there's additional info, append it
+    if (isOtherOrgType && formData.organization_type_other) {
+      orgTypeDisplayValue += `: ${formData.organization_type_other}`;
+    }
+  }
 
   return (
     <SectionCard 
@@ -32,9 +46,7 @@ const OrganizationInfoSection = ({ formData, organizationTypes, t, locale }) => 
         />
         <InfoItem 
           label={t.registration.organizationType}
-          value={selectedOrgType ? 
-            (locale === 'th' ? selectedOrgType.name_th : selectedOrgType.name_en) : 
-            ''}
+          value={orgTypeDisplayValue}
           locale={locale}
         />
       </div>

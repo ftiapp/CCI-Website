@@ -7,13 +7,24 @@ const FormSubmissionHandler = {
   // Submit form data to the API
   submitForm: async ({ formData, locale, seminarRooms, setRegistrationId }) => {
     try {
+      // เพิ่มการตรวจสอบและแก้ไขข้อมูลก่อนส่งไปยัง API
+      const dataToSend = { ...formData };
+      
+      // ตรวจสอบว่าถ้าเลือกประเภทองค์กรเป็น "อื่นๆ" (ID 99) ให้แน่ใจว่ามีค่า organization_type_other
+      if (dataToSend.organizationTypeId === '99') {
+        // ถ้าไม่มีค่า organization_type_other ให้กำหนดเป็นค่าเริ่มต้น
+        if (!dataToSend.organization_type_other || dataToSend.organization_type_other.trim() === '') {
+          dataToSend.organization_type_other = 'อื่นๆ';
+        }
+      }
+      
       // Register the participant
       const response = await fetch('/api/register', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify(formData),
+        body: JSON.stringify(dataToSend),
       });
       
       const data = await response.json();

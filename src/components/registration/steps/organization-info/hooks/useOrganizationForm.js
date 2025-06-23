@@ -61,10 +61,33 @@ export default function useOrganizationForm({ formData, handleChange, locale }) 
   }, [updateFormField]);
 
   // Specific handlers using the generic function
-  const handleOtherOrgTypeChange = useMemo(() => 
-    createOtherChangeHandler(FIELD_NAMES.ORGANIZATION_TYPE_OTHER, setOtherOrgType), 
-    [createOtherChangeHandler]
-  );
+  const handleOtherOrgTypeChange = useMemo(() => {
+    return (e) => {
+      const value = e.target ? e.target.value : e;
+      setOtherOrgType(value);
+      
+      // บันทึกค่าในรูปแบบ snake_case
+      updateFormField(FIELD_NAMES.ORGANIZATION_TYPE_OTHER, value);
+      
+      // บันทึกในรูปแบบ camelCase ด้วย
+      handleChange({
+        target: { name: 'organizationTypeOther', value }
+      });
+      
+      // เพิ่มการบันทึกใน formData โดยตรงเพื่อให้แน่ใจว่าข้อมูลถูกส่งไปยัง API
+      if (value && value.trim() !== '') {
+        // ใช้ setTimeout เพื่อให้แน่ใจว่าการอัปเดตค่าทั้งสองอันข้างต้นเสร็จสิ้นก่อน
+        setTimeout(() => {
+          // ตรวจสอบอีกครั้งว่าค่าถูกบันทึกแล้วจริง
+          updateFormField(FIELD_NAMES.ORGANIZATION_TYPE_OTHER, value);
+          handleChange({
+            target: { name: 'organizationTypeOther', value }
+          });
+        }, 0);
+      }
+    };
+  }, [updateFormField, handleChange]);
+  
 
   const handleOtherPublicTransportChange = useMemo(() => 
     createOtherChangeHandler(FIELD_NAMES.PUBLIC_TRANSPORT_OTHER), 
@@ -82,10 +105,15 @@ export default function useOrganizationForm({ formData, handleChange, locale }) 
     
     const { value } = e.target;
     if (parseInt(value) !== FORM_CONSTANTS.OTHER_OPTION_ID) {
+      // ถ้าไม่ได้เลือก "อื่นๆ" ให้ล้างค่า organization_type_other
       clearFormFields([FIELD_NAMES.ORGANIZATION_TYPE_OTHER]);
       setOtherOrgType('');
+    } else {
+      // เมื่อเลือก "อื่นๆ" ให้กำหนดค่าเริ่มต้นเป็นสตริงว่างเสมอ
+      // เพื่อให้แน่ใจว่าฟิลด์นี้มีอยู่ในข้อมูลฟอร์ม
+      updateFormField(FIELD_NAMES.ORGANIZATION_TYPE_OTHER, '');
     }
-  }, [handleChange, clearFormFields]);
+  }, [handleChange, clearFormFields, updateFormField]);
 
   // Location type change handler
   const handleLocationTypeChange = useCallback((e) => {

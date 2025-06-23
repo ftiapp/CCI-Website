@@ -44,13 +44,24 @@ export async function GET(request) {
         r.organization_name, 
         ot.name_th as organization_type,
         r.organization_type_other,
-        tt.name_th as transportation_type,
-        r.transportation_category,
-        r.public_transport_type,
-        r.public_transport_other,
-        r.car_type,
-        r.car_type_other,
-        r.car_passenger_type,
+        t.transport_type as transportation_category,
+        CASE
+          WHEN t.transport_type = 'public' THEN 'ขนส่งสาธารณะ'
+          WHEN t.transport_type = 'private' THEN 'พาหนะส่วนตัว'
+          WHEN t.transport_type = 'walking' THEN 'เดินทางด้วยการเดิน'
+          ELSE 'ไม่ระบุ'
+        END as transportation_category_text,
+        pt.name_th as public_transport_type,
+        t.public_transport_other,
+        pv.name_th as private_vehicle_type,
+        t.private_vehicle_other,
+        ft.name_th as fuel_type,
+        t.fuel_type_other,
+        CASE
+          WHEN t.passenger_type = 'alone' THEN 'เดินทางคนเดียว'
+          WHEN t.passenger_type = 'carpool' THEN 'เดินทางแบบ Carpool'
+          ELSE ''
+        END as passenger_type,
         r.attendance_type,
         sr.name_th as selected_room,
         CASE 
@@ -70,10 +81,13 @@ export async function GET(request) {
         r.registration_date
       FROM CCI_registrants r
       LEFT JOIN CCI_organization_types ot ON r.organization_type_id = ot.id
-      LEFT JOIN CCI_transport_types tt ON r.transportation_type_id = tt.id
       LEFT JOIN CCI_seminar_rooms sr ON r.selected_room_id = sr.id
       LEFT JOIN CCI_bangkok_districts bd ON r.bangkok_district_id = bd.id
       LEFT JOIN CCI_provinces p ON r.province_id = p.id
+      LEFT JOIN CCI_transportation t ON r.id = t.registrant_id
+      LEFT JOIN CCI_public_transport_types pt ON t.public_transport_id = pt.id
+      LEFT JOIN CCI_private_vehicle_types pv ON t.private_vehicle_id = pv.id
+      LEFT JOIN CCI_fuel_types ft ON t.fuel_type_id = ft.id
       WHERE ${whereClause}
       ORDER BY r.registration_date DESC`,
       params
@@ -90,16 +104,21 @@ export async function GET(request) {
         default: attendanceType = r.attendance_type;
       }
       
-      // Format transportation category
-      let transportationCategory = '';
-      switch(r.transportation_category) {
-        case 'public': transportationCategory = 'ขนส่งสาธารณะ'; break;
-        case 'private': transportationCategory = 'รถยนต์ส่วนตัว'; break;
-        default: transportationCategory = '';
+      // ใช้ค่า transportation_category_text ที่แปลงแล้วจาก SQL
+      let transportationCategory = r.transportation_category_text || '';
+      
+      // ถ้าไม่มีค่า ให้แปลงเอง
+      if (!transportationCategory) {
+        switch(r.transportation_category) {
+          case 'public': transportationCategory = 'ขนส่งสาธารณะ'; break;
+          case 'private': transportationCategory = 'พาหนะส่วนตัว'; break;
+          case 'walking': transportationCategory = 'เดินทางด้วยการเดิน'; break;
+          default: transportationCategory = 'ไม่ระบุ';
+        }
       }
       
       // Format gift received
-      const giftReceived = r.gift_received ? 'รับแล้ว' : 'ยังไม่ได้รับ';
+      const giftReceived = r.gift_received ? 'รับได้' : 'ไม่ได้รับ';
       
       // Format date
       const registrationDate = r.registration_date ? new Date(r.registration_date).toLocaleString('th-TH') : '';
@@ -118,13 +137,14 @@ export async function GET(request) {
         'เขต (กรุงเทพฯ)': r.bangkok_district || '',
         'ประเภทการเข้าร่วม': attendanceType,
         'ห้องสัมมนา': r.selected_room || '',
-        'วิธีการเดินทาง': r.transportation_type || '',
         'ประเภทการเดินทาง': transportationCategory,
         'ประเภทขนส่งสาธารณะ': r.public_transport_type || '',
         'ขนส่งสาธารณะ (อื่นๆ)': r.public_transport_other || '',
-        'ประเภทรถยนต์': r.car_type || '',
-        'ประเภทรถยนต์ (อื่นๆ)': r.car_type_other || '',
-        'ประเภทผู้โดยสาร': r.car_passenger_type || '',
+        'ประเภทพาหนะส่วนตัว': r.private_vehicle_type || '',
+        'พาหนะส่วนตัว (อื่นๆ)': r.private_vehicle_other || '',
+        'ประเภทเชื้อเพลิง': r.fuel_type || '',
+        'เชื้อเพลิง (อื่นๆ)': r.fuel_type_other || '',
+        'รูปแบบการเดินทาง': r.passenger_type || '',
         'สถานะเช็คอิน': r.check_in_status,
         'เวลาเช็คอิน': checkInTime,
         'รับของที่ระลึก': giftReceived,

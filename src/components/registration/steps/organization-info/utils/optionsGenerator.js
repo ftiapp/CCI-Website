@@ -27,6 +27,31 @@ export const createSelectOptions = (items, locale, localeKey = 'name') => {
  * @returns {Array} Array of options with "Other" option
  */
 export const createOptionsWithOther = (baseOptions, locale, otherText) => {
+  // ตรวจสอบว่ามีตัวเลือก "อื่นๆ" อยู่แล้วหรือไม่
+  const hasOtherOption = baseOptions.some(option => 
+    option.value === FORM_CONSTANTS.OTHER_OPTION_ID || 
+    (locale === 'th' && option.label.includes('อื่นๆ')) ||
+    (locale !== 'th' && option.label.toLowerCase().includes('other'))
+  );
+
+  // ถ้ามีตัวเลือก "อื่นๆ" อยู่แล้ว ให้กรองออกก่อนแล้วเพิ่มตัวเลือกใหม่
+  if (hasOtherOption) {
+    const filteredOptions = baseOptions.filter(option => 
+      option.value !== FORM_CONSTANTS.OTHER_OPTION_ID && 
+      !(locale === 'th' && option.label.includes('อื่นๆ')) &&
+      !(locale !== 'th' && option.label.toLowerCase().includes('other'))
+    );
+    
+    return [
+      ...filteredOptions,
+      {
+        value: FORM_CONSTANTS.OTHER_OPTION_ID,
+        label: locale === 'th' ? `อื่นๆ (${otherText})` : `Others (${otherText})`
+      }
+    ];
+  }
+  
+  // ถ้าไม่มีตัวเลือก "อื่นๆ" ให้เพิ่มตัวเลือกใหม่ตามปกติ
   return [
     ...baseOptions,
     {

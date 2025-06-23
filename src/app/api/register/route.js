@@ -87,7 +87,14 @@ export async function POST(request) {
       email: data.email,
       phone: data.phone,
       organization_name: data.organizationName,
-      organization_type_id: parseInt(data.organizationTypeId),
+      // Handle "Other" organization type (99)
+      organization_type_id: parseInt(data.organizationTypeId) || null,
+      // ตรวจสอบค่า organization_type_other เมื่อเลือก "อื่นๆ" (ID 99)
+      // แก้ไขปัญหาโดยตรวจสอบค่าที่ส่งมาในทุกรูปแบบและใช้ค่าที่ไม่ใช่ null
+      organization_type_other: parseInt(data.organizationTypeId) === 99 ? 
+        // ตรวจสอบทุกรูปแบบของข้อมูลที่อาจส่งมา
+        (data.organization_type_other || data.organizationTypeOther || "อื่นๆ") : 
+        null,
       // For walking, use a default transportation_type_id of 1 (assuming 1 is a valid ID for public transportation)
       transportation_type_id: data.transport_type === 'walking' ? 1 : (data.private_vehicle_id ? parseInt(data.private_vehicle_id) : (data.public_transport_id ? parseInt(data.public_transport_id) : 1)),
       transportation_category: data.transport_type, // ใช้ค่า transport_type ที่ส่งมาโดยตรง ไม่แปลงค่า

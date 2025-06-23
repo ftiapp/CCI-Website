@@ -1,5 +1,6 @@
 import { NextResponse } from 'next/server';
 import { executeQuery } from '@/lib/db';
+import { sendThankYouSms } from '@/lib/sms';
 
 export async function POST(request) {
   try {
@@ -72,22 +73,16 @@ export async function POST(request) {
     if (checkInStatus === 1) {
       try {
         const participant = participants[0];
-        const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || 'http://localhost:3000';
+        const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || 'https://cci.fti.or.th';
         const scheduleUrl = `${baseUrl}/schedule`;
         
-        // ส่ง SMS ขอบคุณโดยใช้ API endpoint ใหม่
-        await fetch(`${baseUrl}/api/send-thank-you-sms`, {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify({
-            phone: participant.phone,
-            firstName: participant.first_name,
-            lastName: participant.last_name,
-            scheduleUrl: scheduleUrl
-          }),
-        }).catch(error => {
+        // ส่ง SMS ขอบคุณโดยใช้ฟังก์ชันโดยตรงแทนการเรียก API
+        await sendThankYouSms(
+          participant.phone,
+          participant.first_name,
+          participant.last_name,
+          scheduleUrl
+        ).catch(error => {
           console.error('Error sending thank you SMS:', error);
         });
       } catch (error) {

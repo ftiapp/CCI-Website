@@ -15,6 +15,7 @@ export async function GET(request, { params }) {
     
     const registrants = await executeQuery(
       `SELECT r.*, 
+        r.admin_notes,
         ot.name_th as organization_type_th, ot.name_en as organization_type_en,
         t.transport_type,
         t.public_transport_id,
@@ -165,7 +166,8 @@ export async function PUT(request, { params }) {
           data.private_vehicle_id || null,
           data.private_vehicle_other || null,
           data.passenger_type || null,
-          data.fuel_type_id || null,
+          // Convert fuel_type_id to integer or null if it's a string
+          (data.fuel_type_id && !isNaN(parseInt(data.fuel_type_id))) ? parseInt(data.fuel_type_id) : null,
           data.fuel_type_other || null,
           id
         ]
@@ -192,7 +194,8 @@ export async function PUT(request, { params }) {
           data.private_vehicle_id || null,
           data.private_vehicle_other || null,
           data.passenger_type || null,
-          data.fuel_type_id || null,
+          // Convert fuel_type_id to integer or null if it's a string
+          (data.fuel_type_id && !isNaN(parseInt(data.fuel_type_id))) ? parseInt(data.fuel_type_id) : null,
           data.fuel_type_other || null
         ]
       );

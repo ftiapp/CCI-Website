@@ -183,6 +183,7 @@ export async function registerParticipant({
   phone,
   organization_name,
   organization_type_id,
+  organization_type_other,
   location_type,
   bangkok_district_id,
   province_id,
@@ -221,9 +222,9 @@ export async function registerParticipant({
   const registrantResult = await executeQuery(
     `INSERT INTO CCI_registrants 
     (uuid, first_name, last_name, email, phone, organization_name, 
-    organization_type_id, location_type, bangkok_district_id, province_id, 
+    organization_type_id, organization_type_other, location_type, bangkok_district_id, province_id, 
     attendance_type, selected_room_id, gift_received) 
-    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
     [
       uuid, 
       first_name, 
@@ -232,6 +233,8 @@ export async function registerParticipant({
       phone, 
       organization_name, 
       organization_type_id,
+      // ใช้ค่า organization_type_other ที่รับมาโดยตรง หรือค่าเริ่มต้นถ้าไม่มีค่า
+      parseInt(organization_type_id) === 99 ? (organization_type_other || 'อื่นๆ') : null,
       location_type,
       bangkok_district_id,
       province_id,

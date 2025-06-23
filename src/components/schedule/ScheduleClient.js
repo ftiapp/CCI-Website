@@ -13,6 +13,19 @@ const formatTimeDisplay = (timeString) => {
   
   // ถ้าได้ค่าเป็น time format จาก database (HH:MM:SS หรือ HH:MM)
   if (typeof timeString === 'string') {
+    // Handle case where timeString might be in ISO format or other date string format
+    if (timeString.includes('T') || timeString.includes('Z')) {
+      const date = new Date(timeString);
+      if (!isNaN(date.getTime())) {
+        return date.toLocaleTimeString('th-TH', { 
+          hour: '2-digit', 
+          minute: '2-digit',
+          hour12: false 
+        });
+      }
+    }
+    
+    // Handle standard time format (HH:MM:SS or HH:MM)
     const timeParts = timeString.split(':');
     if (timeParts.length >= 2) {
       const hours = timeParts[0].padStart(2, '0');
@@ -40,7 +53,11 @@ const formatTimeDisplay = (timeString) => {
     });
   }
   
-  return timeString.toString();
+  // Log the problematic time format for debugging
+  console.log('Unhandled time format:', timeString, typeof timeString);
+  
+  // Last resort - try to convert to string and return
+  return String(timeString || '--:--');
 };
 import { motion } from 'framer-motion';
 
@@ -150,7 +167,7 @@ export default function ScheduleClient({
                           }}
                         >
                           <td className="py-3 px-4 text-[#9D7553]">
-                            {formatTimeDisplay(item.start_time)} - {formatTimeDisplay(item.end_time)}
+                            {formatTimeDisplay(item.time_start)} - {formatTimeDisplay(item.time_end)}
                           </td>
                           <td className="py-3 px-4 text-[#9D7553] font-medium">
                             {locale === 'th' ? item.title_th : item.title_en}
@@ -235,7 +252,7 @@ export default function ScheduleClient({
                         >
                           <div className="text-sm text-[#9D7553]/80 mb-1 flex items-center">
                             <ClockIcon className="w-3 h-3 mr-1" />
-                            {formatTimeDisplay(session.start_time)} - {formatTimeDisplay(session.end_time)}
+                            {formatTimeDisplay(session.time_start)} - {formatTimeDisplay(session.time_end)}
                           </div>
                           
                           <h4 className="font-medium text-[#9D7553] mb-1">

@@ -1,13 +1,14 @@
 'use client';
 
 import { useState, useEffect, useCallback } from 'react';
-import { ChartBarIcon, MapPinIcon, TruckIcon, UsersIcon, CheckCircleIcon, CalendarIcon, UserIcon, ClipboardDocumentListIcon } from '@heroicons/react/24/outline';
+import { ChartBarIcon, MapPinIcon, TruckIcon, UsersIcon, CheckCircleIcon, CalendarIcon, UserIcon, ClipboardDocumentListIcon, BuildingOfficeIcon } from '@heroicons/react/24/outline';
 import toast from 'react-hot-toast';
 import ScheduleManagement from './ScheduleManagement';
 import RegistrantManagement from './registrant/RegistrantManagement';
+import OrganizationTypeManagement from './organization-type/OrganizationTypeManagement';
 
 export default function Dashboard() {
-  const [activeTab, setActiveTab] = useState('dashboard'); // 'dashboard', 'schedule', or 'registrants'
+  const [activeTab, setActiveTab] = useState('dashboard'); // 'dashboard', 'schedule', 'registrants', or 'organization-types'
   
   const [stats, setStats] = useState({
     totalRegistrations: 0,
@@ -161,6 +162,16 @@ export default function Dashboard() {
           >
             <ClipboardDocumentListIcon className="h-5 w-5 mr-2" />
             จัดการข้อมูลผู้ลงทะเบียน
+          </button>
+          <button
+            onClick={() => setActiveTab('organization-types')}
+            className={`${activeTab === 'organization-types'
+              ? 'border-earth-500 text-earth-600'
+              : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
+            } whitespace-nowrap py-4 px-1 border-b-2 font-prompt font-medium text-sm flex items-center`}
+          >
+            <BuildingOfficeIcon className="h-5 w-5 mr-2" />
+            จัดการประเภทธุรกิจ
           </button>
         </nav>
       </div>
@@ -474,9 +485,12 @@ export default function Dashboard() {
       ) : activeTab === 'schedule' ? (
         /* Schedule Management Tab */
         <ScheduleManagement />
-      ) : (
+      ) : activeTab === 'registrants' ? (
         /* Registrant Management Tab */
         <RegistrantManagement />
+      ) : (
+        /* Organization Type Management Tab */
+        <OrganizationTypeManagement />
       )}
     </div>
   );

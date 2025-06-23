@@ -13,8 +13,8 @@ export function getTranslations(locale) {
 export const translations = {
   th: {
     common: {
-      title: 'การลงทะเบียนสัมมนา CCI',
-      subtitle: 'องค์กรคาร์บอนเครดิต',
+      title: 'สถาบันการเปลี่ยนแปลงสภาพภูมิอากาศ',
+      subtitle: 'สภาอุตสาหกรรมแห่งประเทศไทย',
       next: 'ถัดไป',
       back: 'ย้อนกลับ',
       submit: 'ส่งข้อมูล',
@@ -37,8 +37,8 @@ export const translations = {
       allRightsReserved: 'สงวนลิขสิทธิ์',
     },
     home: {
-      welcome: 'ยินดีต้อนรับสู่การลงทะเบียนสัมมนา CCI',
-      description: 'งานสัมมนาเกี่ยวกับคาร์บอนเครดิตและการพัฒนาอย่างยั่งยืน',
+      welcome: 'ยินดีต้อนรับสู่ สถาบันการเปลี่ยนแปลงสภาพภูมิอากาศ',
+      description: 'งานสัมมนาการเปลี่ยนแปลงสภาพภูมิอากาศ',
       registerButton: 'ลงทะเบียนเข้าร่วมงาน',
       scheduleButton: 'ดูกำหนดการ',
     },
@@ -80,8 +80,8 @@ export const translations = {
   },
   en: {
     common: {
-      title: 'CCI Seminar Registration',
-      subtitle: 'Carbon Credit Organization',
+      title: 'Climate Change Institute',
+      subtitle: 'Federation Of Thai Industries',
       next: 'Next',
       back: 'Back',
       submit: 'Submit',
@@ -104,8 +104,8 @@ export const translations = {
       allRightsReserved: 'All Rights Reserved',
     },
     home: {
-      welcome: 'Welcome to CCI Seminar Registration',
-      description: 'Seminar on carbon credit and sustainable development',
+      welcome: 'Welcome to Climate Change Institute',
+      description: 'Climate Change Forum and Innovation for Sustainability',
       registerButton: 'Register Now',
       scheduleButton: 'View Schedule',
     },

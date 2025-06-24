@@ -97,7 +97,8 @@ export default function ScheduleClient({
       ];
       const day = dateObj.getDate();
       const month = thaiMonths[dateObj.getMonth()];
-      const year = dateObj.getFullYear() + 543; // Convert to Buddhist Era
+      // Use the actual year (2025) instead of converting to Buddhist Era
+      const year = dateObj.getFullYear();
       return `วันที่ ${day} ${month} ${year}`;
     } else {
       return dateObj.toLocaleDateString('en-US', { 

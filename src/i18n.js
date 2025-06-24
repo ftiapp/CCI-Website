@@ -56,7 +56,7 @@ export const translations = {
       title: 'ลงทะเบียนเข้าร่วมงาน',
       personalInfo: 'ข้อมูลส่วนตัว',
       organizationInfo: 'ข้อมูลองค์กร',
-      attendanceInfo: 'ข้อมูลการเข้าร่วม',
+      attendanceInfo: 'ข้อมูลเข้าร่วม',
       confirmation: 'ยืนยันข้อมูล',
       firstName: 'ชื่อ',
       lastName: 'นามสกุล',

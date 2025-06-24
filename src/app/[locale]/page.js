@@ -2,6 +2,10 @@ import Link from 'next/link';
 import { getTranslations } from '@/i18n';
 import Button from '@/components/ui/Button';
 import { CalendarIcon, UserPlusIcon } from '@heroicons/react/24/outline';
+import { EventStructuredData, OrganizationStructuredData } from '@/components/seo/StructuredData';
+import { generateMetadata } from './metadata';
+
+export { generateMetadata };
 
 export default async function HomePage({ params }) {
   // ใช้วิธีการดึงค่า locale ที่ถูกต้องตาม Next.js 15
@@ -11,6 +15,9 @@ export default async function HomePage({ params }) {
   const t = getTranslations(locale);
   
   return (
+    <>
+      <EventStructuredData locale={locale} />
+      <OrganizationStructuredData locale={locale} />
     <div className="bg-gradient-to-b from-earth-50 to-beige-100">
       {/* Hero Section */}
       <section className="py-16 md:py-24">
@@ -107,5 +114,6 @@ export default async function HomePage({ params }) {
         </div>
       </section>
     </div>
+    </>
   );
 }

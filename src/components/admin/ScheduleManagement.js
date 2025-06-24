@@ -5,6 +5,7 @@ import toast from 'react-hot-toast';
 import { PlusIcon } from '@heroicons/react/24/outline';
 import ScheduleList from './schedule/ScheduleList';
 import ScheduleForm from './schedule/ScheduleForm';
+import ConsistentHeader from '../layout/ConsistentHeader';
 
 export default function ScheduleManagement() {
   const [scheduleItems, setScheduleItems] = useState([]);
@@ -175,16 +176,20 @@ export default function ScheduleManagement() {
   };
   
   return (
-    <div className="space-y-6">
-      <div className="flex justify-between items-center">
-        <h2 className="text-2xl font-prompt font-bold text-earth-800">จัดการตารางกิจกรรม</h2>
-        
+    <div className="container mx-auto px-4 py-8 max-w-6xl">
+      <div className="flex justify-between items-center mb-6">
+        <ConsistentHeader 
+          title="จัดการกำหนดการ" 
+          subtitle="รายการกิจกรรมและกำหนดการทั้งหมดในงาน" 
+          icon="calendar" 
+          colorScheme="mocha-beige"
+        />
         <button
           onClick={handleAddNew}
-          className="bg-earth-600 hover:bg-earth-700 text-white font-prompt px-4 py-2 rounded-lg flex items-center gap-2 transition-colors"
+          className="bg-[#8B7D6B] hover:bg-[#7A6C5A] text-white px-4 py-2 rounded-md flex items-center space-x-2 font-prompt transition-colors"
         >
           <PlusIcon className="h-5 w-5" />
-          เพิ่มกิจกรรมใหม่
+          <span>เพิ่มกิจกรรม</span>
         </button>
       </div>
       

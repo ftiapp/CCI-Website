@@ -4,6 +4,8 @@ import { useEffect } from 'react';
 import { use } from 'react';
 import { getTranslations } from '@/i18n';
 import Image from 'next/image';
+import PageHeader from '@/components/ui/PageHeader';
+import { PhoneIcon } from '@heroicons/react/24/outline';
 
 export default function ContactPage({ params }) {
   // Use React.use() to unwrap params as required in Next.js 15
@@ -18,9 +20,11 @@ export default function ContactPage({ params }) {
 
   return (
     <div className="container mx-auto px-4 py-8 max-w-4xl">
-      <h1 className="text-3xl font-prompt font-bold text-earth-800 mb-6">
-        {locale === 'th' ? 'ติดต่อเรา' : 'Contact Us'}
-      </h1>
+      <PageHeader 
+        title={locale === 'th' ? 'ติดต่อเรา' : 'Contact Us'}
+        subtitle={locale === 'th' ? 'มีคำถามหรือข้อสงสัย? ติดต่อเราได้ที่นี่' : 'Have questions? Contact us here'}
+        type="contact"
+      />
       
       <div className="bg-white rounded-lg shadow-lg overflow-hidden mb-10">
         <div className="p-6">
@@ -77,7 +81,7 @@ export default function ContactPage({ params }) {
               <div className="space-y-3">
                 <p className="font-prompt text-earth-600 flex items-center">
                   <span className="inline-block w-6 text-earth-500 mr-2">📞</span>
-                  <a href="tel:023451000" className="hover:text-earth-800 transition-colors">02-345-1000</a>
+                  <a href="tel:023451000" className="hover:text-earth-800 transition-colors">02-345-1270</a>
                 </p>
                 <p className="font-prompt text-earth-600 flex items-center">
                   <span className="inline-block w-6 text-earth-500 mr-2">✉️</span>

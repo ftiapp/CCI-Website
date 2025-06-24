@@ -9,6 +9,7 @@ import FormStepRenderer from './FormStepRenderer';
 import ValidationHandler from './ValidationHandler';
 import FormSubmissionHandler from './FormSubmissionHandler';
 import ProcessingModal from '@/components/ui/ProcessingModal';
+import PageHeader from '@/components/ui/PageHeader';
 import { isValidEmail, isValidPhone } from '@/lib/utils';
 
 export default function FormContainer({ 
@@ -145,6 +146,15 @@ export default function FormContainer({
   
   return (
     <div className="max-w-3xl mx-auto">
+      {/* Page Header */}
+      {!isSuccess && (
+        <PageHeader 
+          title={locale === 'th' ? 'ลงทะเบียนเข้าร่วมงาน' : 'Event Registration'}
+          subtitle={locale === 'th' ? 'กรุณากรอกข้อมูลให้ครบถ้วน' : 'Please fill in all required information'}
+          type="register"
+        />
+      )}
+      
       {/* Processing Modal */}
       {isProcessing && (
         <ProcessingModal 
@@ -155,13 +165,15 @@ export default function FormContainer({
         />
       )}
       
-      <FormHeader 
-        isSuccess={isSuccess}
-        steps={steps}
-        currentStep={currentStep}
-      />
-      
-      <div className="mb-8">
+      <div className="bg-white rounded-lg shadow-sm border border-earth-200 p-6 mb-8">
+        {/* Step Indicator */}
+        <div className="mb-8">
+          <FormHeader 
+            isSuccess={isSuccess}
+            steps={steps}
+            currentStep={currentStep}
+          />
+        </div>
         <FormStepRenderer
           isSuccess={isSuccess}
           currentStep={currentStep}
@@ -179,17 +191,19 @@ export default function FormContainer({
           registrationId={registrationId}
           setErrors={setErrors}
         />
+        
+        <div className="mt-8">
+          <FormFooter
+            isSuccess={isSuccess}
+            currentStep={currentStep}
+            steps={steps}
+            handleBack={handleBack}
+            handleNext={handleNext}
+            handleSubmit={handleSubmit}
+            t={t}
+          />
+        </div>
       </div>
-      
-      <FormFooter
-        isSuccess={isSuccess}
-        currentStep={currentStep}
-        steps={steps}
-        handleBack={handleBack}
-        handleNext={handleNext}
-        handleSubmit={handleSubmit}
-        t={t}
-      />
     </div>
   );
 }

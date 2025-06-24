@@ -1,0 +1,103 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9"
+        xmlns:xhtml="http://www.w3.org/1999/xhtml">
+  <!-- Thai Pages -->
+  <url>
+    <loc>https://cci.fti.or.th/th</loc>
+    <lastmod>2025-06-23</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>1.0</priority>
+    <xhtml:link rel="alternate" hreflang="en" href="https://cci.fti.or.th/en"/>
+    <xhtml:link rel="alternate" hreflang="th" href="https://cci.fti.or.th/th"/>
+  </url>
+  <url>
+    <loc>https://cci.fti.or.th/th/register</loc>
+    <lastmod>2025-06-23</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.9</priority>
+    <xhtml:link rel="alternate" hreflang="en" href="https://cci.fti.or.th/en/register"/>
+    <xhtml:link rel="alternate" hreflang="th" href="https://cci.fti.or.th/th/register"/>
+  </url>
+  <url>
+    <loc>https://cci.fti.or.th/th/schedule</loc>
+    <lastmod>2025-06-23</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.8</priority>
+    <xhtml:link rel="alternate" hreflang="en" href="https://cci.fti.or.th/en/schedule"/>
+    <xhtml:link rel="alternate" hreflang="th" href="https://cci.fti.or.th/th/schedule"/>
+  </url>
+  <url>
+    <loc>https://cci.fti.or.th/th/contact</loc>
+    <lastmod>2025-06-23</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.7</priority>
+    <xhtml:link rel="alternate" hreflang="en" href="https://cci.fti.or.th/en/contact"/>
+    <xhtml:link rel="alternate" hreflang="th" href="https://cci.fti.or.th/th/contact"/>
+  </url>
+  <url>
+    <loc>https://cci.fti.or.th/th/privacy</loc>
+    <lastmod>2025-06-23</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.5</priority>
+    <xhtml:link rel="alternate" hreflang="en" href="https://cci.fti.or.th/en/privacy"/>
+    <xhtml:link rel="alternate" hreflang="th" href="https://cci.fti.or.th/th/privacy"/>
+  </url>
+  <url>
+    <loc>https://cci.fti.or.th/th/terms</loc>
+    <lastmod>2025-06-23</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.5</priority>
+    <xhtml:link rel="alternate" hreflang="en" href="https://cci.fti.or.th/en/terms"/>
+    <xhtml:link rel="alternate" hreflang="th" href="https://cci.fti.or.th/th/terms"/>
+  </url>
+  
+  <!-- English Pages -->
+  <url>
+    <loc>https://cci.fti.or.th/en</loc>
+    <lastmod>2025-06-23</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.9</priority>
+    <xhtml:link rel="alternate" hreflang="en" href="https://cci.fti.or.th/en"/>
+    <xhtml:link rel="alternate" hreflang="th" href="https://cci.fti.or.th/th"/>
+  </url>
+  <url>
+    <loc>https://cci.fti.or.th/en/register</loc>
+    <lastmod>2025-06-23</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.8</priority>
+    <xhtml:link rel="alternate" hreflang="en" href="https://cci.fti.or.th/en/register"/>
+    <xhtml:link rel="alternate" hreflang="th" href="https://cci.fti.or.th/th/register"/>
+  </url>
+  <url>
+    <loc>https://cci.fti.or.th/en/schedule</loc>
+    <lastmod>2025-06-23</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.7</priority>
+    <xhtml:link rel="alternate" hreflang="en" href="https://cci.fti.or.th/en/schedule"/>
+    <xhtml:link rel="alternate" hreflang="th" href="https://cci.fti.or.th/th/schedule"/>
+  </url>
+  <url>
+    <loc>https://cci.fti.or.th/en/contact</loc>
+    <lastmod>2025-06-23</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.6</priority>
+    <xhtml:link rel="alternate" hreflang="en" href="https://cci.fti.or.th/en/contact"/>
+    <xhtml:link rel="alternate" hreflang="th" href="https://cci.fti.or.th/th/contact"/>
+  </url>
+  <url>
+    <loc>https://cci.fti.or.th/en/privacy</loc>
+    <lastmod>2025-06-23</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.4</priority>
+    <xhtml:link rel="alternate" hreflang="en" href="https://cci.fti.or.th/en/privacy"/>
+    <xhtml:link rel="alternate" hreflang="th" href="https://cci.fti.or.th/th/privacy"/>
+  </url>
+  <url>
+    <loc>https://cci.fti.or.th/en/terms</loc>
+    <lastmod>2025-06-23</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.4</priority>
+    <xhtml:link rel="alternate" hreflang="en" href="https://cci.fti.or.th/en/terms"/>
+    <xhtml:link rel="alternate" hreflang="th" href="https://cci.fti.or.th/th/terms"/>
+  </url>
+</urlset>

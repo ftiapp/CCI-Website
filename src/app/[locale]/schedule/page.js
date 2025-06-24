@@ -1,6 +1,10 @@
 import { getTranslations } from '@/i18n';
 import { getSchedule } from '@/lib/db';
 import ScheduleClient from '@/components/schedule/ScheduleClient';
+import { EventStructuredData, BreadcrumbStructuredData } from '@/components/seo/StructuredData';
+import { generateMetadata } from './metadata';
+
+export { generateMetadata };
 
 export default async function SchedulePage({ params }) {
   // ใช้วิธีการดึงค่า locale ที่ถูกต้องตาม Next.js 15
@@ -48,13 +52,28 @@ export default async function SchedulePage({ params }) {
     description: t.schedule.description
   };
 
+  const breadcrumbItems = [
+    {
+      name: locale === 'th' ? 'หน้าหลัก' : 'Home',
+      path: `/${locale}`
+    },
+    {
+      name: locale === 'th' ? 'กำหนดการ' : 'Schedule',
+      path: `/${locale}/schedule`
+    }
+  ];
+
   return (
-    <ScheduleClient
-      morningSchedule={morningSchedule}
-      afternoonByRoom={afternoonByRoom}
-      locale={locale}
-      translations={translations}
-      eventDate={eventDate}
-    />
+    <>
+      <EventStructuredData locale={locale} />
+      <BreadcrumbStructuredData items={breadcrumbItems} locale={locale} />
+      <ScheduleClient
+        morningSchedule={morningSchedule}
+        afternoonByRoom={afternoonByRoom}
+        locale={locale}
+        translations={translations}
+        eventDate={eventDate}
+      />
+    </>
   );
 }

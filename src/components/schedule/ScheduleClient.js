@@ -118,9 +118,22 @@ export default function ScheduleClient({
       <div className="container mx-auto px-4">
         <div className="max-w-4xl mx-auto">
           <ScrollReveal direction="up" distance={20} duration={0.4}>
-            <h1 className="text-3xl font-prompt font-bold text-[#9D7553] mb-8 text-center">
-              {translations.title}
-            </h1>
+            <div className="bg-[#E6DBCC] rounded-lg shadow-sm mb-8 overflow-hidden">
+              <div className="px-6 py-4 flex items-center justify-between">
+                <div className="flex items-center space-x-3">
+                  <div className="bg-[#8B7D6B] p-2 rounded-lg text-white">
+                    <CalendarDaysIcon className="w-6 h-6" />
+                  </div>
+                  <div>
+                    <h1 className="text-xl font-prompt font-semibold text-[#8B7D6B]">{translations.title}</h1>
+                    {eventDate && (
+                      <p className="text-sm font-prompt text-[#A99985]">{formatEventDate(eventDate)}</p>
+                    )}
+                  </div>
+                </div>
+              </div>
+              <div className="h-1 bg-gradient-to-r from-[#8B7D6B] to-[#D4C5B1]"></div>
+            </div>
           </ScrollReveal>
           
           {/* Morning Schedule */}

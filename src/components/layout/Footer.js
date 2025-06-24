@@ -94,10 +94,10 @@ export default function Footer({ locale }) {
                 <p className="flex items-center space-x-2">
                   <span className="inline-block w-4 text-earth-400">📞</span>
                   <a 
-                    href="tel:023451000" 
+                    href="tel:023451270" 
                     className="hover:text-beige-300 transition-colors duration-200"
                   >
-                    02-345-1000
+                    02-345-1270
                   </a>
                 </p>
               </div>

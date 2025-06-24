@@ -1,6 +1,10 @@
 import { getTranslations } from '@/i18n';
 import RegistrationForm from '@/components/registration/RegistrationForm';
 import { getOrganizationTypes, getTransportationTypes, getSeminarRooms, getBangkokDistricts, getProvinces } from '@/lib/db';
+import { EventStructuredData, BreadcrumbStructuredData } from '@/components/seo/StructuredData';
+import { generateMetadata } from './metadata';
+
+export { generateMetadata };
 
 export default async function RegisterPage({ params }) {
   // ใช้ await กับ params ตามที่ Next.js 15 แนะนำ
@@ -57,21 +61,24 @@ export default async function RegisterPage({ params }) {
     ];
   }
   
+  const breadcrumbItems = [
+    {
+      name: locale === 'th' ? 'หน้าหลัก' : 'Home',
+      path: `/${locale}`
+    },
+    {
+      name: locale === 'th' ? 'ลงทะเบียน' : 'Registration',
+      path: `/${locale}/register`
+    }
+  ];
+
   return (
-    <div className="bg-earth-50 py-12">
-      <div className="container mx-auto px-4">
-        <div className="max-w-3xl mx-auto">
-          <h1 className="text-3xl font-prompt font-bold text-earth-900 mb-4 text-center">
-            {t.registration.title}
-          </h1>
-          
-          <p className="text-center text-earth-700 mb-8 font-prompt">
-            {locale === 'th' ? 
-              'กรอกข้อมูลเพื่อลงทะเบียนเข้าร่วมงานสัมมนา' : 
-              'Fill in the form to register for the seminar'}
-          </p>
-          
-          <div className="bg-white rounded-lg shadow-sm border border-earth-200 p-6">
+    <>
+      <EventStructuredData locale={locale} />
+      <BreadcrumbStructuredData items={breadcrumbItems} locale={locale} />
+      <div className="bg-earth-50 py-12">
+        <div className="container mx-auto px-4">
+          <div className="max-w-3xl mx-auto">
             <RegistrationForm 
               locale={locale}
               organizationTypes={organizationTypes}
@@ -83,6 +90,6 @@ export default async function RegisterPage({ params }) {
           </div>
         </div>
       </div>
-    </div>
+    </>
   );
 }

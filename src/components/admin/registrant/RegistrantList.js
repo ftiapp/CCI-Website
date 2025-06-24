@@ -1,5 +1,6 @@
 import React from 'react';
 import { PencilIcon, TrashIcon } from '@heroicons/react/24/outline';
+import ConsistentHeader from '../../layout/ConsistentHeader';
 
 export default function RegistrantList({
   registrants,
@@ -141,7 +142,13 @@ export default function RegistrantList({
   };
 
   return (
-    <div className="bg-white rounded-lg shadow overflow-hidden">
+    <div>
+      <ConsistentHeader 
+        title="จัดการผู้ลงทะเบียน" 
+        subtitle="รายการผู้ลงทะเบียนทั้งหมดในระบบ" 
+        icon="users" 
+      />
+      <div className="bg-white rounded-lg shadow overflow-hidden">
       {loading ? (
         <div className="flex justify-center items-center p-8">
           <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-blue-500"></div>
@@ -265,6 +272,7 @@ export default function RegistrantList({
           )}
         </>
       )}
+    </div>
     </div>
   );
 }

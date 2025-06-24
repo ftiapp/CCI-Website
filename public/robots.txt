@@ -1,0 +1,23 @@
+User-agent: *
+Allow: /
+
+# Sitemaps
+Sitemap: https://cci.fti.or.th/sitemap.xml
+
+# Disallow admin areas
+Disallow: /cciAdmin/
+Disallow: /api/
+
+# Allow important pages
+Allow: /th/
+Allow: /en/
+Allow: /th/register
+Allow: /en/register
+Allow: /th/schedule
+Allow: /en/schedule
+Allow: /th/contact
+Allow: /en/contact
+Allow: /th/privacy
+Allow: /en/privacy
+Allow: /th/terms
+Allow: /en/terms

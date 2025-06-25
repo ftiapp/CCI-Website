@@ -89,6 +89,11 @@ export async function getOrganizationTypes() {
   return executeQuery('SELECT * FROM CCI_organization_types');
 }
 
+// Get all industry types
+export async function getIndustryTypes() {
+  return executeQuery('SELECT * FROM CCI_industry_types');
+}
+
 // Get all transportation types
 export async function getTransportationTypes() {
   return executeQuery('SELECT * FROM CCI_transport_types');
@@ -184,6 +189,8 @@ export async function registerParticipant({
   organization_name,
   organization_type_id,
   organization_type_other,
+  industry_type_id,
+  industry_type_other,
   location_type,
   bangkok_district_id,
   province_id,
@@ -218,28 +225,39 @@ export async function registerParticipant({
   // ถ้าเดินทางด้วยขนส่งมวลชนหรือเดิน จะได้รับของที่ระลึกอัตโนมัติ
   const autoGiftReceived = transportation_category === 'public' || transportation_category === 'walking' ? 1 : 0;
   
+  // แปลงค่า undefined เป็น null ก่อนส่งไปยังฐานข้อมูล
+  const safeOrganizationTypeId = organization_type_id === undefined ? null : organization_type_id;
+  const safeIndustryTypeId = industry_type_id === undefined ? null : industry_type_id;
+  const safeBangkokDistrictId = bangkok_district_id === undefined ? null : bangkok_district_id;
+  const safeProvinceId = province_id === undefined ? null : province_id;
+  const safeSelectedRoomId = selected_room_id === undefined ? null : selected_room_id;
+  
   // ลงทะเบียนผู้เข้าร่วมในตาราง CCI_registrants (ไม่รวมข้อมูลการเดินทาง)
   const registrantResult = await executeQuery(
     `INSERT INTO CCI_registrants 
     (uuid, first_name, last_name, email, phone, organization_name, 
-    organization_type_id, organization_type_other, location_type, bangkok_district_id, province_id, 
+    organization_type_id, organization_type_other, industry_type_id, industry_type_other, 
+    location_type, bangkok_district_id, province_id, 
     attendance_type, selected_room_id, gift_received) 
-    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
     [
       uuid, 
-      first_name, 
-      last_name, 
-      email, 
-      phone, 
-      organization_name, 
-      organization_type_id,
+      first_name || '', 
+      last_name || '', 
+      email || '', 
+      phone || '', 
+      organization_name || '', 
+      safeOrganizationTypeId,
       // ใช้ค่า organization_type_other ที่รับมาโดยตรง หรือค่าเริ่มต้นถ้าไม่มีค่า
-      parseInt(organization_type_id) === 99 ? (organization_type_other || 'อื่นๆ') : null,
-      location_type,
-      bangkok_district_id,
-      province_id,
-      attendance_type,
-      selected_room_id,
+      parseInt(safeOrganizationTypeId) === 99 ? (organization_type_other || 'อื่นๆ') : null,
+      safeIndustryTypeId,
+      // ใช้ค่า industry_type_other ที่รับมาโดยตรง หรือค่าเริ่มต้นถ้าไม่มีค่า
+      parseInt(safeIndustryTypeId) === 99 ? (industry_type_other || 'อื่นๆ') : null,
+      location_type || null,
+      safeBangkokDistrictId,
+      safeProvinceId,
+      attendance_type || null,
+      safeSelectedRoomId,
       autoGiftReceived
     ]
   );

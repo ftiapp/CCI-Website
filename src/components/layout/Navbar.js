@@ -27,12 +27,12 @@ export default function Navbar({ locale }) {
       <div className="container mx-auto px-4 py-4">
         <div className="flex items-center justify-between">
           <Link href={`/${locale}`} className="flex items-center space-x-3">
-            <div className="relative w-12 h-12">
+            <div className="relative w-16 h-16">
               <Image 
                 src="/fti-cci-logo-rgb.png" 
                 alt="CCI Logo" 
                 fill 
-                sizes="48px"
+                sizes="64px"
                 className="object-contain" 
                 priority 
               />

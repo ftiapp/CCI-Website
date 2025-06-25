@@ -10,10 +10,11 @@ import InfoItem from './InfoItem';
  * @param {Object} props - Component props
  * @param {Object} props.formData - Form data object
  * @param {Array} props.organizationTypes - Organization types data
+ * @param {Array} props.industryTypes - Industry types data
  * @param {Object} props.t - Translation object
  * @param {string} props.locale - Current locale
  */
-const OrganizationInfoSection = ({ formData, organizationTypes, t, locale }) => {
+const OrganizationInfoSection = ({ formData, organizationTypes, industryTypes = [], t, locale }) => {
   // Find selected organization type
   const selectedOrgType = organizationTypes?.find(
     type => type.id.toString() === formData.organizationTypeId?.toString()
@@ -32,6 +33,25 @@ const OrganizationInfoSection = ({ formData, organizationTypes, t, locale }) => 
       orgTypeDisplayValue += `: ${formData.organization_type_other}`;
     }
   }
+  
+  // Find selected industry type
+  const selectedIndustryType = industryTypes?.find(
+    type => type.id.toString() === formData.industryTypeId?.toString()
+  );
+  
+  // Check if "Other" industry type is selected (ID 99)
+  const isOtherIndustryType = formData.industryTypeId?.toString() === '99';
+  
+  // Get the industry type display value
+  let industryTypeDisplayValue = '';
+  if (selectedIndustryType) {
+    industryTypeDisplayValue = locale === 'th' ? selectedIndustryType.name_th : selectedIndustryType.name_en;
+    
+    // If "Other" is selected and there's additional info, append it
+    if (isOtherIndustryType && formData.industry_type_other) {
+      industryTypeDisplayValue += `: ${formData.industry_type_other}`;
+    }
+  }
 
   return (
     <SectionCard 
@@ -47,6 +67,11 @@ const OrganizationInfoSection = ({ formData, organizationTypes, t, locale }) => 
         <InfoItem 
           label={t.registration.organizationType}
           value={orgTypeDisplayValue}
+          locale={locale}
+        />
+        <InfoItem 
+          label={locale === 'th' ? 'ประเภทอุตสาหกรรม' : 'Industry Type'}
+          value={industryTypeDisplayValue}
           locale={locale}
         />
       </div>

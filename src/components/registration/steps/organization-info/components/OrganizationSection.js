@@ -4,7 +4,7 @@ import { BuildingOfficeIcon } from '@heroicons/react/24/outline';
 import Input from '@/components/ui/Input';
 import SearchableSelect from '@/components/ui/SearchableSelect';
 import { getTranslations } from '@/i18n';
-import { useMemo } from 'react';
+import { useMemo, useEffect } from 'react';
 import { createSelectOptions, createOptionsWithOther } from '../utils/optionsGenerator';
 
 /**
@@ -16,19 +16,52 @@ export default function OrganizationSection({
   errors, 
   handleChange,
   handleOrgTypeChange,
+  handleIndustryTypeChange,
   organizationTypes,
+  industryTypes,
   otherOrgType,
   isOtherOrgSelected,
+  otherIndustryType,
+  isOtherIndustrySelected,
   handleOtherOrgTypeChange,
-  otherFieldName
+  handleOtherIndustryTypeChange,
+  otherOrgFieldName,
+  otherIndustryFieldName
 }) {
   const t = getTranslations(locale || 'th');
   
-  // Memoized options
+  // Memoized options for organization types
   const orgTypeOptions = useMemo(() => {
-    const baseOptions = createSelectOptions(organizationTypes, locale, 'name');
-    return createOptionsWithOther(baseOptions, locale, locale === 'th' ? 'โปรดระบุ' : 'Please specify');
+    // ตรวจสอบว่า organizationTypes มีข้อมูลหรือไม่
+    if (!organizationTypes || organizationTypes.length === 0) {
+      return [];
+    }
+    
+    // กรองข้อมูลซ้ำออกก่อนสร้างตัวเลือก
+    const uniqueOrgTypes = Array.from(
+      new Map(organizationTypes.map(item => [item.id, item])).values()
+    );
+    
+    const baseOptions = createSelectOptions(uniqueOrgTypes, locale, 'name');
+    
+    // กรองตัวเลือกซ้ำอีกครั้งก่อนเพิ่มตัวเลือก "อื่นๆ"
+    const uniqueBaseOptions = Array.from(
+      new Map(baseOptions.map(option => [option.value, option])).values()
+    );
+    
+    return createOptionsWithOther(uniqueBaseOptions, locale, locale === 'th' ? 'โปรดระบุ' : 'Please specify');
   }, [organizationTypes, locale]);
+  
+  // ตรวจสอบและแสดงค่าตัวเลือกในคอนโซลเพื่อการดีบัก
+  useEffect(() => {
+    console.log('Organization Types Options:', orgTypeOptions);
+  }, [orgTypeOptions]);
+  
+  // Memoized options for industry types
+  const industryTypeOptions = useMemo(() => {
+    const baseOptions = createSelectOptions(industryTypes, locale, 'name');
+    return createOptionsWithOther(baseOptions, locale, locale === 'th' ? 'โปรดระบุ' : 'Please specify');
+  }, [industryTypes, locale]);
 
   return (
     <div>
@@ -65,8 +98,26 @@ export default function OrganizationSection({
           error={errors.organizationTypeId}
           allowOther={isOtherOrgSelected}
           otherValue={otherOrgType}
-          otherName={otherFieldName}
+          otherName={otherOrgFieldName}
           onOtherChange={handleOtherOrgTypeChange}
+        />
+      </div>
+      
+      <div className="mb-4">
+        <label className="block text-sm font-medium text-earth-700 mb-1">
+          {locale === 'th' ? 'ประเภทอุตสาหกรรม' : 'Industry Type'}
+        </label>
+        <SearchableSelect
+          name="industryTypeId"
+          value={formData.industryTypeId}
+          onChange={handleIndustryTypeChange}
+          options={industryTypeOptions}
+          placeholder={locale === 'th' ? 'เลือกประเภทอุตสาหกรรม' : 'Select Industry Type'}
+          error={errors.industryTypeId}
+          allowOther={isOtherIndustrySelected}
+          otherValue={otherIndustryType}
+          otherName={otherIndustryFieldName}
+          onOtherChange={handleOtherIndustryTypeChange}
         />
       </div>
     </div>

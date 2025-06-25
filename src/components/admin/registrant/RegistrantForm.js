@@ -17,6 +17,7 @@ export default function RegistrantForm({ registrant, onSubmit, onCancel }) {
   // โหลดข้อมูลอ้างอิงจาก API
   const {
     organizationTypes,
+    industryTypes,
     publicTransportOptions,
     privateVehicleOptions,
     seminarRooms,
@@ -56,6 +57,7 @@ export default function RegistrantForm({ registrant, onSubmit, onCancel }) {
         formData={formData} 
         handleChange={handleChange} 
         organizationTypes={organizationTypes} 
+        industryTypes={industryTypes}
       />
 
       {/* ข้อมูลที่อยู่ */}

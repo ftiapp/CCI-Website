@@ -1,6 +1,6 @@
 import { getTranslations } from '@/i18n';
 import RegistrationForm from '@/components/registration/RegistrationForm';
-import { getOrganizationTypes, getTransportationTypes, getSeminarRooms, getBangkokDistricts, getProvinces } from '@/lib/db';
+import { getOrganizationTypes, getIndustryTypes, getTransportationTypes, getSeminarRooms, getBangkokDistricts, getProvinces } from '@/lib/db';
 import { EventStructuredData, BreadcrumbStructuredData } from '@/components/seo/StructuredData';
 import { generateMetadata } from './metadata';
 
@@ -14,6 +14,7 @@ export default async function RegisterPage({ params }) {
   
   // Fetch data for form dropdowns with error handling
   let organizationTypes = [];
+  let industryTypes = [];
   let transportationTypes = [];
   let seminarRooms = [];
   let bangkokDistricts = [];
@@ -21,6 +22,7 @@ export default async function RegisterPage({ params }) {
   
   try {
     organizationTypes = await getOrganizationTypes();
+    industryTypes = await getIndustryTypes();
     transportationTypes = await getTransportationTypes();
     seminarRooms = await getSeminarRooms();
     bangkokDistricts = await getBangkokDistricts();
@@ -33,7 +35,14 @@ export default async function RegisterPage({ params }) {
       { id: 2, name_th: 'หน่วยงานรัฐ', name_en: 'Government Agency' },
       { id: 3, name_th: 'องค์กรไม่แสวงหาผลกำไร', name_en: 'Non-profit Organization' },
       { id: 4, name_th: 'สถาบันการศึกษา', name_en: 'Educational Institution' },
-      { id: 5, name_th: 'อื่นๆ', name_en: 'Other' }
+      { id: 99, name_th: 'อื่นๆ', name_en: 'Other' }
+    ];
+    industryTypes = [
+      { id: 1, name_th: 'พลังงาน', name_en: 'Energy' },
+      { id: 2, name_th: 'การเงินและการธนาคาร', name_en: 'Finance & Banking' },
+      { id: 3, name_th: 'เทคโนโลยีสารสนเทศ', name_en: 'Information Technology' },
+      { id: 4, name_th: 'การศึกษา', name_en: 'Education' },
+      { id: 99, name_th: 'อื่นๆ', name_en: 'Other' }
     ];
     transportationTypes = [
       { id: 1, name_th: 'รถยนต์ส่วนตัว', name_en: 'Private Car' },
@@ -61,6 +70,7 @@ export default async function RegisterPage({ params }) {
     ];
   }
   
+  // Breadcrumb items for structured data
   const breadcrumbItems = [
     {
       name: locale === 'th' ? 'หน้าหลัก' : 'Home',
@@ -71,17 +81,18 @@ export default async function RegisterPage({ params }) {
       path: `/${locale}/register`
     }
   ];
-
+  
   return (
     <>
-      <EventStructuredData locale={locale} />
       <BreadcrumbStructuredData items={breadcrumbItems} locale={locale} />
+      <EventStructuredData locale={locale} />
       <div className="bg-earth-50 py-12">
         <div className="container mx-auto px-4">
           <div className="max-w-3xl mx-auto">
             <RegistrationForm 
-              locale={locale}
+              locale={locale} 
               organizationTypes={organizationTypes}
+              industryTypes={industryTypes}
               transportationTypes={transportationTypes}
               seminarRooms={seminarRooms}
               bangkokDistricts={bangkokDistricts}

@@ -14,6 +14,7 @@ import { FIELD_NAMES } from './constants';
  * @param {Object} props.errors - Form errors object
  * @param {Function} props.handleChange - Form change handler
  * @param {Array} props.organizationTypes - Organization types data
+ * @param {Array} props.industryTypes - Industry types data
  * @param {Array} props.bangkokDistricts - Bangkok districts data
  * @param {Array} props.provinces - Provinces data
  */
@@ -24,6 +25,7 @@ export default function OrganizationInfoStep({
   handleChange,
   handleRadioChange,
   organizationTypes = [],
+  industryTypes = [],
   bangkokDistricts = [],
   provinces = []
 }) {
@@ -31,13 +33,17 @@ export default function OrganizationInfoStep({
   const {
     otherOrgType,
     isOtherOrgSelected,
+    otherIndustryType,
+    isOtherIndustrySelected,
     isOtherPublicTransportSelected,
     isOtherPrivateVehicleSelected,
     isFuelTypeOther,
     handleOtherOrgTypeChange,
+    handleOtherIndustryTypeChange,
     handleOtherPublicTransportChange,
     handleOtherPrivateVehicleChange,
     handleOrgTypeChange,
+    handleIndustryTypeChange,
     handleLocationTypeChange,
     handleTransportTypeChange,
     handleFuelTypeChange,
@@ -53,11 +59,17 @@ export default function OrganizationInfoStep({
         errors={errors}
         handleChange={handleChange}
         handleOrgTypeChange={handleOrgTypeChange}
+        handleIndustryTypeChange={handleIndustryTypeChange}
         organizationTypes={organizationTypes}
+        industryTypes={industryTypes}
         otherOrgType={otherOrgType}
         isOtherOrgSelected={isOtherOrgSelected}
+        otherIndustryType={otherIndustryType}
+        isOtherIndustrySelected={isOtherIndustrySelected}
         handleOtherOrgTypeChange={handleOtherOrgTypeChange}
-        otherFieldName={FIELD_NAMES.ORGANIZATION_TYPE_OTHER}
+        handleOtherIndustryTypeChange={handleOtherIndustryTypeChange}
+        otherOrgFieldName={FIELD_NAMES.ORGANIZATION_TYPE_OTHER}
+        otherIndustryFieldName={FIELD_NAMES.INDUSTRY_TYPE_OTHER}
       />
       
       <TravelInfoSection 

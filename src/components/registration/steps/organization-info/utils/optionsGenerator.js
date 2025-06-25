@@ -13,10 +13,18 @@ import { useState, useEffect } from 'react';
 export const createSelectOptions = (items, locale, localeKey = 'name') => {
   if (!items || items.length === 0) return [];
   
-  return items.map(item => ({
+  // สร้างตัวเลือกจากข้อมูลที่มี
+  const options = items.map(item => ({
     value: item.id,
     label: locale === 'th' ? item[`${localeKey}_th`] : item[`${localeKey}_en`]
   }));
+  
+  // กรองข้อมูลซ้ำออกโดยใช้ Set และ Map
+  const uniqueOptions = Array.from(
+    new Map(options.map(option => [option.value, option])).values()
+  );
+  
+  return uniqueOptions;
 };
 
 /**
@@ -27,19 +35,20 @@ export const createSelectOptions = (items, locale, localeKey = 'name') => {
  * @returns {Array} Array of options with "Other" option
  */
 export const createOptionsWithOther = (baseOptions, locale, otherText) => {
-  // ตรวจสอบว่ามีตัวเลือก "อื่นๆ" อยู่แล้วหรือไม่
-  const hasOtherOption = baseOptions.some(option => 
-    option.value === FORM_CONSTANTS.OTHER_OPTION_ID || 
-    (locale === 'th' && option.label.includes('อื่นๆ')) ||
-    (locale !== 'th' && option.label.toLowerCase().includes('other'))
+  // กรองรายการซ้ำออกก่อน
+  const uniqueOptions = Array.from(
+    new Map(baseOptions.map(option => [option.value, option])).values()
+  );
+  
+  // ตรวจสอบว่ามีตัวเลือก "อื่นๆ" อยู่แล้วหรือไม่ โดยตรวจสอบเฉพาะ ID 99
+  const hasOtherOption = uniqueOptions.some(option => 
+    option.value === FORM_CONSTANTS.OTHER_OPTION_ID
   );
 
   // ถ้ามีตัวเลือก "อื่นๆ" อยู่แล้ว ให้กรองออกก่อนแล้วเพิ่มตัวเลือกใหม่
   if (hasOtherOption) {
-    const filteredOptions = baseOptions.filter(option => 
-      option.value !== FORM_CONSTANTS.OTHER_OPTION_ID && 
-      !(locale === 'th' && option.label.includes('อื่นๆ')) &&
-      !(locale !== 'th' && option.label.toLowerCase().includes('other'))
+    const filteredOptions = uniqueOptions.filter(option => 
+      option.value !== FORM_CONSTANTS.OTHER_OPTION_ID
     );
     
     return [
@@ -53,7 +62,7 @@ export const createOptionsWithOther = (baseOptions, locale, otherText) => {
   
   // ถ้าไม่มีตัวเลือก "อื่นๆ" ให้เพิ่มตัวเลือกใหม่ตามปกติ
   return [
-    ...baseOptions,
+    ...uniqueOptions,
     {
       value: FORM_CONSTANTS.OTHER_OPTION_ID,
       label: locale === 'th' ? `อื่นๆ (${otherText})` : `Others (${otherText})`

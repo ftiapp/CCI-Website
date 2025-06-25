@@ -12,6 +12,7 @@ export default function SuccessStep({
   registrationId,
   formData,
   organizationTypes,
+  industryTypes,
   transportationTypes,
   seminarRooms,
   isTicketPage = false

@@ -13,11 +13,17 @@ import { FORM_CONSTANTS, FIELD_NAMES } from '../constants';
  */
 export default function useOrganizationForm({ formData, handleChange, locale }) {
   const [otherOrgType, setOtherOrgType] = useState('');
+  const [otherIndustryType, setOtherIndustryType] = useState('');
   
   // Memoized computed values
   const isOtherOrgSelected = useMemo(() => 
     formData.organizationTypeId === FORM_CONSTANTS.OTHER_OPTION_ID, 
     [formData.organizationTypeId]
+  );
+  
+  const isOtherIndustrySelected = useMemo(() => 
+    formData.industryTypeId === FORM_CONSTANTS.OTHER_OPTION_ID, 
+    [formData.industryTypeId]
   );
 
   const isOtherPublicTransportSelected = useMemo(() => 
@@ -88,6 +94,33 @@ export default function useOrganizationForm({ formData, handleChange, locale }) 
     };
   }, [updateFormField, handleChange]);
   
+  const handleOtherIndustryTypeChange = useMemo(() => {
+    return (e) => {
+      const value = e.target ? e.target.value : e;
+      setOtherIndustryType(value);
+      
+      // บันทึกค่าในรูปแบบ snake_case
+      updateFormField(FIELD_NAMES.INDUSTRY_TYPE_OTHER, value);
+      
+      // บันทึกในรูปแบบ camelCase ด้วย
+      handleChange({
+        target: { name: 'industryTypeOther', value }
+      });
+      
+      // เพิ่มการบันทึกใน formData โดยตรงเพื่อให้แน่ใจว่าข้อมูลถูกส่งไปยัง API
+      if (value && value.trim() !== '') {
+        // ใช้ setTimeout เพื่อให้แน่ใจว่าการอัปเดตค่าทั้งสองอันข้างต้นเสร็จสิ้นก่อน
+        setTimeout(() => {
+          // ตรวจสอบอีกครั้งว่าค่าถูกบันทึกแล้วจริง
+          updateFormField(FIELD_NAMES.INDUSTRY_TYPE_OTHER, value);
+          handleChange({
+            target: { name: 'industryTypeOther', value }
+          });
+        }, 0);
+      }
+    };
+  }, [updateFormField, handleChange]);
+  
 
   const handleOtherPublicTransportChange = useMemo(() => 
     createOtherChangeHandler(FIELD_NAMES.PUBLIC_TRANSPORT_OTHER), 
@@ -112,6 +145,22 @@ export default function useOrganizationForm({ formData, handleChange, locale }) 
       // เมื่อเลือก "อื่นๆ" ให้กำหนดค่าเริ่มต้นเป็นสตริงว่างเสมอ
       // เพื่อให้แน่ใจว่าฟิลด์นี้มีอยู่ในข้อมูลฟอร์ม
       updateFormField(FIELD_NAMES.ORGANIZATION_TYPE_OTHER, '');
+    }
+  }, [handleChange, clearFormFields, updateFormField]);
+  
+  // Industry type change handler
+  const handleIndustryTypeChange = useCallback((e) => {
+    handleChange(e);
+    
+    const { value } = e.target;
+    if (parseInt(value) !== FORM_CONSTANTS.OTHER_OPTION_ID) {
+      // ถ้าไม่ได้เลือก "อื่นๆ" ให้ล้างค่า industry_type_other
+      clearFormFields([FIELD_NAMES.INDUSTRY_TYPE_OTHER]);
+      setOtherIndustryType('');
+    } else {
+      // เมื่อเลือก "อื่นๆ" ให้กำหนดค่าเริ่มต้นเป็นสตริงว่างเสมอ
+      // เพื่อให้แน่ใจว่าฟิลด์นี้มีอยู่ในข้อมูลฟอร์ม
+      updateFormField(FIELD_NAMES.INDUSTRY_TYPE_OTHER, '');
     }
   }, [handleChange, clearFormFields, updateFormField]);
 
@@ -194,23 +243,30 @@ export default function useOrganizationForm({ formData, handleChange, locale }) 
     [createTransportChangeHandler]
   );
 
-  // Initialize other value from form data
+  // Initialize other values from form data
   useEffect(() => {
     if (formData.organization_type_other) {
       setOtherOrgType(formData.organization_type_other);
     }
-  }, [formData.organization_type_other]);
+    if (formData.industry_type_other) {
+      setOtherIndustryType(formData.industry_type_other);
+    }
+  }, [formData.organization_type_other, formData.industry_type_other]);
 
   return {
     otherOrgType,
     isOtherOrgSelected,
+    otherIndustryType,
+    isOtherIndustrySelected,
     isOtherPublicTransportSelected,
     isOtherPrivateVehicleSelected,
     isFuelTypeOther,
     handleOtherOrgTypeChange,
+    handleOtherIndustryTypeChange,
     handleOtherPublicTransportChange,
     handleOtherPrivateVehicleChange,
     handleOrgTypeChange,
+    handleIndustryTypeChange,
     handleLocationTypeChange,
     handleTransportTypeChange,
     handleFuelTypeChange,

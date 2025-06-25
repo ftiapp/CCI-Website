@@ -17,6 +17,7 @@ export async function GET(request, { params }) {
       `SELECT r.*, 
         r.admin_notes,
         ot.name_th as organization_type_th, ot.name_en as organization_type_en,
+        it.name_th as industry_type_th, it.name_en as industry_type_en,
         t.transport_type,
         t.public_transport_id,
         t.public_transport_other,
@@ -30,6 +31,7 @@ export async function GET(request, { params }) {
         p.name_th as province_name_th, p.name_en as province_name_en
       FROM CCI_registrants r
       LEFT JOIN CCI_organization_types ot ON r.organization_type_id = ot.id
+      LEFT JOIN CCI_industry_types it ON r.industry_type_id = it.id
       LEFT JOIN CCI_transportation t ON r.id = t.registrant_id
       LEFT JOIN CCI_seminar_rooms sr ON r.selected_room_id = sr.id
       LEFT JOIN CCI_bangkok_districts bd ON r.bangkok_district_id = bd.id

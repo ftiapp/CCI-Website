@@ -3,6 +3,7 @@ import { toast } from 'react-toastify';
 
 export default function useReferenceData() {
   const [organizationTypes, setOrganizationTypes] = useState([]);
+  const [industryTypes, setIndustryTypes] = useState([]);
   const [transportationTypes, setTransportationTypes] = useState([]);
   const [publicTransportOptions, setPublicTransportOptions] = useState([]);
   const [privateVehicleOptions, setPrivateVehicleOptions] = useState([]);
@@ -19,6 +20,13 @@ export default function useReferenceData() {
         const orgTypesData = await orgTypesResponse.json();
         if (orgTypesData.success) {
           setOrganizationTypes(orgTypesData.organizationTypes);
+        }
+        
+        // Fetch industry types
+        const industryTypesResponse = await fetch('/api/admin/industry-types');
+        const industryTypesData = await industryTypesResponse.json();
+        if (industryTypesData.success) {
+          setIndustryTypes(industryTypesData.industryTypes);
         }
 
         // Fetch transportation types
@@ -68,6 +76,7 @@ export default function useReferenceData() {
 
   return {
     organizationTypes,
+    industryTypes,
     transportationTypes,
     publicTransportOptions,
     privateVehicleOptions,

@@ -16,6 +16,7 @@ import ConsentSection from './components/ConsentSection';
  * @param {string} props.locale - Current locale
  * @param {Object} props.formData - Form data object
  * @param {Array} props.organizationTypes - Organization types data
+ * @param {Array} props.industryTypes - Industry types data
  * @param {Array} props.transportationTypes - Transportation types data
  * @param {Array} props.seminarRooms - Seminar rooms data
  * @param {Array} props.bangkokDistricts - Bangkok districts data
@@ -27,6 +28,7 @@ export default function ConfirmationStep({
   locale, 
   formData,
   organizationTypes = [],
+  industryTypes = [],
   transportationTypes = [],
   seminarRooms = [],
   bangkokDistricts = [],
@@ -57,6 +59,7 @@ export default function ConfirmationStep({
         <OrganizationInfoSection 
           formData={formData}
           organizationTypes={organizationTypes}
+          industryTypes={industryTypes}
           t={t}
           locale={locale}
         />

@@ -19,6 +19,7 @@ export default function FormStepRenderer({
   handleChange,
   handleRadioChange,
   organizationTypes,
+  industryTypes,
   transportationTypes,
   seminarRooms,
   bangkokDistricts,
@@ -34,6 +35,7 @@ export default function FormStepRenderer({
           registrationId={registrationId}
           formData={formData}
           organizationTypes={organizationTypes}
+          industryTypes={industryTypes}
           transportationTypes={transportationTypes}
           seminarRooms={seminarRooms}
         />
@@ -62,6 +64,7 @@ export default function FormStepRenderer({
             handleChange={handleChange}
             handleRadioChange={handleRadioChange}
             organizationTypes={organizationTypes}
+            industryTypes={industryTypes}
             transportationTypes={transportationTypes}
             bangkokDistricts={bangkokDistricts}
             provinces={provinces}
@@ -86,6 +89,7 @@ export default function FormStepRenderer({
             errors={errors}
             handleChange={handleChange}
             organizationTypes={organizationTypes}
+            industryTypes={industryTypes}
             transportationTypes={transportationTypes}
             seminarRooms={seminarRooms}
             bangkokDistricts={bangkokDistricts}

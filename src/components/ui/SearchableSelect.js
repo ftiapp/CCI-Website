@@ -122,13 +122,23 @@ export default function SearchableSelect({
     }
   }, [isOpen, handleScroll]);
   
+  // กรองข้อมูลซ้ำออกจากตัวเลือก
+  const removeDuplicateOptions = useCallback((optionsArray) => {
+    // ใช้ Map เพื่อกรองข้อมูลซ้ำโดยใช้ value เป็น key
+    return Array.from(
+      new Map(optionsArray.map(option => [option.value, option])).values()
+    );
+  }, []);
+  
   // Initialize state when component mounts
   useEffect(() => {
-    setFilteredOptions(options);
-    setVisibleOptions(options.slice(0, PAGE_SIZE));
+    // กรองข้อมูลซ้ำออกก่อนตั้งค่า state
+    const uniqueOptions = removeDuplicateOptions(options);
+    setFilteredOptions(uniqueOptions);
+    setVisibleOptions(uniqueOptions.slice(0, PAGE_SIZE));
     setPage(0);
-    setHasMore(options.length > PAGE_SIZE);
-  }, [options, PAGE_SIZE]);
+    setHasMore(uniqueOptions.length > PAGE_SIZE);
+  }, [options, PAGE_SIZE, removeDuplicateOptions]);
   
   // Force update visible options when dropdown opens
   useEffect(() => {
@@ -213,20 +223,23 @@ export default function SearchableSelect({
             {/* Options list with infinite scroll */}
             <div 
               ref={optionsContainerRef}
-              className="overflow-auto max-h-60"
+              className="overflow-auto max-h-60 border-t border-beige-100"
             >
+              {/* ใช้ Set เพื่อเก็บค่าที่แสดงแล้วเพื่อป้องกันการแสดงซ้ำ */}
               {visibleOptions.length > 0 ? (
-                visibleOptions.map((option, index) => (
-                  <div
-                    key={`${option.value}-${index}`}
-                    className={`px-3 py-2 cursor-pointer hover:bg-beige-50 ${
-                      option.value === value ? 'bg-beige-100 font-medium' : ''
-                    }`}
-                    onClick={() => handleOptionSelect(option.value)}
-                  >
-                    <div className="truncate">{option.label}</div>
-                  </div>
-                ))
+                // ใช้ Set เพื่อกรองตัวเลือกที่ซ้ำกันออกไป
+                Array.from(new Map(visibleOptions.map(option => [option.value, option])).values())
+                  .map((option) => (
+                    <div
+                      key={`option-${option.value}`}
+                      className={`px-3 py-2 cursor-pointer hover:bg-beige-50 ${
+                        option.value === value ? 'bg-beige-100 font-medium' : ''
+                      }`}
+                      onClick={() => handleOptionSelect(option.value)}
+                    >
+                      <div className="truncate">{option.label}</div>
+                    </div>
+                  ))
               ) : (
                 <div className="px-3 py-2 text-gray-500">ไม่พบตัวเลือกที่ตรงกับการค้นหา</div>
               )}

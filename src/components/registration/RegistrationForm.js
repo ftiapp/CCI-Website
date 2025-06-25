@@ -5,6 +5,7 @@ import { FormContainer } from './form';
 export default function RegistrationForm({ 
   locale, 
   organizationTypes, 
+  industryTypes,
   transportationTypes, 
   seminarRooms,
   bangkokDistricts,
@@ -14,6 +15,7 @@ export default function RegistrationForm({
     <FormContainer
       locale={locale}
       organizationTypes={organizationTypes}
+      industryTypes={industryTypes}
       transportationTypes={transportationTypes}
       seminarRooms={seminarRooms}
       bangkokDistricts={bangkokDistricts}

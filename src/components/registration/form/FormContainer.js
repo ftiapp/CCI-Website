@@ -15,6 +15,7 @@ import { isValidEmail, isValidPhone } from '@/lib/utils';
 export default function FormContainer({ 
   locale, 
   organizationTypes, 
+  industryTypes,
   transportationTypes, 
   seminarRooms,
   bangkokDistricts,
@@ -41,6 +42,7 @@ export default function FormContainer({
     phone: '',
     organizationName: '',
     organizationTypeId: '',
+    industryTypeId: '',
     transport_type: '',
     public_transport_id: '',
     public_transport_other: '',
@@ -184,6 +186,7 @@ export default function FormContainer({
           handleChange={handleChange}
           handleRadioChange={handleRadioChange}
           organizationTypes={organizationTypes}
+          industryTypes={industryTypes}
           transportationTypes={transportationTypes}
           seminarRooms={seminarRooms}
           bangkokDistricts={bangkokDistricts}

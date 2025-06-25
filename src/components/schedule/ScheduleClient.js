@@ -163,11 +163,10 @@ export default function ScheduleClient({
                   <table className="w-full">
                     <thead>
                       <tr className="bg-[#F5F5DC]">
-                        <th className="py-3 px-4 text-left text-[#9D7553] w-1/6">{translations.time}</th>
-                        <th className="py-3 px-4 text-left text-[#9D7553] w-2/6">{translations.topic}</th>
-                        <th className="py-3 px-4 text-left text-[#9D7553] w-1/6">{translations.speaker}</th>
-                        <th className="py-3 px-4 text-left text-[#9D7553] w-1/6">{translations.room}</th>
-                        <th className="py-3 px-4 text-left text-[#9D7553] w-1/6">{translations.description}</th>
+                        <th className="py-3 px-4 text-left text-[#9D7553] w-1/6 min-w-[120px]">{translations.time}</th>
+                        <th className="py-3 px-4 text-left text-[#9D7553] w-2/6 min-w-[200px]">{translations.topic}</th>
+                        <th className="py-3 px-4 text-left text-[#9D7553] w-1/6 min-w-[120px]">{translations.room}</th>
+                        <th className="py-3 px-4 text-left text-[#9D7553] w-2/6 min-w-[200px]">{translations.description}</th>
                       </tr>
                     </thead>
                     <tbody>
@@ -185,9 +184,6 @@ export default function ScheduleClient({
                           </td>
                           <td className="py-3 px-4 text-[#9D7553] font-medium">
                             {locale === 'th' ? item.title_th : item.title_en}
-                          </td>
-                          <td className="py-3 px-4 text-[#9D7553]/90">
-                            {locale === 'th' ? item.speaker_th : item.speaker_en}
                           </td>
                           <td className="py-3 px-4 text-[#9D7553]/90">
                             {locale === 'th' ? item.room_name_th : item.room_name_en}

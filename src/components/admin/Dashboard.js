@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useEffect, useCallback } from 'react';
+import ErrorBoundary from '../ErrorBoundary';
 import { ChartBarIcon, MapPinIcon, TruckIcon, UsersIcon, CheckCircleIcon, CalendarIcon, UserIcon, ClipboardDocumentListIcon, BuildingOfficeIcon } from '@heroicons/react/24/outline';
 import toast from 'react-hot-toast';
 import ScheduleManagement from './ScheduleManagement';
@@ -484,13 +485,19 @@ export default function Dashboard() {
         </div>
       ) : activeTab === 'schedule' ? (
         /* Schedule Management Tab */
-        <ScheduleManagement />
+        <ErrorBoundary>
+          <ScheduleManagement />
+        </ErrorBoundary>
       ) : activeTab === 'registrants' ? (
         /* Registrant Management Tab */
-        <RegistrantManagement />
+        <ErrorBoundary>
+          <RegistrantManagement />
+        </ErrorBoundary>
       ) : (
         /* Organization Type Management Tab */
-        <OrganizationTypeManagement />
+        <ErrorBoundary>
+          <OrganizationTypeManagement />
+        </ErrorBoundary>
       )}
     </div>
   );

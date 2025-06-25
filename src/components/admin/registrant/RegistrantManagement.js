@@ -35,19 +35,59 @@ export default function RegistrantManagement() {
       });
 
       const response = await fetch(`/api/admin/participants?${queryParams}`);
+      
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+      
       const data = await response.json();
 
       if (data.success) {
         console.log('Received data:', data);
-        setRegistrants(data.participants || []); // Changed from data.registrants to data.participants
-        setTotalPages(data.pagination?.totalPages || 1);
-        setProvinces(data.provinces || []);
+        // Ensure participants is an array
+        const safeParticipants = Array.isArray(data.participants) ? data.participants : [];
+        setRegistrants(safeParticipants);
+        
+        // Ensure pagination data is valid
+        setTotalPages(data.pagination && typeof data.pagination.totalPages === 'number' ? data.pagination.totalPages : 1);
+        
+        // Ensure provinces is an array
+        const safeProvinces = Array.isArray(data.provinces) ? data.provinces : [];
+        setProvinces(safeProvinces);
       } else {
-        toast.error('ไม่สามารถดึงข้อมูลผู้ลงทะเบียนได้');
+        toast.error('ไม่สามารถดึงข้อมูลผู้ลงทะเบียนได้', {
+          position: 'top-right',
+          style: {
+            borderRadius: '10px',
+            background: '#333',
+            color: '#fff',
+            padding: '16px',
+            fontFamily: 'prompt, sans-serif',
+            fontWeight: '500',
+          },
+        });
+        
+        // Set empty arrays as fallback
+        setRegistrants([]);
+        setProvinces([]);
       }
     } catch (error) {
       console.error('Error fetching registrants:', error);
-      toast.error('เกิดข้อผิดพลาดในการดึงข้อมูล');
+      toast.error('เกิดข้อผิดพลาดในการดึงข้อมูล', {
+        position: 'top-right',
+        style: {
+          borderRadius: '10px',
+          background: '#333',
+          color: '#fff',
+          padding: '16px',
+          fontFamily: 'prompt, sans-serif',
+          fontWeight: '500',
+        },
+      });
+      
+      // Set empty arrays as fallback
+      setRegistrants([]);
+      setProvinces([]);
     } finally {
       setLoading(false);
     }

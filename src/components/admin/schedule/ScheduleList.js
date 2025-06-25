@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useMemo } from 'react';
 import { format } from 'date-fns';
 import { th } from 'date-fns/locale';
 import { PencilIcon, TrashIcon, ChevronDownIcon, ChevronUpIcon } from '@heroicons/react/24/outline';
@@ -8,18 +8,74 @@ import { PencilIcon, TrashIcon, ChevronDownIcon, ChevronUpIcon } from '@heroicon
 export default function ScheduleList({ scheduleItems, onEdit, onDelete }) {
   const [expandedItems, setExpandedItems] = useState({});
   
-  // Group schedule items by date
-  const groupedByDate = scheduleItems.reduce((acc, item) => {
-    const date = item.event_date;
-    if (!acc[date]) {
-      acc[date] = [];
-    }
-    acc[date].push(item);
-    return acc;
-  }, {});
+  console.log('ScheduleList received items:', scheduleItems);
   
-  // Sort dates
-  const sortedDates = Object.keys(groupedByDate).sort();
+  // Group schedule items by date
+  const groupedSchedule = useMemo(() => {
+    const groupedByDate = {};
+    
+    // Ensure scheduleItems is an array before processing
+    if (!Array.isArray(scheduleItems)) {
+      console.error('scheduleItems is not an array:', scheduleItems);
+      return [];
+    }
+    
+    // Check if array is empty
+    if (scheduleItems.length === 0) {
+      console.log('scheduleItems array is empty');
+      return [];
+    }
+    
+    scheduleItems.forEach(item => {
+      try {
+        // Validate item has event_date and time_start properties
+        if (!item || !item.event_date) {
+          console.warn('Invalid schedule item found (missing event_date):', item);
+          return; // Skip this item
+        }
+        
+        // ใช้ event_date จาก API
+        const eventDate = new Date(item.event_date);
+        
+        // Check if date is valid
+        if (isNaN(eventDate.getTime())) {
+          console.warn('Invalid date in schedule item:', item);
+          return; // Skip this item
+        }
+        
+        const date = format(eventDate, 'yyyy-MM-dd');
+        
+        if (!groupedByDate[date]) {
+          groupedByDate[date] = [];
+        }
+        
+        groupedByDate[date].push(item);
+      } catch (error) {
+        console.error('Error processing schedule item:', error, item);
+      }
+    });
+    
+    // Sort dates and items within each date
+    const result = [];
+    
+    Object.keys(groupedByDate)
+      .sort((a, b) => new Date(a) - new Date(b))
+      .forEach(date => {
+        const items = groupedByDate[date].sort((a, b) => {
+          // ใช้ time_start จาก API แทน start_time
+          const timeA = a.time_start || '';
+          const timeB = b.time_start || '';
+          return timeA.localeCompare(timeB);
+        });
+        
+        result.push({
+          date,
+          items
+        });
+      });
+    
+    return result;
+  }, [scheduleItems]);
   
   // Toggle item expansion
   const toggleExpand = (id) => {
@@ -45,26 +101,33 @@ export default function ScheduleList({ scheduleItems, onEdit, onDelete }) {
     }
   };
   
-  if (scheduleItems.length === 0) {
+  // ตรวจสอบว่ามีข้อมูลหรือไม่
+  if (!scheduleItems || scheduleItems.length === 0) {
     return (
-      <div className="text-center py-8 bg-gray-50 rounded-lg">
-        <p className="text-gray-500 font-prompt">ไม่พบข้อมูลตารางกิจกรรม</p>
+      <div className="text-center py-12 bg-gray-50 rounded-lg shadow-sm">
+        <div className="flex flex-col items-center justify-center space-y-4">
+          <svg xmlns="http://www.w3.org/2000/svg" className="h-16 w-16 text-gray-300" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+          </svg>
+          <p className="text-gray-500 font-prompt text-lg">ไม่พบข้อมูลตารางกิจกรรม</p>
+          <p className="text-gray-400 font-prompt text-sm">กรุณาเพิ่มกิจกรรมโดยคลิกที่ปุ่ม "เพิ่มกิจกรรม"</p>
+        </div>
       </div>
     );
   }
   
   return (
     <div className="space-y-6">
-      {sortedDates.map(date => (
-        <div key={date} className="bg-white rounded-lg shadow overflow-hidden">
+      {groupedSchedule.map(dateGroup => (
+        <div key={dateGroup.date} className="bg-white rounded-lg shadow overflow-hidden">
           <div className="bg-earth-100 px-6 py-4">
             <h3 className="text-xl font-prompt font-semibold text-earth-800 capitalize">
-              {formatDate(date)}
+              {formatDate(dateGroup.date)}
             </h3>
           </div>
           
           <div className="divide-y divide-gray-200">
-            {groupedByDate[date].map(item => (
+            {dateGroup.items.map(item => (
               <div key={item.id} className="px-6 py-4">
                 <div className="flex justify-between items-start">
                   <div className="flex-1">
@@ -109,26 +172,25 @@ export default function ScheduleList({ scheduleItems, onEdit, onDelete }) {
                         </button>
                         
                         {expandedItems[item.id] && (
-                          <div className="mt-2 text-sm text-gray-600 font-prompt">
+                          <div className="mt-2 pl-2 border-l-2 border-earth-200 text-sm text-gray-700 font-prompt">
                             {item.description_th}
                           </div>
                         )}
                       </div>
                     )}
                   </div>
-                  
                   <div className="flex space-x-2">
                     <button
                       onClick={() => onEdit(item)}
-                      className="p-2 text-blue-600 hover:bg-blue-50 rounded-full transition-colors"
-                      title="แก้ไข"
+                      className="p-1.5 rounded-full text-earth-600 hover:bg-earth-100 hover:text-earth-800 transition-colors"
+                      title="แก้ไขกิจกรรม"
                     >
                       <PencilIcon className="h-5 w-5" />
                     </button>
                     <button
                       onClick={() => onDelete(item.id)}
-                      className="p-2 text-red-600 hover:bg-red-50 rounded-full transition-colors"
-                      title="ลบ"
+                      className="p-1.5 rounded-full text-red-600 hover:bg-red-100 hover:text-red-800 transition-colors"
+                      title="ลบกิจกรรม"
                     >
                       <TrashIcon className="h-5 w-5" />
                     </button>

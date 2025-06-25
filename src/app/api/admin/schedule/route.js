@@ -4,10 +4,14 @@ import { executeQuery } from '@/lib/db';
 // GET - Fetch all schedule items
 export async function GET(request) {
   try {
+    console.log('Schedule API: Request received');
+    
     // Get filter parameters if needed
     const { searchParams } = new URL(request.url);
     const roomId = searchParams.get('roomId') || 'all';
     const isMorning = searchParams.get('isMorning');
+    
+    console.log('Schedule API: Filters', { roomId, isMorning });
     
     // Build query with filters
     let whereClause = '';
@@ -23,20 +27,39 @@ export async function GET(request) {
       params.push(parseInt(isMorning));
     }
     
-    // Get schedule items with room info
-    const scheduleItems = await executeQuery(
-      `SELECT s.*, r.name_th as room_name_th, r.name_en as room_name_en
+    // Construct the full query for logging
+    const scheduleQuery = `SELECT s.*, r.name_th as room_name_th, r.name_en as room_name_en
        FROM CCI_schedule s
        LEFT JOIN CCI_seminar_rooms r ON s.room_id = r.id
        WHERE 1=1 ${whereClause}
-       ORDER BY s.event_date, s.time_start`,
-      params
-    );
+       ORDER BY s.event_date, s.time_start`;
+       
+    console.log('Schedule API: Executing query', { query: scheduleQuery, params });
+    
+    // Get schedule items with room info
+    const scheduleItems = await executeQuery(scheduleQuery, params);
+    
+    console.log('Schedule API: Query result', { count: scheduleItems.length, sample: scheduleItems.slice(0, 2) });
     
     // Get all rooms for the dropdown
     const rooms = await executeQuery(
       'SELECT id, name_th, name_en FROM CCI_seminar_rooms ORDER BY id'
     );
+    
+    console.log('Schedule API: Rooms fetched', { count: rooms.length });
+    
+    // Check if scheduleItems is empty but should have data
+    if (scheduleItems.length === 0) {
+      console.log('Schedule API: No schedule items found, checking if table exists');
+      
+      // Check if the table exists and has data
+      try {
+        const tableCheck = await executeQuery('SELECT COUNT(*) as count FROM CCI_schedule');
+        console.log('Schedule API: Table check result', tableCheck);
+      } catch (tableError) {
+        console.error('Schedule API: Error checking table', tableError);
+      }
+    }
     
     return NextResponse.json({
       success: true,

@@ -28,7 +28,7 @@ export default function AttendanceInfoForm({ formData, handleChange, seminarRoom
             <select
               id="selected_room_id"
               name="selected_room_id"
-              value={formData.selected_room_id}
+              value={formData.selected_room_id || ''}
               onChange={handleChange}
               className="w-full p-2 border rounded-md font-prompt"
               required

@@ -13,15 +13,22 @@ export default function RegistrantList({
 }) {
   // Function to format date in Thai locale
   const formatDate = (dateString) => {
-    if (!dateString) return '';
-    const date = new Date(dateString);
-    return date.toLocaleDateString('th-TH', {
-      year: 'numeric',
-      month: 'long',
-      day: 'numeric',
-      hour: '2-digit',
-      minute: '2-digit'
-    });
+    if (!dateString) return '-';
+    try {
+      const date = new Date(dateString);
+      // Check if date is valid
+      if (isNaN(date.getTime())) return '-';
+      return date.toLocaleDateString('th-TH', {
+        year: 'numeric',
+        month: 'long',
+        day: 'numeric',
+        hour: '2-digit',
+        minute: '2-digit'
+      });
+    } catch (error) {
+      console.error('Error formatting date:', error);
+      return '-';
+    }
   };
 
   // Function to get status badge class
@@ -54,18 +61,25 @@ export default function RegistrantList({
   
   // Function to check if transportation type is public or walking
   const isEligibleForGift = (transportType) => {
-    if (!transportType) return false;
-    const lowerType = transportType.toLowerCase();
-    return lowerType.includes('public') || 
-           lowerType.includes('bus') || 
-           lowerType.includes('train') || 
-           lowerType.includes('walk') || 
-           lowerType.includes('เดิน') || 
-           lowerType.includes('ขนส่งมวลชน') || 
-           lowerType.includes('รถเมล์') || 
-           lowerType.includes('รถไฟ') || 
-           lowerType.includes('bts') || 
-           lowerType.includes('mrt');
+    // Return false if transportType is null, undefined, or not a string
+    if (!transportType || typeof transportType !== 'string') return false;
+    
+    try {
+      const lowerType = transportType.toLowerCase();
+      return lowerType.includes('public') || 
+             lowerType.includes('bus') || 
+             lowerType.includes('train') || 
+             lowerType.includes('walk') || 
+             lowerType.includes('เดิน') || 
+             lowerType.includes('ขนส่งมวลชน') || 
+             lowerType.includes('รถเมล์') || 
+             lowerType.includes('รถไฟ') || 
+             lowerType.includes('bts') || 
+             lowerType.includes('mrt');
+    } catch (error) {
+      console.error('Error checking gift eligibility:', error);
+      return false;
+    }
   };
 
   // Function to get attendance type text
@@ -214,7 +228,7 @@ export default function RegistrantList({
                       <div className="text-xs text-gray-400">
                         {registrant.organization_type_th}
                         {/* แสดงข้อมูลเพิ่มเติมเมื่อเลือกประเภทองค์กรเป็น "อื่นๆ" */}
-                        {registrant.organization_type_id === 99 && registrant.organization_type_other && (
+                        {registrant.organization_type_id && registrant.organization_type_id === 99 && registrant.organization_type_other && (
                           <span className="ml-1">: {registrant.organization_type_other}</span>
                         )}
                       </div>

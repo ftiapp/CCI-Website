@@ -41,7 +41,7 @@ export default function useRegistrantForm(registrant) {
         let transportType = registrant.transport_type || '';
         let publicTransportId = '';
         let privateVehicleId = '';
-        let fuelTypeId = 1; // ค่าเริ่มต้น (gasoline)
+        let fuelTypeId = 'gasoline'; // ค่าเริ่มต้น (gasoline)
         let passengerType = 'driver'; // ค่าเริ่มต้น
         
         console.log('Transportation data from API:', {
@@ -67,19 +67,21 @@ export default function useRegistrantForm(registrant) {
           console.log('Fuel type ID from API (raw):', registrant.fuel_type_id);
           console.log('Fuel type other from API:', registrant.fuel_type_other);
           
-          // แปลงค่าตาม ID
-          if (registrant.fuel_type_id === 1 || registrant.fuel_type_id === '1') {
-            fuelTypeId = 'gasoline';
-          } else if (registrant.fuel_type_id === 2 || registrant.fuel_type_id === '2') {
-            fuelTypeId = 'diesel';
-          } else if (registrant.fuel_type_id === 3 || registrant.fuel_type_id === '3') {
-            fuelTypeId = 'electric';
-          } else if (registrant.fuel_type_id === 4 || registrant.fuel_type_id === '4') {
-            fuelTypeId = 'hybrid';
-          } else if (registrant.fuel_type_id === 99 || registrant.fuel_type_id === '99' || registrant.fuel_type_id === 999 || registrant.fuel_type_id === '999') {
-            fuelTypeId = 'other';
-          } else {
-            fuelTypeId = 'gasoline'; // ค่าเริ่มต้น
+          // แปลงค่าตาม ID - ตรวจสอบว่า fuel_type_id มีค่าก่อนเปรียบเทียบ
+          const fuelId = registrant.fuel_type_id;
+          if (fuelId) {
+            const fuelIdStr = String(fuelId);
+            if (fuelIdStr === '1') {
+              fuelTypeId = 'gasoline';
+            } else if (fuelIdStr === '2') {
+              fuelTypeId = 'diesel';
+            } else if (fuelIdStr === '3') {
+              fuelTypeId = 'electric';
+            } else if (fuelIdStr === '4') {
+              fuelTypeId = 'hybrid';
+            } else if (fuelIdStr === '99' || fuelIdStr === '999') {
+              fuelTypeId = 'other';
+            }
           }
           
           console.log('Fuel type ID after conversion:', fuelTypeId);
@@ -88,32 +90,57 @@ export default function useRegistrantForm(registrant) {
           passengerType = registrant.passenger_type || 'driver';
         }
 
+        // Create a safe object with default values for all fields
+        const safeRegistrant = {
+          id: '',
+          uuid: '',
+          first_name: '',
+          last_name: '',
+          email: '',
+          phone: '',
+          organization_name: '',
+          organization_type_id: '',
+          organization_type_other: '',
+          location_type: '',
+          bangkok_district_id: '',
+          province_id: '',
+          attendance_type: '',
+          selected_room_id: '',
+          public_transport_other: '',
+          private_vehicle_other: '',
+          car_type_other: '',
+          fuel_type_other: '',
+          admin_notes: '',
+          ...registrant // Spread the actual registrant data over the defaults
+        };
+        
+        // Now set the form data using the safe object
         setFormData({
-          id: registrant.id || '',
-          uuid: registrant.uuid || '',
-          first_name: registrant.first_name || '',
-          last_name: registrant.last_name || '',
-          email: registrant.email || '',
-          phone: registrant.phone || '',
-          organization_name: registrant.organization_name || '',
-          organization_type_id: registrant.organization_type_id || '',
-          organization_type_other: registrant.organization_type_other || '',
-          location_type: registrant.location_type || '',
-          bangkok_district_id: registrant.bangkok_district_id || '',
-          province_id: registrant.province_id || '',
-          attendance_type: registrant.attendance_type || '',
-          selected_room_id: registrant.selected_room_id || '',
+          id: safeRegistrant.id,
+          uuid: safeRegistrant.uuid,
+          first_name: safeRegistrant.first_name,
+          last_name: safeRegistrant.last_name,
+          email: safeRegistrant.email,
+          phone: safeRegistrant.phone,
+          organization_name: safeRegistrant.organization_name,
+          organization_type_id: safeRegistrant.organization_type_id,
+          organization_type_other: safeRegistrant.organization_type_other,
+          location_type: safeRegistrant.location_type,
+          bangkok_district_id: safeRegistrant.bangkok_district_id,
+          province_id: safeRegistrant.province_id,
+          attendance_type: safeRegistrant.attendance_type,
+          selected_room_id: safeRegistrant.selected_room_id,
           
           // ข้อมูลการเดินทาง
           transport_type: transportType,
           public_transport_id: publicTransportId,
-          public_transport_other: registrant.public_transport_other || '',
+          public_transport_other: safeRegistrant.public_transport_other,
           private_vehicle_id: privateVehicleId,
-          private_vehicle_other: registrant.private_vehicle_other || registrant.car_type_other || '',
+          private_vehicle_other: safeRegistrant.private_vehicle_other || safeRegistrant.car_type_other,
           fuel_type_id: fuelTypeId,
-          fuel_type_other: registrant.fuel_type_other || '',
+          fuel_type_other: safeRegistrant.fuel_type_other,
           passenger_type: passengerType,
-          admin_notes: registrant.admin_notes || ''
+          admin_notes: safeRegistrant.admin_notes
         });
         
         console.log('Form data set:', {

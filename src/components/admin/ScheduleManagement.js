@@ -19,11 +19,28 @@ export default function ScheduleManagement() {
     setIsLoading(true);
     try {
       const response = await fetch('/api/admin/schedule');
+      
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+      
       const data = await response.json();
       
+      // เพิ่มการตรวจสอบข้อมูลที่ได้รับจาก API
+      console.log('Schedule API response:', data);
+      console.log('Schedule items received:', data.scheduleItems);
+      console.log('Rooms received:', data.rooms);
+      
       if (data.success) {
-        setScheduleItems(data.scheduleItems);
-        setRooms(data.rooms);
+        // Ensure scheduleItems is an array
+        const safeScheduleItems = Array.isArray(data.scheduleItems) ? data.scheduleItems : [];
+        console.log('Safe schedule items:', safeScheduleItems);
+        setScheduleItems(safeScheduleItems);
+        
+        // Ensure rooms is an array
+        const safeRooms = Array.isArray(data.rooms) ? data.rooms : [];
+        console.log('Safe rooms:', safeRooms);
+        setRooms(safeRooms);
       } else {
         throw new Error(data.error || 'Failed to fetch schedule data');
       }
@@ -40,6 +57,10 @@ export default function ScheduleManagement() {
           fontWeight: '500',
         },
       });
+      
+      // Set empty arrays as fallback
+      setScheduleItems([]);
+      setRooms([]);
     } finally {
       setIsLoading(false);
     }

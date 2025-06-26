@@ -66,13 +66,13 @@ export default function StepIndicator({
                   className={cn(
                     "w-8 h-8 md:w-10 md:h-10 rounded-full flex items-center justify-center text-sm font-medium transition-all duration-300 relative",
                     isCompleted 
-                      ? "bg-[#8B7D6B] text-white shadow-lg" 
+                      ? "bg-deeplake-700 text-white shadow-lg" 
                       : isActive 
-                        ? "bg-[#A99985] text-white border-2 border-[#8B7D6B] shadow-lg md:scale-110" 
+                        ? "bg-deeplake-500 text-white border-2 border-deeplake-700 shadow-lg md:scale-110" 
                         : "bg-gray-100 text-gray-500 border border-gray-200"
                   )}
                   style={{
-                    boxShadow: isActive ? '0 0 0 4px rgba(139, 125, 107, 0.3)' : undefined
+                    boxShadow: isActive ? '0 0 0 4px rgba(8, 77, 78, 0.3)' : undefined
                   }}
                 >
                   {isCompleted ? (
@@ -89,9 +89,9 @@ export default function StepIndicator({
                   className={cn(
                     "mt-2 md:mt-3 text-xs md:text-sm text-center max-w-16 md:max-w-20 leading-tight",
                     isActive 
-                      ? "text-[#8B7D6B] font-semibold" 
+                      ? "text-deeplake-700 font-semibold" 
                       : isCompleted 
-                        ? "text-[#A99985] font-medium" 
+                        ? "text-deeplake-500 font-medium" 
                         : "text-gray-500"
                   )}
                 >
@@ -105,7 +105,7 @@ export default function StepIndicator({
                   className={cn(
                     "flex-1 h-0.5 mx-2 md:mx-4 transition-all duration-500",
                     index < currentStep 
-                      ? "bg-[#8B7D6B]" 
+                      ? "bg-deeplake-600" 
                       : "bg-gray-200"
                   )}
                   style={{
@@ -133,13 +133,13 @@ export default function StepIndicator({
                     className={cn(
                       "w-8 h-8 rounded-full flex items-center justify-center text-xs font-medium transition-all duration-300 relative mb-2",
                       isCompleted 
-                        ? "bg-[#8B7D6B] text-white shadow-md" 
+                        ? "bg-deeplake-700 text-white shadow-md" 
                         : isActive 
-                          ? "bg-[#A99985] text-white border-2 border-[#8B7D6B] shadow-md" 
+                          ? "bg-deeplake-500 text-white border-2 border-deeplake-700 shadow-md" 
                           : "bg-gray-100 text-gray-500 border border-gray-200"
                     )}
                     style={{
-                      boxShadow: isActive ? '0 0 0 3px rgba(139, 125, 107, 0.3)' : undefined
+                      boxShadow: isActive ? '0 0 0 3px rgba(8, 77, 78, 0.3)' : undefined
                     }}
                   >
                     {isCompleted ? (
@@ -156,9 +156,9 @@ export default function StepIndicator({
                     className={cn(
                       "text-xs text-center leading-tight px-1",
                       isActive 
-                        ? "text-[#8B7D6B] font-semibold" 
+                        ? "text-deeplake-700 font-semibold" 
                         : isCompleted 
-                          ? "text-[#A99985] font-medium" 
+                          ? "text-deeplake-500 font-medium" 
                           : "text-gray-500"
                     )}
                   >
@@ -172,7 +172,7 @@ export default function StepIndicator({
                     className={cn(
                       "h-0.5 flex-1 mx-1 transition-all duration-500 -mt-4",
                       index < currentStep 
-                        ? "bg-[#8B7D6B]" 
+                        ? "bg-deeplake-600" 
                         : "bg-gray-200"
                     )}
                     style={{

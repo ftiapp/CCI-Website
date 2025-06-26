@@ -48,7 +48,7 @@ export default function TransportTypeSection({
 
   return (
     <div className="mb-4">
-      <label className="block text-sm font-medium text-earth-700 mb-1">
+      <label className="block text-sm font-medium text-beige-800 mb-1">
         {locale === 'th' ? 'ใช้พาหนะอะไรเป็นหลัก' : 'Main transportation method'} <span className="text-red-500">*</span>
       </label>
       

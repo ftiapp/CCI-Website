@@ -206,8 +206,8 @@ export default function ScheduleClient({
           <div>
             <ScrollReveal direction="up" distance={15} duration={0.3} delay={0.3}>
               <div className="flex justify-between items-center mb-4">
-                <h2 className="text-xl font-prompt font-semibold text-[#9D7553] flex items-center">
-                  <span className="w-8 h-8 bg-[#9D7553] rounded-full flex items-center justify-center text-white mr-2">
+                <h2 className="text-xl font-prompt font-semibold text-deeplake-700 flex items-center">
+                  <span className="w-8 h-8 bg-deeplake-700 rounded-full flex items-center justify-center text-white mr-2">
                     <ClockIcon className="w-4 h-4" />
                   </span>
                   {translations.afternoon}
@@ -222,7 +222,7 @@ export default function ScheduleClient({
               </div>
             </ScrollReveal>
             
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+            <div className="flex flex-col gap-6">
               {Object.keys(afternoonByRoom).map((roomId, roomIndex) => {
                 const roomSchedule = afternoonByRoom[roomId];
                 const roomInfo = roomSchedule[0];
@@ -230,7 +230,7 @@ export default function ScheduleClient({
                 return (
                   <motion.div 
                     key={roomId} 
-                    className="bg-white rounded-lg shadow-sm border border-[#F5F5DC] overflow-hidden"
+                    className="bg-white rounded-lg shadow-sm border border-deeplake-200 overflow-hidden"
                     initial={{ opacity: 0, y: 20 }}
                     animate={{ opacity: 1, y: 0 }}
                     transition={{ 
@@ -239,14 +239,16 @@ export default function ScheduleClient({
                       ease: "easeOut"
                     }}
                   >
-                    <div className="bg-[#9D7553] text-white p-4">
+                    <div className="bg-deeplake-700 text-white p-4">
                       <div className="flex justify-between items-center">
-                        <h3 className="font-medium flex items-center">
+                        <h3 className="text-sm font-medium flex items-center">
                           <MapPinIcon className="w-4 h-4 mr-1" />
                           {locale === 'th' ? roomInfo.room_name_th : roomInfo.room_name_en}
                         </h3>
                         
-
+                        <div className="text-sm">
+                          {formatTimeDisplay(roomInfo.time_start)} - {formatTimeDisplay(roomInfo.time_end)}
+                        </div>
                       </div>
                     </div>
                 
@@ -260,21 +262,18 @@ export default function ScheduleClient({
                             animation: `fadeIn 0.5s ease-out ${0.4 + (roomIndex * 0.1) + (sessionIndex * 0.05)}s forwards`
                           }}
                         >
-                          <div className="text-sm text-[#9D7553]/80 mb-1 flex items-center">
-                            <ClockIcon className="w-3 h-3 mr-1" />
-                            {formatTimeDisplay(session.time_start)} - {formatTimeDisplay(session.time_end)}
-                          </div>
+                          {sessionIndex === 0 ? null : <div className="border-t border-deeplake-100 my-4"></div>}
                           
-                          <h4 className="font-medium text-[#9D7553] mb-1">
+                          <h4 className="font-medium text-deeplake-700 mb-1">
                             {locale === 'th' ? session.title_th : session.title_en}
                           </h4>
                           
-                          <div className="text-sm text-[#9D7553]/90 mb-2 flex items-center">
+                          <div className="text-sm text-deeplake-600 mb-2 flex items-center">
                             <UserIcon className="w-3 h-3 mr-1" />
                             {locale === 'th' ? session.speaker_th : session.speaker_en}
                           </div>
                           
-                          <p className="text-sm text-[#9D7553]/80">
+                          <p className="text-sm text-beige-800">
                             {locale === 'th' ? 
                               (session.description_th || '-') : 
                               (session.description_en || '-')}

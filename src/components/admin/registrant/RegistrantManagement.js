@@ -14,7 +14,11 @@ export default function RegistrantManagement() {
   const [search, setSearch] = useState('');
   const [provinceFilter, setProvinceFilter] = useState('all');
   const [statusFilter, setStatusFilter] = useState('all');
+  const [organizationTypeFilter, setOrganizationTypeFilter] = useState('all');
+  const [industryTypeFilter, setIndustryTypeFilter] = useState('all');
   const [provinces, setProvinces] = useState([]);
+  const [organizationTypes, setOrganizationTypes] = useState([]);
+  const [industryTypes, setIndustryTypes] = useState([]);
   const [showForm, setShowForm] = useState(false);
   const [editingRegistrant, setEditingRegistrant] = useState(null);
   const [showNotificationModal, setShowNotificationModal] = useState(false);
@@ -31,7 +35,9 @@ export default function RegistrantManagement() {
         page: currentPage,
         search: search,
         province: provinceFilter,
-        status: statusFilter
+        status: statusFilter,
+        organization_type: organizationTypeFilter,
+        industry_type: industryTypeFilter
       });
 
       const response = await fetch(`/api/admin/participants?${queryParams}`);
@@ -54,6 +60,14 @@ export default function RegistrantManagement() {
         // Ensure provinces is an array
         const safeProvinces = Array.isArray(data.provinces) ? data.provinces : [];
         setProvinces(safeProvinces);
+        
+        // Ensure organization types is an array
+        const safeOrgTypes = Array.isArray(data.organization_types) ? data.organization_types : [];
+        setOrganizationTypes(safeOrgTypes);
+        
+        // Ensure industry types is an array
+        const safeIndustryTypes = Array.isArray(data.industry_types) ? data.industry_types : [];
+        setIndustryTypes(safeIndustryTypes);
       } else {
         toast.error('ไม่สามารถดึงข้อมูลผู้ลงทะเบียนได้', {
           position: 'top-right',
@@ -64,6 +78,7 @@ export default function RegistrantManagement() {
             padding: '16px',
             fontFamily: 'prompt, sans-serif',
             fontWeight: '500',
+            borderLeft: '4px solid #174344', // lake-800 color
           },
         });
         
@@ -82,6 +97,7 @@ export default function RegistrantManagement() {
           padding: '16px',
           fontFamily: 'prompt, sans-serif',
           fontWeight: '500',
+          borderLeft: '4px solid #174344', // lake-800 color
         },
       });
       
@@ -91,10 +107,18 @@ export default function RegistrantManagement() {
     } finally {
       setLoading(false);
     }
-  }, [currentPage, search, provinceFilter, statusFilter]);
+  }, [currentPage, search, provinceFilter, statusFilter, organizationTypeFilter, industryTypeFilter]);
 
   useEffect(() => {
     fetchRegistrants();
+    console.log('Fetching registrants with filters:', {
+      page: currentPage,
+      search,
+      provinceFilter,
+      statusFilter,
+      organizationTypeFilter,
+      industryTypeFilter
+    });
   }, [fetchRegistrants]);
 
   const handleSearchChange = (e) => {
@@ -109,6 +133,16 @@ export default function RegistrantManagement() {
 
   const handleStatusFilterChange = (e) => {
     setStatusFilter(e.target.value);
+    setCurrentPage(1);
+  };
+
+  const handleOrganizationTypeFilterChange = (e) => {
+    setOrganizationTypeFilter(e.target.value);
+    setCurrentPage(1);
+  };
+
+  const handleIndustryTypeFilterChange = (e) => {
+    setIndustryTypeFilter(e.target.value);
     setCurrentPage(1);
   };
 
@@ -225,7 +259,16 @@ export default function RegistrantManagement() {
         }
         
         toast.success('อัปเดตข้อมูลผู้ลงทะเบียนสำเร็จ', {
-          className: 'font-prompt'
+          position: 'top-right',
+          style: {
+            borderRadius: '10px',
+            background: '#333',
+            color: '#fff',
+            padding: '16px',
+            fontFamily: 'prompt, sans-serif',
+            fontWeight: '500',
+            borderLeft: '4px solid #2a8f92', // lake-500 color
+          }
         });
         setShowForm(false);
         
@@ -246,12 +289,32 @@ export default function RegistrantManagement() {
         fetchRegistrants();
       } else {
         toast.error(data.error || 'ไม่สามารถอัปเดตข้อมูลได้', {
-          className: 'font-prompt'
+          position: 'top-right',
+          style: {
+            borderRadius: '10px',
+            background: '#333',
+            color: '#fff',
+            padding: '16px',
+            fontFamily: 'prompt, sans-serif',
+            fontWeight: '500',
+            borderLeft: '4px solid #174344', // lake-800 color
+          }
         });
       }
     } catch (error) {
       console.error('Error updating registrant:', error);
-      toast.error('เกิดข้อผิดพลาดในการอัปเดตข้อมูล');
+      toast.error('เกิดข้อผิดพลาดในการอัปเดตข้อมูล', {
+        position: 'top-right',
+        style: {
+          borderRadius: '10px',
+          background: '#333',
+          color: '#fff',
+          padding: '16px',
+          fontFamily: 'prompt, sans-serif',
+          fontWeight: '500',
+          borderLeft: '4px solid #174344', // lake-800 color
+        }
+      });
     }
   };
 
@@ -277,13 +340,46 @@ export default function RegistrantManagement() {
       const data = await response.json();
       
       if (data.success) {
-        toast.success('ส่งการแจ้งเตือนสำเร็จ');
+        toast.success('ส่งการแจ้งเตือนสำเร็จ', {
+          position: 'top-right',
+          style: {
+            borderRadius: '10px',
+            background: '#333',
+            color: '#fff',
+            padding: '16px',
+            fontFamily: 'prompt, sans-serif',
+            fontWeight: '500',
+            borderLeft: '4px solid #2a8f92', // lake-500 color
+          }
+        });
       } else {
-        toast.error(data.error || 'ไม่สามารถส่งการแจ้งเตือนได้');
+        toast.error(data.error || 'ไม่สามารถส่งการแจ้งเตือนได้', {
+          position: 'top-right',
+          style: {
+            borderRadius: '10px',
+            background: '#333',
+            color: '#fff',
+            padding: '16px',
+            fontFamily: 'prompt, sans-serif',
+            fontWeight: '500',
+            borderLeft: '4px solid #174344', // lake-800 color
+          }
+        });
       }
     } catch (error) {
       console.error('Error sending notification:', error);
-      toast.error('เกิดข้อผิดพลาดในการส่งการแจ้งเตือน');
+      toast.error('เกิดข้อผิดพลาดในการส่งการแจ้งเตือน', {
+        position: 'top-right',
+        style: {
+          borderRadius: '10px',
+          background: '#333',
+          color: '#fff',
+          padding: '16px',
+          fontFamily: 'prompt, sans-serif',
+          fontWeight: '500',
+          borderLeft: '4px solid #174344', // lake-800 color
+        }
+      });
     } finally {
       setShowNotificationModal(false);
     }
@@ -325,10 +421,32 @@ export default function RegistrantManagement() {
       document.body.removeChild(link);
       window.URL.revokeObjectURL(url);
       
-      toast.success('ส่งออกข้อมูลสำเร็จ');
+      toast.success('ส่งออกข้อมูลสำเร็จ', {
+        position: 'top-right',
+        style: {
+          borderRadius: '10px',
+          background: '#333',
+          color: '#fff',
+          padding: '16px',
+          fontFamily: 'prompt, sans-serif',
+          fontWeight: '500',
+          borderLeft: '4px solid #2a8f92', // lake-500 color
+        }
+      });
     } catch (error) {
       console.error('Error exporting registrants:', error);
-      toast.error('เกิดข้อผิดพลาดในการส่งออกข้อมูล');
+      toast.error('เกิดข้อผิดพลาดในการส่งออกข้อมูล', {
+        position: 'top-right',
+        style: {
+          borderRadius: '10px',
+          background: '#333',
+          color: '#fff',
+          padding: '16px',
+          fontFamily: 'prompt, sans-serif',
+          fontWeight: '500',
+          borderLeft: '4px solid #174344', // lake-800 color
+        }
+      });
     } finally {
       setExporting(false);
     }
@@ -342,7 +460,7 @@ export default function RegistrantManagement() {
           <button
             onClick={handleExportToExcel}
             disabled={exporting}
-            className="flex items-center px-4 py-2 bg-green-600 text-white rounded-md hover:bg-green-700 transition font-prompt"
+            className="flex items-center px-4 py-2 bg-gradient-to-r from-earth-600 to-lake-600 text-white rounded-md hover:from-earth-700 hover:to-lake-700 transition font-prompt"
           >
             <ArrowDownTrayIcon className="w-5 h-5 mr-2" />
             {exporting ? 'กำลังส่งออก...' : 'ส่งออก Excel'}
@@ -351,7 +469,7 @@ export default function RegistrantManagement() {
       </div>
       
       {/* Filters */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
+      <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-5 gap-4 mb-6">
         <div>
           <label htmlFor="search" className="block text-sm font-prompt mb-1">ค้นหา</label>
           <input
@@ -394,6 +512,50 @@ export default function RegistrantManagement() {
             <option value="0">ยังไม่ได้เช็คอิน</option>
             <option value="1">เช็คอินแล้ว</option>
             <option value="2">ไม่เข้าร่วม</option>
+          </select>
+        </div>
+        
+        <div>
+          <label htmlFor="organization_type" className="block text-sm font-prompt mb-1">ประเภทองค์กร</label>
+          <select
+            id="organization_type"
+            value={organizationTypeFilter}
+            onChange={handleOrganizationTypeFilterChange}
+            className="w-full p-2 border rounded-md font-prompt"
+          >
+            <option value="all">ทั้งหมด</option>
+            {Array.isArray(organizationTypes) && organizationTypes.length > 0 ? (
+              organizationTypes.map(type => (
+                <option key={type.id} value={type.id}>
+                  {type.name_th}
+                </option>
+              ))
+            ) : (
+              <option value="" disabled>กำลังโหลดข้อมูล...</option>
+            )}
+            <option value="99">อื่นๆ</option>
+          </select>
+        </div>
+        
+        <div>
+          <label htmlFor="industry_type" className="block text-sm font-prompt mb-1">ประเภทอุตสาหกรรม</label>
+          <select
+            id="industry_type"
+            value={industryTypeFilter}
+            onChange={handleIndustryTypeFilterChange}
+            className="w-full p-2 border rounded-md font-prompt"
+          >
+            <option value="all">ทั้งหมด</option>
+            {Array.isArray(industryTypes) && industryTypes.length > 0 ? (
+              industryTypes.map(type => (
+                <option key={type.id} value={type.id}>
+                  {type.name_th}
+                </option>
+              ))
+            ) : (
+              <option value="" disabled>กำลังโหลดข้อมูล...</option>
+            )}
+            <option value="99">อื่นๆ</option>
           </select>
         </div>
       </div>

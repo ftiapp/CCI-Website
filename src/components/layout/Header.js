@@ -79,8 +79,8 @@ export default function Header({ locale }) {
                   href={`/${locale}${item.href}`}
                   className={`font-prompt text-sm transition-colors duration-200 ${
                     pathnameWithoutLocale === item.href
-                      ? 'text-beige-700 font-medium border-b-2 border-beige-500 pb-1'
-                      : 'text-earth-700 hover:text-beige-600 hover:border-b-2 hover:border-beige-300 pb-1'
+                      ? 'text-lake-600 font-medium border-b-2 border-lake-500 pb-1'
+                      : 'text-earth-700 hover:text-lake-500 hover:border-b-2 hover:border-lake-400 pb-1'
                   }`}
                 >
                   {item.label}
@@ -90,7 +90,7 @@ export default function Header({ locale }) {
             
             <Link
               href={`/${alternateLocale}${pathnameWithoutLocale}`}
-              className="flex items-center space-x-1 text-earth-700 hover:text-beige-600 transition-colors duration-200 bg-earth-100 hover:bg-earth-200 px-3 py-1.5 rounded-full"
+              className="flex items-center space-x-1 text-earth-700 hover:text-lake-600 transition-colors duration-200 bg-earth-100 hover:bg-lake-100 px-3 py-1.5 rounded-full"
             >
               <GlobeAltIcon className="w-5 h-5" />
               <span className="text-sm font-prompt">
@@ -131,8 +131,8 @@ export default function Header({ locale }) {
                     href={`/${locale}${item.href}`}
                     className={`font-prompt text-base py-2 ${
                       pathnameWithoutLocale === item.href
-                        ? 'text-beige-700 font-medium bg-earth-100 px-3 rounded-md'
-                        : 'text-earth-700 hover:text-beige-600 hover:bg-earth-100 px-3 rounded-md'
+                        ? 'text-lake-700 font-medium bg-lake-50 px-3 rounded-md'
+                        : 'text-earth-700 hover:text-lake-600 hover:bg-lake-50 px-3 rounded-md'
                     }`}
                     onClick={() => setMobileMenuOpen(false)}
                   >
@@ -141,7 +141,7 @@ export default function Header({ locale }) {
                 ))}
                 <Link
                   href={`/${alternateLocale}${pathnameWithoutLocale}`}
-                  className="flex items-center space-x-2 text-earth-700 hover:text-beige-600 border border-earth-200 px-3 py-2 rounded-md"
+                  className="flex items-center space-x-2 text-earth-700 hover:text-lake-600 border border-lake-200 px-3 py-2 rounded-md"
                   onClick={() => setMobileMenuOpen(false)}
                 >
                   <GlobeAltIcon className="w-5 h-5" />

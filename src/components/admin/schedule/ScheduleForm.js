@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { XMarkIcon } from '@heroicons/react/24/outline';
+import toast from 'react-hot-toast';
 
 export default function ScheduleForm({ rooms, initialData, onSubmit, onCancel }) {
   const [formData, setFormData] = useState({
@@ -73,6 +74,20 @@ export default function ScheduleForm({ rooms, initialData, onSubmit, onCancel })
       newErrors.time_end = 'เวลาสิ้นสุดต้องมากกว่าเวลาเริ่ม';
     }
     
+    // Show toast notification for errors
+    if (Object.keys(newErrors).length > 0) {
+      const errorMessages = Object.values(newErrors);
+      toast.error(errorMessages[0], {
+        position: 'top-right',
+        style: {
+          fontFamily: 'prompt',
+          borderRadius: '10px',
+          background: '#F56565',
+          color: '#FFF',
+        }
+      });
+    }
+    
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
   };
@@ -96,7 +111,7 @@ export default function ScheduleForm({ rooms, initialData, onSubmit, onCancel })
     <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
       <div className="bg-white rounded-lg shadow-xl w-full max-w-3xl max-h-[90vh] overflow-y-auto">
         <div className="flex justify-between items-center p-6 border-b border-gray-200">
-          <h3 className="text-xl font-prompt font-bold text-earth-800">
+          <h3 className="text-xl font-prompt font-bold text-deeplake-700">
             {initialData ? 'แก้ไขกิจกรรม' : 'เพิ่มกิจกรรมใหม่'}
           </h3>
           <button
@@ -119,11 +134,9 @@ export default function ScheduleForm({ rooms, initialData, onSubmit, onCancel })
                 name="event_date"
                 value={formData.event_date}
                 onChange={handleChange}
-                className={`w-full px-3 py-2 border ${errors.event_date ? 'border-red-500' : 'border-gray-300'} rounded-md shadow-sm font-prompt focus:outline-none focus:ring-2 focus:ring-earth-500`}
+                className={`w-full px-3 py-2 border ${errors.event_date ? 'border-red-500' : 'border-gray-300'} rounded-md shadow-sm font-prompt focus:outline-none focus:ring-2 focus:ring-deeplake-500`}
               />
-              {errors.event_date && (
-                <p className="mt-1 text-sm text-red-600 font-prompt">{errors.event_date}</p>
-              )}
+              
             </div>
             
             {/* Room */}
@@ -135,7 +148,7 @@ export default function ScheduleForm({ rooms, initialData, onSubmit, onCancel })
                 name="room_id"
                 value={formData.room_id}
                 onChange={handleChange}
-                className={`w-full px-3 py-2 border ${errors.room_id ? 'border-red-500' : 'border-gray-300'} rounded-md shadow-sm font-prompt focus:outline-none focus:ring-2 focus:ring-earth-500`}
+                className={`w-full px-3 py-2 border ${errors.room_id ? 'border-red-500' : 'border-gray-300'} rounded-md shadow-sm font-prompt focus:outline-none focus:ring-2 focus:ring-deeplake-500`}
               >
                 <option value="">เลือกห้อง</option>
                 {rooms.map(room => (
@@ -144,9 +157,7 @@ export default function ScheduleForm({ rooms, initialData, onSubmit, onCancel })
                   </option>
                 ))}
               </select>
-              {errors.room_id && (
-                <p className="mt-1 text-sm text-red-600 font-prompt">{errors.room_id}</p>
-              )}
+              
             </div>
             
             {/* Time Start */}
@@ -159,11 +170,9 @@ export default function ScheduleForm({ rooms, initialData, onSubmit, onCancel })
                 name="time_start"
                 value={formData.time_start}
                 onChange={handleChange}
-                className={`w-full px-3 py-2 border ${errors.time_start ? 'border-red-500' : 'border-gray-300'} rounded-md shadow-sm font-prompt focus:outline-none focus:ring-2 focus:ring-earth-500`}
+                className={`w-full px-3 py-2 border ${errors.time_start ? 'border-red-500' : 'border-gray-300'} rounded-md shadow-sm font-prompt focus:outline-none focus:ring-2 focus:ring-deeplake-500`}
               />
-              {errors.time_start && (
-                <p className="mt-1 text-sm text-red-600 font-prompt">{errors.time_start}</p>
-              )}
+              
             </div>
             
             {/* Time End */}
@@ -176,11 +185,9 @@ export default function ScheduleForm({ rooms, initialData, onSubmit, onCancel })
                 name="time_end"
                 value={formData.time_end}
                 onChange={handleChange}
-                className={`w-full px-3 py-2 border ${errors.time_end ? 'border-red-500' : 'border-gray-300'} rounded-md shadow-sm font-prompt focus:outline-none focus:ring-2 focus:ring-earth-500`}
+                className={`w-full px-3 py-2 border ${errors.time_end ? 'border-red-500' : 'border-gray-300'} rounded-md shadow-sm font-prompt focus:outline-none focus:ring-2 focus:ring-deeplake-500`}
               />
-              {errors.time_end && (
-                <p className="mt-1 text-sm text-red-600 font-prompt">{errors.time_end}</p>
-              )}
+              
             </div>
             
             {/* Title TH */}
@@ -193,11 +200,9 @@ export default function ScheduleForm({ rooms, initialData, onSubmit, onCancel })
                 name="title_th"
                 value={formData.title_th}
                 onChange={handleChange}
-                className={`w-full px-3 py-2 border ${errors.title_th ? 'border-red-500' : 'border-gray-300'} rounded-md shadow-sm font-prompt focus:outline-none focus:ring-2 focus:ring-earth-500`}
+                className={`w-full px-3 py-2 border ${errors.title_th ? 'border-red-500' : 'border-gray-300'} rounded-md shadow-sm font-prompt focus:outline-none focus:ring-2 focus:ring-deeplake-500`}
               />
-              {errors.title_th && (
-                <p className="mt-1 text-sm text-red-600 font-prompt">{errors.title_th}</p>
-              )}
+              
             </div>
             
             {/* Title EN */}
@@ -210,7 +215,7 @@ export default function ScheduleForm({ rooms, initialData, onSubmit, onCancel })
                 name="title_en"
                 value={formData.title_en}
                 onChange={handleChange}
-                className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm font-prompt focus:outline-none focus:ring-2 focus:ring-earth-500"
+                className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm font-prompt focus:outline-none focus:ring-2 focus:ring-deeplake-500"
               />
             </div>
             
@@ -224,7 +229,7 @@ export default function ScheduleForm({ rooms, initialData, onSubmit, onCancel })
                 name="speaker_th"
                 value={formData.speaker_th}
                 onChange={handleChange}
-                className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm font-prompt focus:outline-none focus:ring-2 focus:ring-earth-500"
+                className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm font-prompt focus:outline-none focus:ring-2 focus:ring-deeplake-500"
               />
             </div>
             
@@ -238,7 +243,7 @@ export default function ScheduleForm({ rooms, initialData, onSubmit, onCancel })
                 name="speaker_en"
                 value={formData.speaker_en}
                 onChange={handleChange}
-                className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm font-prompt focus:outline-none focus:ring-2 focus:ring-earth-500"
+                className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm font-prompt focus:outline-none focus:ring-2 focus:ring-deeplake-500"
               />
             </div>
             
@@ -252,7 +257,7 @@ export default function ScheduleForm({ rooms, initialData, onSubmit, onCancel })
                 value={formData.description_th}
                 onChange={handleChange}
                 rows="3"
-                className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm font-prompt focus:outline-none focus:ring-2 focus:ring-earth-500"
+                className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm font-prompt focus:outline-none focus:ring-2 focus:ring-deeplake-500"
               ></textarea>
             </div>
             
@@ -266,7 +271,7 @@ export default function ScheduleForm({ rooms, initialData, onSubmit, onCancel })
                 value={formData.description_en}
                 onChange={handleChange}
                 rows="3"
-                className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm font-prompt focus:outline-none focus:ring-2 focus:ring-earth-500"
+                className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm font-prompt focus:outline-none focus:ring-2 focus:ring-deeplake-500"
               ></textarea>
             </div>
             
@@ -279,7 +284,7 @@ export default function ScheduleForm({ rooms, initialData, onSubmit, onCancel })
                   name="is_morning"
                   checked={formData.is_morning === 1}
                   onChange={handleChange}
-                  className="h-4 w-4 text-earth-600 focus:ring-earth-500 border-gray-300 rounded"
+                  className="h-4 w-4 text-deeplake-600 focus:ring-deeplake-500 border-gray-300 rounded"
                 />
                 <label htmlFor="is_morning" className="ml-2 block text-sm text-gray-700 font-prompt">
                   กิจกรรมช่วงเช้า
@@ -292,13 +297,13 @@ export default function ScheduleForm({ rooms, initialData, onSubmit, onCancel })
             <button
               type="button"
               onClick={onCancel}
-              className="px-4 py-2 border border-gray-300 rounded-md shadow-sm text-sm font-prompt font-medium text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-earth-500"
+              className="px-4 py-2 border border-gray-300 rounded-md shadow-sm text-sm font-prompt font-medium text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-deeplake-500"
             >
               ยกเลิก
             </button>
             <button
               type="submit"
-              className="px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-prompt font-medium text-white bg-earth-600 hover:bg-earth-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-earth-500"
+              className="px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-prompt font-medium text-white bg-deeplake-600 hover:bg-deeplake-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-deeplake-500"
             >
               {initialData ? 'บันทึกการแก้ไข' : 'เพิ่มกิจกรรม'}
             </button>

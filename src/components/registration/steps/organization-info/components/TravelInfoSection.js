@@ -81,11 +81,11 @@ export default function TravelInfoSection({
         />
       )}
       
-      <div className="mt-6 p-4 bg-beige-50 border border-beige-200 rounded-md">
-        <p className="text-sm text-earth-800">
+      <div className="mt-6 p-4 bg-deeplake-50 border border-deeplake-200 rounded-md">
+        <p className="text-sm text-beige-800">
           {locale === 'th' ? (
             <>
-              สถาบันการเปลี่ยนแปลงสภาพภูมิอากาศ (CCI) สภาอุตสาหกรรมแห่งประเทศไทย ขอเชิญชวนท่านร่วมลดการปล่อยคาร์บอนด้วยการเดินทางมาร่วมงานโดยระบบ<span className="font-bold">ขนส่งมวลชน</span>/<span className="font-bold">การเดินเท้า</span> ผู้เข้าร่วมที่แสดงหลักฐานการเดินทางด้วยวิธีดังกล่าวจะได้รับของที่ระลึกพิเศษ (จำนวนจำกัด)
+              CCI Climate Change Forum 2025 ขอเชิญชวนท่านร่วมลดการปล่อยคาร์บอนด้วยการเดินทางมาร่วมงานโดยระบบ<span className="font-bold">ขนส่งมวลชน</span>/<span className="font-bold">การเดินเท้า</span> ผู้เข้าร่วมที่แสดงหลักฐานการเดินทางด้วยวิธีดังกล่าวจะได้รับของที่ระลึกพิเศษ (จำนวนจำกัด)
             </>
           ) : (
             <>

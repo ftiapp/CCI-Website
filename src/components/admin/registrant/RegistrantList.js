@@ -232,6 +232,13 @@ export default function RegistrantList({
                           <span className="ml-1">: {registrant.organization_type_other}</span>
                         )}
                       </div>
+                      <div className="text-xs text-gray-400">
+                        {registrant.industry_type_th}
+                        {/* แสดงข้อมูลเพิ่มเติมเมื่อเลือกประเภทอุตสาหกรรมเป็น "อื่นๆ" */}
+                        {registrant.industry_type_id && registrant.industry_type_id === 99 && registrant.industry_type_other && (
+                          <span className="ml-1">: {registrant.industry_type_other}</span>
+                        )}
+                      </div>
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500 font-prompt">
                       <div>{getAttendanceTypeText(registrant.attendance_type)}</div>

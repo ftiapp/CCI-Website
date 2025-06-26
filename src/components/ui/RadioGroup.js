@@ -31,13 +31,13 @@ export default function RadioGroup({
   return (
     <div className="mb-4">
       {label && (
-        <div className="block mb-2 font-prompt text-earth-800">
+        <div className="block mb-2 font-prompt text-beige-800">
           {label} {required && <span className="text-red-500">*</span>}
         </div>
       )}
       <div className={cn("space-y-2", className)} {...props}>
         {options.map((option) => (
-          <label key={option.value} className="flex items-center space-x-3 cursor-pointer p-2 rounded-md hover:bg-beige-50">
+          <label key={option.value} className="flex items-center space-x-3 cursor-pointer p-2 rounded-md hover:bg-deeplake-50">
             <div className="relative flex items-center justify-center w-5 h-5">
               <input
                 type="radio"
@@ -45,10 +45,10 @@ export default function RadioGroup({
                 value={option.value}
                 checked={isChecked(option.value, value)}
                 onChange={onChange}
-                className="w-5 h-5 text-beige-600 border-2 border-earth-300 focus:ring-2 focus:ring-beige-500 focus:ring-offset-2 appearance-none rounded-full"
+                className="w-5 h-5 text-deeplake-600 border-2 border-earth-300 focus:ring-2 focus:ring-deeplake-500 focus:ring-offset-2 appearance-none rounded-full"
               />
               {isChecked(option.value, value) && (
-                <div className="absolute w-2.5 h-2.5 bg-beige-600 rounded-full pointer-events-none"></div>
+                <div className="absolute w-2.5 h-2.5 bg-deeplake-600 rounded-full pointer-events-none"></div>
               )}
             </div>
             <span className="font-prompt text-earth-800">{option.label}</span>

@@ -36,7 +36,7 @@ export default function LocationSection({
 
   return (
     <div className="mb-4">
-      <label className="block text-sm font-medium text-earth-700 mb-1">
+      <label className="block text-sm font-medium text-beige-800 mb-1">
         {locale === 'th' ? 'เดินทางจาก' : 'Traveling from'} <span className="text-red-500">*</span>
       </label>
       

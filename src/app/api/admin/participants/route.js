@@ -10,6 +10,8 @@ export async function GET(request) {
     const search = searchParams.get('search') || '';
     const provinceFilter = searchParams.get('province') || 'all';
     const statusFilter = searchParams.get('status') || 'all';
+    const organizationTypeFilter = searchParams.get('organization_type') || 'all';
+    const industryTypeFilter = searchParams.get('industry_type') || 'all';
     
     // Calculate offset
     const offset = (page - 1) * limit;
@@ -40,6 +42,18 @@ export async function GET(request) {
     if (statusFilter !== 'all') {
       whereClause += ' AND r.check_in_status = ?';
       params.push(parseInt(statusFilter));
+    }
+    
+    // Organization type filter
+    if (organizationTypeFilter !== 'all') {
+      whereClause += ' AND r.organization_type_id = ?';
+      params.push(parseInt(organizationTypeFilter));
+    }
+    
+    // Industry type filter
+    if (industryTypeFilter !== 'all') {
+      whereClause += ' AND r.industry_type_id = ?';
+      params.push(parseInt(industryTypeFilter));
     }
     
     // Get total count
@@ -77,6 +91,7 @@ export async function GET(request) {
         p.name_th as province_name_th, p.name_en as province_name_en
       FROM CCI_registrants r
       LEFT JOIN CCI_organization_types ot ON r.organization_type_id = ot.id
+      LEFT JOIN CCI_industry_types it ON r.industry_type_id = it.id
       LEFT JOIN CCI_transportation t ON r.id = t.registrant_id
       LEFT JOIN CCI_seminar_rooms sr ON r.selected_room_id = sr.id
       LEFT JOIN CCI_bangkok_districts bd ON r.bangkok_district_id = bd.id
@@ -92,6 +107,16 @@ export async function GET(request) {
       'SELECT id, name_th, name_en FROM CCI_provinces ORDER BY name_th'
     );
     
+    // Get all organization types for filter
+    const organizationTypes = await executeQuery(
+      'SELECT id, name_th, name_en FROM CCI_organization_types ORDER BY name_th'
+    );
+    
+    // Get all industry types for filter
+    const industryTypes = await executeQuery(
+      'SELECT id, name_th, name_en FROM CCI_industry_types ORDER BY name_th'
+    );
+    
     return NextResponse.json({
       success: true,
       participants,
@@ -101,7 +126,9 @@ export async function GET(request) {
         limit,
         totalPages: Math.ceil(total / limit)
       },
-      provinces
+      provinces,
+      organization_types: organizationTypes,
+      industry_types: industryTypes
     });
     
   } catch (error) {

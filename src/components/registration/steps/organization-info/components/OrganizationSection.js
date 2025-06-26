@@ -66,7 +66,7 @@ export default function OrganizationSection({
   return (
     <div>
       <h2 className="text-xl font-prompt font-semibold text-earth-800 mb-6 flex items-center">
-        <BuildingOfficeIcon className="w-5 h-5 mr-2 text-beige-600" />
+        <BuildingOfficeIcon className="w-5 h-5 mr-2 text-lake-600" />
         {t.registration.organizationInfo}
       </h2>
       

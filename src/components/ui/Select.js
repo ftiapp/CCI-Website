@@ -17,7 +17,7 @@ export default function Select({
   return (
     <div className="mb-4">
       {label && (
-        <label htmlFor={name} className="block mb-2 font-prompt text-earth-800">
+        <label htmlFor={name} className="block mb-2 font-prompt text-beige-800">
           {label} {required && <span className="text-red-500">*</span>}
         </label>
       )}
@@ -30,7 +30,7 @@ export default function Select({
           "w-full px-4 py-2 border rounded-md font-prompt focus:outline-none focus:ring-2 bg-white",
           error 
             ? "border-red-300 focus:border-red-500 focus:ring-red-200" 
-            : "border-earth-200 focus:border-beige-500 focus:ring-beige-200",
+            : "border-earth-200 focus:border-deeplake-500 focus:ring-deeplake-200",
           className
         )}
         {...props}

@@ -21,6 +21,7 @@ const ValidationHandler = {
           padding: '16px',
           fontFamily: 'prompt, sans-serif',
           fontWeight: '500',
+          borderLeft: '4px solid #084d4e', // deeplake-800 color
         },
         icon: '⚠️',
       }
@@ -43,6 +44,7 @@ const ValidationHandler = {
           padding: '16px',
           fontFamily: 'prompt, sans-serif',
           fontWeight: '500',
+          borderLeft: '4px solid #084d4e', // deeplake-800 color
         },
         icon: '⚠️',
       }

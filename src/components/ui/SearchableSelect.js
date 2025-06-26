@@ -171,7 +171,7 @@ export default function SearchableSelect({
   return (
     <div className={`mb-4 ${className}`}>
       {label && (
-        <label className="block text-sm font-medium text-earth-700 mb-1">
+        <label className="block text-sm font-medium text-beige-800 mb-1">
           {label} {required && <span className="text-red-500">*</span>}
         </label>
       )}
@@ -179,12 +179,12 @@ export default function SearchableSelect({
       <div className="relative" ref={dropdownRef}>
         {/* Selected value display */}
         <div
-          className={`w-full px-3 py-2 border rounded-md shadow-sm focus:outline-none focus:ring-1 focus:ring-beige-500 cursor-pointer flex justify-between items-center ${
+          className={`w-full px-3 py-2 border rounded-md shadow-sm focus:outline-none focus:ring-1 focus:ring-deeplake-500 cursor-pointer flex justify-between items-center ${
             error ? 'border-red-500' : 'border-beige-300'
           }`}
           onClick={() => setIsOpen(!isOpen)}
         >
-          <span className={displayValue ? 'text-earth-800' : 'text-gray-400'}>
+          <span className={displayValue ? 'text-beige-800' : 'text-gray-400'}>
             {displayValue || placeholder}
           </span>
           <svg
@@ -203,13 +203,13 @@ export default function SearchableSelect({
         
         {/* Dropdown */}
         {isOpen && (
-          <div className="absolute z-10 w-full mt-1 bg-white border border-beige-300 rounded-md shadow-lg max-h-80">
+          <div className="absolute z-10 w-full mt-1 bg-white border border-deeplake-300 rounded-md shadow-lg max-h-80">
             {/* Search input */}
-            <div className="sticky top-0 bg-white p-2 border-b border-beige-200 z-10">
+            <div className="sticky top-0 bg-white p-2 border-b border-deeplake-200 z-10">
               <div className="relative">
                 <input
                   type="text"
-                  className="w-full px-3 py-2 border border-beige-300 rounded-md shadow-sm focus:outline-none focus:ring-1 focus:ring-beige-500 pl-9"
+                  className="w-full px-3 py-2 border border-beige-300 rounded-md shadow-sm focus:outline-none focus:ring-1 focus:ring-deeplake-500 pl-9"
                   placeholder="ค้นหา..."
                   value={searchTerm}
                   onChange={handleSearchChange}
@@ -223,7 +223,7 @@ export default function SearchableSelect({
             {/* Options list with infinite scroll */}
             <div 
               ref={optionsContainerRef}
-              className="overflow-auto max-h-60 border-t border-beige-100"
+              className="overflow-auto max-h-60 border-t border-deeplake-100"
             >
               {/* ใช้ Set เพื่อเก็บค่าที่แสดงแล้วเพื่อป้องกันการแสดงซ้ำ */}
               {visibleOptions.length > 0 ? (
@@ -232,8 +232,8 @@ export default function SearchableSelect({
                   .map((option) => (
                     <div
                       key={`option-${option.value}`}
-                      className={`px-3 py-2 cursor-pointer hover:bg-beige-50 ${
-                        option.value === value ? 'bg-beige-100 font-medium' : ''
+                      className={`px-3 py-2 cursor-pointer hover:bg-deeplake-50 ${
+                        option.value === value ? 'bg-deeplake-100 font-medium' : ''
                       }`}
                       onClick={() => handleOptionSelect(option.value)}
                     >

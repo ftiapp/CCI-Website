@@ -6,7 +6,7 @@ import { getSeminarRoomById, getSchedule } from '@/lib/db';
 export async function POST(request) {
   try {
     const data = await request.json();
-    const { phone, firstName, lastName, registrationId, eventDate, locale, attendanceType, selectedRoomId } = data;
+    const { phone, firstName, lastName, registrationId, eventDate, locale, attendanceType, selectedRoomId, notificationType } = data;
     
     // Fetch schedule data to get accurate times
     const scheduleData = await getSchedule();
@@ -101,25 +101,42 @@ export async function POST(request) {
       }
     }
     
-    // Create SMS message based on language
+    // Create SMS message based on language and notification type
     let message;
     
     if (locale === 'th') {
       // For Thai messages, we need to use the raw text
       // The API requires type=5 for Thai language
-      const thaiMessage = `ขอบคุณสำหรับการลงทะเบียน CCI Climate Change Forum 2025
+      let thaiMessage;
+      
+      if (notificationType === 'update') {
+        thaiMessage = `แจ้งเตือน: ข้อมูลการลงทะเบียนของท่านได้รับการปรับปรุง
 คุณ ${firstName} ${lastName}
 เบอร์โทร: ${displayPhone}
 วันที่: 15 กันยายน 2568
 ประเภทการเข้าร่วม: ${getAttendanceTypeLabel()}${roomInfo}
-ตรวจสอบ QR Code ได้ที่: ${baseUrl}/${locale}/ticket/${registrationId}`;
+ตรวจสอบ QR Code ได้ที่: ${baseUrl}/${locale}/ticket/${registrationId}
+แผนที่และเส้นทาง: ${baseUrl}/${locale}/map`;
+      } else {
+        thaiMessage = `ขอบคุณสำหรับการลงทะเบียน CCI Climate Change Forum 2025
+คุณ ${firstName} ${lastName}
+เบอร์โทร: ${displayPhone}
+วันที่: 15 กันยายน 2568
+ประเภทการเข้าร่วม: ${getAttendanceTypeLabel()}${roomInfo}
+ตรวจสอบ QR Code ได้ที่: ${baseUrl}/${locale}/ticket/${registrationId}
+แผนที่และเส้นทาง: ${baseUrl}/${locale}/map`;
+      }
       
       // For Thai language, we use the raw message as the API will handle it with type=5
       message = thaiMessage;
     } else {
       // For English messages, we need to replace spaces with +
       // The API requires type=0 for English language
-      message = `Thank you for registering for CCI Climate Change Forum 2025\nName: ${firstName} ${lastName}\nPhone: ${displayPhone}\nDate: September 15, 2025\nAttendance: ${getAttendanceTypeLabel()}${roomInfo}\nCheck your QR Code at: ${baseUrl}/${locale}/ticket/${registrationId}`;
+      if (notificationType === 'update') {
+        message = `Alert: Your registration information has been updated\nName: ${firstName} ${lastName}\nPhone: ${displayPhone}\nDate: September 15, 2025\nAttendance: ${getAttendanceTypeLabel()}${roomInfo}\nCheck your QR Code at: ${baseUrl}/${locale}/ticket/${registrationId}\nMap & Directions: ${baseUrl}/${locale}/map`;
+      } else {
+        message = `Thank you for registering for CCI Climate Change Forum 2025\nName: ${firstName} ${lastName}\nPhone: ${displayPhone}\nDate: September 15, 2025\nAttendance: ${getAttendanceTypeLabel()}${roomInfo}\nCheck your QR Code at: ${baseUrl}/${locale}/ticket/${registrationId}\nMap & Directions: ${baseUrl}/${locale}/map`;
+      }
       
       // Replace spaces with + for English messages
       message = message.replace(/ /g, '+');

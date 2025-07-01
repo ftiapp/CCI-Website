@@ -185,7 +185,7 @@ export default function ContactForm({ locale }) {
                     </h3>
                     <p className="text-blue-600 text-sm leading-relaxed">
                       Climate Change Institute<br />
-                      The Federation Of Thai Industries
+                      The Federation of Thai Industries
                     </p>
                   </div>
                 </div>

@@ -375,14 +375,17 @@ export default function AttendanceInfoStep({
             </h3>
             
             <motion.button
-              onClick={() => setIsScheduleModalOpen(true)}
-              className="flex items-center space-x-2 px-4 py-2 bg-gradient-to-r from-teal-500 to-blue-500 text-white rounded-xl font-prompt font-medium shadow-lg hover:shadow-xl transition-all duration-300 transform hover:-translate-y-0.5"
-              whileHover={{ scale: 1.02 }}
-              whileTap={{ scale: 0.98 }}
-            >
-              <EyeIcon className="w-4 h-4" />
-              <span>{locale === 'th' ? 'ดูแบบเต็มจอ' : 'View Fullscreen'}</span>
-            </motion.button>
+  onClick={() => {
+    const scheduleUrl = `/${locale}/schedule`;
+    window.open(scheduleUrl, '_blank', 'noopener,noreferrer');
+  }}
+  className="flex items-center space-x-2 px-4 py-2 bg-gradient-to-r from-teal-500 to-blue-500 text-white rounded-xl font-prompt font-medium shadow-lg hover:shadow-xl transition-all duration-300 transform hover:-translate-y-0.5"
+  whileHover={{ scale: 1.02 }}
+  whileTap={{ scale: 0.98 }}
+>
+  <EyeIcon className="w-4 h-4" />
+  <span>{locale === 'th' ? 'ดูแบบเต็มจอ' : 'View Fullscreen'}</span>
+</motion.button>
           </div>
           
           {isLoading ? (

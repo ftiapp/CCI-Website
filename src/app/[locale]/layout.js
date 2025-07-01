@@ -46,7 +46,7 @@ export async function generateMetadata({ params }) {
 }
 
 export default async function LocaleLayout({ children, params }) {
-  // ใช้ await กับ params ตามที่ Next.js 15 แนะนำ
+  // Await params before accessing its properties as required in Next.js 15
   const _params = await Promise.resolve(params);
   const locale = _params?.locale || defaultLocale;
   

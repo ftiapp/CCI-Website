@@ -25,7 +25,7 @@ export function EventStructuredData({ locale = 'th' }) {
     },
     'organizer': {
       '@type': 'Organization',
-      'name': locale === 'th' ? 'สภาอุตสาหกรรมแห่งประเทศไทย' : 'The Federation of Thai Industries',
+      'name': locale === 'th' ? 'สภาอุตสาหกรรมแห่งประเทศไทย' : 'Federation of Thai Industries',
       'url': 'https://fti.or.th/'
     },
     'image': [

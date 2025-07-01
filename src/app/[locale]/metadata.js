@@ -1,7 +1,9 @@
 import { getTranslations } from '@/i18n';
 
-export default function generateMetadata({ params }) {
-  const { locale = 'th' } = params || {};
+export async function generateMetadata({ params }) {
+  // Await params before accessing its properties as required in Next.js 15
+  const _params = await Promise.resolve(params);
+  const { locale = 'th' } = _params || {};
   const t = getTranslations(locale);
   
   const title = locale === 'th' ? 'CCI Climate Change Forum 2025 | สภาอุตสาหกรรมแห่งประเทศไทย' : 'CCI Climate Change Forum 2025 | The Federation of Thai Industries';

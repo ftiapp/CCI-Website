@@ -141,44 +141,7 @@ export default function PublicTransportSection({
           ))}
         </div>
         
-        {/* Eco benefits notice */}
-        <motion.div
-          initial={{ opacity: 0, y: 10 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.2 }}
-          className="p-4 bg-gradient-to-r from-green-100 to-emerald-100 rounded-xl border border-green-200"
-        >
-          <div className="flex items-start space-x-3">
-            <div className="flex-shrink-0">
-              <div className="w-8 h-8 bg-gradient-to-r from-green-500 to-emerald-500 rounded-lg flex items-center justify-center shadow-md">
-                <StarIcon className="w-4 h-4 text-white" />
-              </div>
-            </div>
-            <div>
-              <h4 className="text-sm font-prompt font-bold text-green-800 mb-1">
-                {locale === 'th' ? 'ช่วยลดการปล่อยคาร์บอน' : 'Help Reduce Carbon Emissions'}
-              </h4>
-              <p className="text-xs text-green-700 font-prompt leading-relaxed">
-                {locale === 'th' 
-                  ? 'การใช้ขนส่งมวลชนช่วยลดมลพิษทางอากาศและการปล่อยก๊าซเรือนกระจก ร่วมสร้างโลกที่ยั่งยืน' 
-                  : 'Using public transport helps reduce air pollution and greenhouse gas emissions. Join us in creating a sustainable world.'}
-              </p>
-              
-              {/* Benefits list */}
-              <div className="mt-2 flex flex-wrap gap-2">
-                <span className="px-2 py-1 bg-white/60 rounded-full text-xs font-prompt text-green-700 border border-green-200">
-                  🌱 {locale === 'th' ? 'ลดมลพิษ' : 'Reduce pollution'}
-                </span>
-                <span className="px-2 py-1 bg-white/60 rounded-full text-xs font-prompt text-green-700 border border-green-200">
-                  💰 {locale === 'th' ? 'ประหยัดค่าใช้จ่าย' : 'Save money'}
-                </span>
-                <span className="px-2 py-1 bg-white/60 rounded-full text-xs font-prompt text-green-700 border border-green-200">
-                  🎁 {locale === 'th' ? 'รับของที่ระลึก' : 'Get souvenir'}
-                </span>
-              </div>
-            </div>
-          </div>
-        </motion.div>
+       
       </div>
     </motion.div>
   );

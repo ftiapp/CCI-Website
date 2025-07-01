@@ -77,15 +77,15 @@ export default function PrivateVehicleSection({
   const [passengerTypeOptions, setPassengerTypeOptions] = useState([
     { 
       value: 'alone', 
-      label: locale === 'th' ? 'เดินทางคนเดียว' : 'Traveling alone',
+      label: locale === 'th' ? 'ผู้ขับขี่' : 'Driver',
       icon: '👤',
-      description: locale === 'th' ? 'เดินทางไปคนเดียว' : 'Solo travel'
+      description: locale === 'th' ? 'ผู้ขับขี่' : 'Driver'
     },
     { 
       value: 'carpool', 
-      label: locale === 'th' ? 'เดินทางแบบ Carpool' : 'Carpooling',
+      label: locale === 'th' ? 'ผู้โดยสาร' : 'Passenger',
       icon: '👥',
-      description: locale === 'th' ? 'แบ่งปันรถกับคนอื่น' : 'Sharing ride with others'
+      description: locale === 'th' ? 'ผู้โดยสาร' : 'Passenger'
     }
   ]);
 

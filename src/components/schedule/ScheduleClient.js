@@ -107,15 +107,16 @@ export default function ScheduleClient({
       ];
       const day = dateObj.getDate();
       const month = thaiMonths[dateObj.getMonth()];
-      // Use the actual year (2025) instead of converting to Buddhist Era
-      const year = dateObj.getFullYear();
+      // Hardcode to 2568 for Thai locale (Buddhist Era)
+      const year = 2568;
       return `วันที่ ${day} ${month} ${year}`;
     } else {
-      return dateObj.toLocaleDateString('en-US', { 
+      // For English locale, use day and month from the date but hardcode the year to 2025
+      const formattedDate = dateObj.toLocaleDateString('en-US', { 
         day: 'numeric', 
-        month: 'long', 
-        year: 'numeric' 
+        month: 'long'
       });
+      return `${formattedDate}, 2025`;
     }
   };
   

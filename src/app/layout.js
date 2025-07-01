@@ -25,7 +25,7 @@ export const metadata = {
   keywords: ['carbon credit', 'climate change', 'seminar', 'registration', 'FTI', 'CCI', 'Thailand'],
   authors: [{ name: 'CCI', url: 'https://cci.fti.or.th' }],
   creator: 'Carbon Credit Initiative',
-  publisher: 'The Federation of Thai Industries',
+  publisher: 'Federation of Thai Industries',
   formatDetection: {
     email: true,
     address: true,

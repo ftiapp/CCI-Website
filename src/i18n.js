@@ -81,7 +81,7 @@ export const translations = {
   en: {
     common: {
       title: 'Climate Change Institute',
-      subtitle: 'Federation Of Thai Industries',
+      subtitle: 'The Federation of Thai Industries',
       next: 'Next',
       back: 'Back',
       submit: 'Submit',

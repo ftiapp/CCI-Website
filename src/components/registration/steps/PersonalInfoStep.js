@@ -212,6 +212,7 @@ export default function PersonalInfoStep({ locale, formData, errors, handleChang
                 error={errors.firstName}
                 variant="glass"
                 className="pl-12"
+                data-field="firstName"
               />
               <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none top-6">
                 <UserIcon className="h-5 w-5 text-emerald-600" />
@@ -229,6 +230,7 @@ export default function PersonalInfoStep({ locale, formData, errors, handleChang
                 error={errors.lastName}
                 variant="glass"
                 className="pl-12"
+                data-field="lastName"
               />
               <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none top-6">
                 <UserIcon className="h-5 w-5 text-emerald-600" />
@@ -280,6 +282,7 @@ export default function PersonalInfoStep({ locale, formData, errors, handleChang
               error={errors.email}
               variant="glass"
               className="pl-12"
+              data-field="email"
             />
             <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none top-6">
               <EnvelopeIcon className="h-5 w-5 text-teal-600" />
@@ -298,6 +301,7 @@ export default function PersonalInfoStep({ locale, formData, errors, handleChang
               error={errors.phone}
               variant="glass"
               className="pl-12"
+              data-field="phone"
             />
             <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none top-6">
               <PhoneIcon className="h-5 w-5 text-blue-600" />

@@ -41,7 +41,7 @@ export default function TransportTypeSection({
   ];
 
   return (
-    <div>
+    <div className="transport_type-container" data-field="transport_type">
       <label className="block mb-4 font-prompt font-semibold text-slate-700 text-sm">
         {locale === 'th' ? 'ใช้พาหนะอะไรเป็นหลัก' : 'Main transportation method'} 
         <span className="text-red-500 ml-1">*</span>
@@ -110,7 +110,7 @@ export default function TransportTypeSection({
       </div>
       
       {errors.transport_type && (
-        <p className="mt-3 text-sm text-red-600 font-prompt">{errors.transport_type}</p>
+        <p className="mt-3 text-sm text-red-600 font-prompt" data-error-for="transport_type">{errors.transport_type}</p>
       )}
     </div>
   );

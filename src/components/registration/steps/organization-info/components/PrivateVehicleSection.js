@@ -147,6 +147,7 @@ export default function PrivateVehicleSection({
           otherValue={formData.private_vehicle_other || ''}
           otherName={FIELD_NAMES.PRIVATE_VEHICLE_OTHER}
           onOtherChange={handleOtherPrivateVehicleChange}
+          otherRequired={isOtherPrivateVehicleSelected}
         />
       </div>
       

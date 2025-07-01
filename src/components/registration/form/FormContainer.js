@@ -248,6 +248,18 @@ export default function FormContainer({
       return;
     }
 
+    // Validate consent checkbox before submitting
+    if (!formData.consent) {
+      const consentError = locale === 'th' 
+        ? 'กรุณายอมรับเงื่อนไขการใช้งานและนโยบายความเป็นส่วนตัว' 
+        : 'Please accept the terms of service and privacy policy';
+      
+      setErrors(prev => ({ ...prev, consent: consentError }));
+      ValidationHandler.showErrorToast(consentError, locale);
+      ValidationHandler.scrollToFirstError('consent');
+      return;
+    }
+
     try {
       setIsProcessing(true);
       const result = await FormSubmissionHandler.submitForm({

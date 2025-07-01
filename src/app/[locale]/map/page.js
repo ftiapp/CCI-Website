@@ -1,20 +1,24 @@
 import Link from 'next/link';
 
 export default async function MapPage({ params }) {
-  // Await params before using them
   const resolvedParams = await params;
   const { locale = 'th' } = resolvedParams || {};
   
-  // Translations for this specific page
   const translations = {
     th: {
       pageTitle: 'แผนที่และวิธีการเดินทาง',
       location: 'สถานที่',
       locationDetail: 'ชั้น 8 ห้องใบไม้, อาคารเอ็มทาวเวอร์ (M-Tower)',
       bts: 'รถไฟฟ้า BTS',
-      btsDetail: 'ลงสถานีบางจาก (ทางออก 4) ฝั่งซอยสุขุมวิท 62',
+      btsDetail: 'ลงสถานีบางจาก (ทางออก 4) ฝั่งซอยสุขุมวิท 62 จากนั้นเดิน 120 เมตร มายังอาคาร M Tower',
+      bus: 'รถโดยสารประจำทาง',
+      busDetail: 'ลงที่ป้ายอู่บางจาก ห่างจากอาคาร M Tower ประมาณ 100 เมตร',
+      busRoutes: 'สายรถที่ให้บริการ: 2, 23, 25, 38, 45, 46, 48, 98, 116',
       car: 'รถยนต์ส่วนตัว',
       carDetail: 'จอดรถได้ที่อาคาร M Tower',
+      carExpressway: 'สำหรับผู้ที่เดินทางจากทางด่วน',
+      carExpresswayDetail: 'ใช้ทางออก "สุขุมวิท 62" จากทางด่วน จากนั้นขับตรงเข้าสู่ซอยสุขุมวิท 62/1 ตามป้ายแสดงทางไปยังอาคาร M Tower',
+      carNote: 'หมายเหตุ: ไม่แนะนำให้เลี้ยวซ้ายเข้าสู่ถนนสุขุมวิท 62 โดยตรง เนื่องจากอาจต้องเผชิญกับสัญญาณไฟจราจรและการกลับรถ',
       mapTitle: 'แผนที่อาคารเอ็มทาวเวอร์ (M-Tower)',
       address: 'เลขที่ 944 ถนนพระราม 4 แขวงพระโขนง เขตคลองเตย กรุงเทพฯ 10110',
       viewGoogleMap: 'ดูใน Google Maps',
@@ -37,9 +41,15 @@ export default async function MapPage({ params }) {
       location: 'Location',
       locationDetail: '8th Floor, Bai Mai Room, M-Tower Building',
       bts: 'BTS Skytrain',
-      btsDetail: 'Bang Chak Station (Exit 4), Sukhumvit Soi 62 side',
+      btsDetail: 'Alight at Bang Chak Station (Exit 4), inbound side of Sukhumvit Road (Sukhumvit Soi 62). Approximately 120-meter walk to M Tower',
+      bus: 'Public Bus',
+      busDetail: 'Disembark at Bang Chak Bus Depot, approximately 100 meters from M Tower',
+      busRoutes: 'Bus routes: 2, 23, 25, 38, 45, 46, 48, 98, 116',
       car: 'Private Vehicle',
       carDetail: 'Parking available at M Tower Building',
+      carExpressway: 'Via Expressway',
+      carExpresswayDetail: 'Take "Sukhumvit 62" exit from expressway, then proceed straight into Soi Sukhumvit 62/1, following signage to M Tower',
+      carNote: 'Note: Not recommended to turn left directly into Sukhumvit 62, as this may result in delays due to traffic signals and required U-turns',
       mapTitle: 'Map of M-Tower Building',
       address: '944 Rama 4 Road, Phra Khanong, Khlong Toei, Bangkok 10110',
       viewGoogleMap: 'View on Google Maps',
@@ -56,7 +66,7 @@ export default async function MapPage({ params }) {
       eventInfo: 'Event Information',
       eventInfoDetail: 'Details about CCI Climate Change Forum 2025 and various schedules',
       viewEventInfo: 'View Event Info'
-    },
+    }
   };
   
   const t = translations[locale] || translations.th;
@@ -159,19 +169,47 @@ export default async function MapPage({ params }) {
                   </div>
                 </div>
                 
+                {/* Bus */}
+                <div className="flex items-start space-x-4 p-4 rounded-xl bg-slate-50 hover:bg-slate-100 transition-colors duration-200">
+                  <div className="w-12 h-12 bg-orange-100 rounded-xl flex items-center justify-center flex-shrink-0">
+                    <svg className="w-6 h-6 text-orange-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7v8a2 2 0 002 2h6M8 7V5a2 2 0 012-2h4.586a1 1 0 01.707.293l4.414 4.414a1 1 0 01.293.707V15a2 2 0 01-2 2h-2M8 7H6a2 2 0 00-2 2v10a2 2 0 002 2h8a2 2 0 002-2v-2" />
+                    </svg>
+                  </div>
+                  <div className="flex-1">
+                    <h3 className="text-lg font-prompt font-semibold text-slate-800 mb-1">
+                      {t.bus}
+                    </h3>
+                    <p className="text-slate-600 mb-2">{t.busDetail}</p>
+                    <p className="text-slate-500 text-sm">{t.busRoutes}</p>
+                  </div>
+                </div>
+                
                 {/* Car */}
                 <div className="flex items-start space-x-4 p-4 rounded-xl bg-slate-50 hover:bg-slate-100 transition-colors duration-200">
                   <div className="w-12 h-12 bg-indigo-100 rounded-xl flex items-center justify-center flex-shrink-0">
                     <svg className="w-6 h-6 text-indigo-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 9l4-4 4 4m0 6l-4 4-4-4" />
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 5v14" />
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 6h6l1 3v6h-2.5m0 0a1.5 1.5 0 11-3 0m3 0a1.5 1.5 0 11-3 0m3 0H9.5m0 0a1.5 1.5 0 11-3 0m3 0a1.5 1.5 0 11-3 0M7 6V4a1 1 0 011-1h8a1 1 0 011 1v2m-6 5h4" />
                     </svg>
                   </div>
                   <div className="flex-1">
                     <h3 className="text-lg font-prompt font-semibold text-slate-800 mb-1">
                       {t.car}
                     </h3>
-                    <p className="text-slate-600">{t.carDetail}</p>
+                    <p className="text-slate-600 mb-2">{t.carDetail}</p>
+                    
+                    {/* Expressway section */}
+                    <div className="mt-3 p-3 bg-white rounded-lg border border-slate-200">
+                      <h4 className="text-sm font-semibold text-slate-700 mb-1">
+                        {t.carExpressway}
+                      </h4>
+                      <p className="text-slate-600 text-sm mb-2">{t.carExpresswayDetail}</p>
+                      <div className="bg-amber-50 border border-amber-200 rounded-lg p-2 mt-2">
+                        <p className="text-amber-800 text-xs">
+                          <span className="font-semibold">⚠️ {locale === 'th' ? 'หมายเหตุ' : 'Note'}:</span> {t.carNote}
+                        </p>
+                      </div>
+                    </div>
                   </div>
                 </div>
               </div>

@@ -63,6 +63,7 @@ const ConsentSection = ({ formData, errors, handleChange, locale }) => {
                   target: { name: 'consent', value: e.target.checked }
                 })}
                 className="sr-only"
+                data-field="consent"
               />
               
               {/* Custom checkbox design */}
@@ -177,6 +178,7 @@ const ConsentSection = ({ formData, errors, handleChange, locale }) => {
                 initial={{ opacity: 0, y: 10 }}
                 animate={{ opacity: 1, y: 0 }}
                 className="mt-4 p-3 bg-red-50/80 backdrop-blur-sm border border-red-200 rounded-xl"
+                data-error-for="consent"
               >
                 <p className="text-red-600 text-sm font-prompt flex items-center">
                   <span className="mr-2">⚠️</span>

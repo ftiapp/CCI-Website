@@ -187,7 +187,7 @@ export default function AttendanceInfoStep({
           <label className="block mb-4 font-prompt font-semibold text-slate-700 text-sm">
             {t.registration.attendanceType} <span className="text-red-500 ml-1">*</span>
           </label>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4 attendanceType-container" data-field="attendanceType">
             {attendanceOptions.map((option, index) => (
               <motion.label
                 key={option.value}
@@ -240,7 +240,7 @@ export default function AttendanceInfoStep({
             ))}
           </div>
           {errors.attendanceType && (
-            <p className="mt-2 text-sm text-red-600 font-prompt">{errors.attendanceType}</p>
+            <p className="mt-2 text-sm text-red-600 font-prompt" data-error-for="attendanceType">{errors.attendanceType}</p>
           )}
         </motion.div>
         
@@ -270,6 +270,7 @@ export default function AttendanceInfoStep({
                   onChange={handleChange}
                   className="w-full px-4 py-3 bg-white/80 backdrop-blur-sm border border-slate-200 rounded-xl focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 font-prompt transition-all duration-300"
                   required
+                  data-field="selectedRoomId"
                 >
                   <option value="">
                     {locale === 'th' ? 
@@ -284,7 +285,7 @@ export default function AttendanceInfoStep({
                 </select>
                 
                 {errors.selectedRoomId && (
-                  <p className="mt-2 text-sm text-red-600 font-prompt">{errors.selectedRoomId}</p>
+                  <p className="mt-2 text-sm text-red-600 font-prompt" data-error-for="selectedRoomId">{errors.selectedRoomId}</p>
                 )}
               </div>
             </motion.div>

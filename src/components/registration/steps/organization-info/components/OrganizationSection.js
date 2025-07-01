@@ -122,10 +122,11 @@ export default function OrganizationSection({
               placeholder={locale === 'th' ? 'ชื่อองค์กร' : 'Organization Name'}
               className="w-full pl-12 pr-4 py-3 bg-white/80 backdrop-blur-sm border border-slate-200 rounded-xl focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 font-prompt transition-all duration-300 hover:bg-white/90"
               required
+              data-field="organizationName"
             />
           </div>
           {errors.organizationName && (
-            <p className="mt-2 flex items-center text-sm text-red-600">
+            <p className="mt-2 flex items-center text-sm text-red-600" data-error-for="organizationName">
               <span className="font-prompt">{errors.organizationName}</span>
             </p>
           )}
@@ -139,7 +140,7 @@ export default function OrganizationSection({
           className="mb-6 relative"
           style={{ zIndex: 10 }}
         >
-          <div className="p-6 bg-gradient-to-r from-blue-50 to-indigo-50 rounded-2xl border border-blue-200 overflow-visible">
+          <div className="p-6 bg-gradient-to-r from-blue-50 to-indigo-50 rounded-2xl border border-blue-200 overflow-visible" data-field="organizationTypeId">
             <div className="flex items-center mb-4">
               <div className="w-8 h-8 bg-gradient-to-r from-blue-500 to-indigo-500 rounded-lg flex items-center justify-center mr-3">
                 <BuildingOfficeIcon className="w-4 h-4 text-white" />
@@ -162,6 +163,7 @@ export default function OrganizationSection({
                 otherValue={otherOrgType}
                 otherName={otherOrgFieldName}
                 onOtherChange={handleOtherOrgTypeChange}
+                otherRequired={isOtherOrgSelected}
               />
             </div>
           </div>
@@ -182,6 +184,7 @@ export default function OrganizationSection({
               </div>
               <label className="font-prompt font-semibold text-slate-700 text-sm">
                 {locale === 'th' ? 'ประเภทอุตสาหกรรม' : 'Industry Type'}
+                {isOtherIndustrySelected && <span className="text-red-500 ml-1">*</span>}
               </label>
             </div>
             
@@ -197,6 +200,7 @@ export default function OrganizationSection({
                 otherValue={otherIndustryType}
                 otherName={otherIndustryFieldName}
                 onOtherChange={handleOtherIndustryTypeChange}
+                otherRequired={isOtherIndustrySelected}
               />
             </div>
           </div>

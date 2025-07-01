@@ -16,6 +16,7 @@ export default function SearchableSelect({
   allowOther = false,
   otherValue = '',
   otherName = '',
+  otherRequired = false,
   onOtherChange = () => {}
 }) {
   const [isOpen, setIsOpen] = useState(false);
@@ -183,6 +184,7 @@ export default function SearchableSelect({
             error ? 'border-red-500' : 'border-beige-300'
           }`}
           onClick={() => setIsOpen(!isOpen)}
+          data-field={name}
         >
           <span className={displayValue ? 'text-beige-800' : 'text-gray-400'}>
             {displayValue || placeholder}
@@ -258,6 +260,10 @@ export default function SearchableSelect({
       {/* Other input field */}
       {allowOther && (
         <div className="mt-2">
+          <div className="flex items-center mb-1">
+            {otherRequired && <span className="text-red-500 mr-1">*</span>}
+            <span className="text-sm text-gray-600 font-prompt">{placeholder || "โปรดระบุ"}</span>
+          </div>
           <input
             type="text"
             name={otherName}
@@ -267,13 +273,15 @@ export default function SearchableSelect({
             className={`w-full px-3 py-2 border rounded-md shadow-sm focus:outline-none focus:ring-1 focus:ring-beige-500 ${
               error ? 'border-red-500' : 'border-beige-300'
             }`}
+            required={otherRequired}
+            data-field={otherName}
           />
         </div>
       )}
       
       {/* Error message */}
       {error && (
-        <p className="mt-1 text-sm text-red-600">{error}</p>
+        <p className="mt-1 text-sm text-red-600" data-error-for={name}>{error}</p>
       )}
     </div>
   );

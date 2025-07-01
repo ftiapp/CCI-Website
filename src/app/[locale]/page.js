@@ -155,12 +155,13 @@ function HomePageContent({ locale }) {
                 {locale === 'th' ? (
                   <>
                     ขอต้อนรับทุกท่านเข้าสู่งาน CCI Climate Change Forum 2025<br />
-                    งานสัมมนาเพื่อการพัฒนาที่ยั่งยืนและการรับมือกับการเปลี่ยนแปลงสภาพภูมิอากาศ
+                    งานสัมมนาเพื่อการพัฒนาที่ยั่งยืนและขับเคลื่อนสู่การปล่อยก๊าซเรือนกระจกสุทธิเป็นศูนย์ 
+
                   </>
                 ) : (
                   <>
-                    Welcome to CCI Climate Change Forum 2025<br />
-                    A seminar for sustainable development and climate change adaptation
+                    Join us at the CCI Climate Change Forum 2025 <br />
+                    A seminar on Sustainable Development and Climate Change Adaptation, driving towards Net Zero.
                   </>
                 )}
               </p>
@@ -168,16 +169,16 @@ function HomePageContent({ locale }) {
               {/* Stats */}
               <div className="grid grid-cols-1 md:grid-cols-3 gap-6 max-w-3xl mb-8">
                 <div className="bg-white/70 backdrop-blur-sm rounded-2xl p-6 shadow-lg border border-white/50">
-                  <div className="text-3xl font-bold text-emerald-600 mb-2">2025</div>
+                  <div className="text-3xl font-bold text-emerald-600 mb-2">{locale === 'th' ? '2568' : '2025'}</div>
                   <div className="text-slate-600">{locale === 'th' ? 'ปี แห่งการเปลี่ยนแปลง' : 'Year of Change'}</div>
                 </div>
                 <div className="bg-white/70 backdrop-blur-sm rounded-2xl p-6 shadow-lg border border-white/50">
                   <div className="text-3xl font-bold text-teal-600 mb-2">500+</div>
-                  <div className="text-slate-600">{locale === 'th' ? 'ผู้เข้าร่วมคาดหวัง' : 'Expected Participants'}</div>
+                  <div className="text-slate-600">{locale === 'th' ? 'ผู้ร่วมขับเคลื่อนที่คาดหวัง' : 'Expected drivers of change '}</div>
                 </div>
                 <div className="bg-white/70 backdrop-blur-sm rounded-2xl p-6 shadow-lg border border-white/50">
-                  <div className="text-3xl font-bold text-blue-600 mb-2">1</div>
-                  <div className="text-slate-600">{locale === 'th' ? 'วัน เต็มไปด้วยความรู้' : 'Day Full of Knowledge'}</div>
+                  <div className="text-3xl font-bold text-blue-600 mb-2">10+</div>
+                  <div className="text-slate-600">{locale === 'th' ? 'ผู้นำขับเคลื่อน Climate Action' : 'Leaders Driving Climate Action'}</div>
                 </div>
               </div>
 

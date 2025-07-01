@@ -51,6 +51,78 @@ const ValidationHandler = {
     );
   },
   
+  // Scroll to the first error field
+  scrollToFirstError: (errorFieldName) => {
+    setTimeout(() => {
+      // Try to find the element by name attribute first
+      let errorElement = document.querySelector(`[name="${errorFieldName}"]`);
+      
+      // If not found, try to find by id
+      if (!errorElement) {
+        errorElement = document.getElementById(errorFieldName);
+      }
+      
+      // If still not found, try to find a label or error message associated with this field
+      if (!errorElement) {
+        // Look for labels that might be associated with this field
+        const labels = document.querySelectorAll('label');
+        for (const label of labels) {
+          if (label.htmlFor === errorFieldName) {
+            errorElement = label;
+            break;
+          }
+        }
+        
+        // If still not found, look for error message elements
+        if (!errorElement) {
+          errorElement = document.querySelector(`[data-error-for="${errorFieldName}"]`) || 
+                        document.querySelector(`p:contains("${errorFieldName}")`);
+        }
+      }
+      
+      // For radio buttons and special fields, we might need to find the container
+      if (!errorElement && ['transport_type', 'location_type', 'attendanceType', 'consent'].includes(errorFieldName)) {
+        errorElement = document.querySelector(`.${errorFieldName}-container`) || 
+                      document.querySelector(`[data-field="${errorFieldName}"]`);
+      }
+      
+      // If we found an element, scroll to it
+      if (errorElement) {
+        // Add a temporary highlight effect
+        const originalBackground = errorElement.style.background;
+        const originalTransition = errorElement.style.transition;
+        
+        errorElement.style.transition = 'background-color 0.5s ease';
+        errorElement.style.backgroundColor = 'rgba(239, 68, 68, 0.1)';
+        
+        // Scroll the element into view with smooth behavior
+        errorElement.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        
+        // Try to focus if it's an input element
+        if (errorElement.tagName === 'INPUT' || 
+            errorElement.tagName === 'SELECT' || 
+            errorElement.tagName === 'TEXTAREA') {
+          errorElement.focus();
+        }
+        
+        // Remove highlight after a delay
+        setTimeout(() => {
+          errorElement.style.backgroundColor = originalBackground;
+          errorElement.style.transition = originalTransition;
+        }, 1500);
+      } else {
+        // If we couldn't find the specific element, at least scroll to the top of the form
+        const formElement = document.querySelector('form') || document.querySelector('.form-container');
+        if (formElement) {
+          formElement.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        } else {
+          // Last resort: scroll to top of the page
+          window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+      }
+    }, 100); // Small delay to ensure DOM is updated
+  },
+  
   // Validate current step
   validateStep: ({ currentStep, formData, errors, setErrors, t, locale }) => {
     const newErrors = {};
@@ -90,6 +162,16 @@ const ValidationHandler = {
       // Organization info validation
       if (!formData.organizationName) newErrors.organizationName = t.common.required;
       if (!formData.organizationTypeId) newErrors.organizationTypeId = t.common.required;
+      
+      // Validate organization type other field if 'Other' is selected
+      if (parseInt(formData.organizationTypeId) === 99 && !formData.organization_type_other) {
+        newErrors.organization_type_other = t.common.required;
+      }
+      
+      // Validate industry type other field if 'Other' is selected
+      if (parseInt(formData.industryTypeId) === 99 && !formData.industry_type_other) {
+        newErrors.industry_type_other = t.common.required;
+      }
       
       // Location validation
       if (!formData.location_type) {
@@ -162,6 +244,9 @@ const ValidationHandler = {
       const errorMessage = newErrors[firstErrorKey];
       
       ValidationHandler.showErrorToast(errorMessage, locale);
+      
+      // Scroll to the first error field
+      ValidationHandler.scrollToFirstError(firstErrorKey);
       
       return false;
     }

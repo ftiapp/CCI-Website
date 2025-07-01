@@ -80,6 +80,7 @@ export default function Input({
           onChange={onChange}
           placeholder={placeholder}
           disabled={disabled}
+          data-field={props['data-field'] || name}
           className={cn(
             // Base styles
             "w-full border rounded-xl font-prompt transition-all duration-300 focus:outline-none focus:ring-2",

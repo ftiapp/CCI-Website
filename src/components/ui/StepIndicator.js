@@ -2,37 +2,14 @@
 
 import React from 'react';
 import { cn } from '@/lib/utils';
-
-// Mock icons since we don't have access to heroicons
-const CheckIcon = ({ className }) => (
-  <svg className={className} fill="currentColor" viewBox="0 0 24 24">
-    <path d="M9 16.17L5.53 12.7a.996.996 0 1 0-1.41 1.41L9 19l11.59-11.59a.996.996 0 1 0-1.41-1.41L9 16.17z"/>
-  </svg>
-);
-
-const UserIcon = ({ className }) => (
-  <svg className={className} fill="currentColor" viewBox="0 0 24 24">
-    <path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"/>
-  </svg>
-);
-
-const BuildingOfficeIcon = ({ className }) => (
-  <svg className={className} fill="currentColor" viewBox="0 0 24 24">
-    <path d="M12 7V3H2v18h20V7H12zM6 19H4v-2h2v2zm0-4H4v-2h2v2zm0-4H4V9h2v2zm0-4H4V5h2v2zm4 12H8v-2h2v2zm0-4H8v-2h2v2zm0-4H8V9h2v2zm0-4H8V5h2v2zm10 12h-8v-2h2v-2h-2v-2h2v-2h-2V9h8v10zm-2-8h-2v2h2v-2zm0 4h-2v2h2v-2z"/>
-  </svg>
-);
-
-const CalendarIcon = ({ className }) => (
-  <svg className={className} fill="currentColor" viewBox="0 0 24 24">
-    <path d="M19 3h-1V1h-2v2H8V1H6v2H5c-1.11 0-1.99.9-1.99 2L3 19c0 1.1.89 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm0 16H5V8h14v11zM7 10h5v5H7z"/>
-  </svg>
-);
-
-const DocumentCheckIcon = ({ className }) => (
-  <svg className={className} fill="currentColor" viewBox="0 0 24 24">
-    <path d="M14,2H6A2,2 0 0,0 4,4V20A2,2 0 0,0 6,22H18A2,2 0 0,0 20,20V8L14,2M18,20H6V4H13V9H18V20Z M10.5,12.5L9,14L11,16L15,12L13.5,10.5L11,13L10.5,12.5Z"/>
-  </svg>
-);
+import { 
+  CheckIcon, 
+  UserIcon, 
+  BuildingOfficeIcon, 
+  CalendarDaysIcon, 
+  DocumentCheckIcon 
+} from '@heroicons/react/24/outline';
+import { motion } from 'framer-motion';
 
 export default function StepIndicator({ 
   steps = ['Personal Info', 'Company Details', 'Schedule', 'Confirmation'], 
@@ -46,12 +23,12 @@ export default function StepIndicator({
   const stepIcons = [
     <UserIcon key="user" className="w-full h-full" />,
     <BuildingOfficeIcon key="building" className="w-full h-full" />,
-    <CalendarIcon key="calendar" className="w-full h-full" />,
+    <CalendarDaysIcon key="calendar" className="w-full h-full" />,
     <DocumentCheckIcon key="document" className="w-full h-full" />
   ];
   
   return (
-    <div className={cn("w-full py-4 md:py-6", className)}>
+    <div className={cn("w-full py-6 md:py-8", className)}>
       {/* Desktop/Tablet Layout */}
       <div className="hidden sm:flex items-center">
         {steps.map((step, index) => {
@@ -61,57 +38,117 @@ export default function StepIndicator({
           return (
             <React.Fragment key={index}>
               {/* Step Circle and Label */}
-              <div className="flex flex-col items-center">
-                <div 
+              <motion.div 
+                className="flex flex-col items-center"
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.5, delay: index * 0.1 }}
+              >
+                <motion.div 
                   className={cn(
-                    "w-8 h-8 md:w-10 md:h-10 rounded-full flex items-center justify-center text-sm font-medium transition-all duration-300 relative",
+                    "relative w-12 h-12 md:w-14 md:h-14 rounded-full flex items-center justify-center text-sm font-medium transition-all duration-300 backdrop-blur-sm",
                     isCompleted 
-                      ? "bg-deeplake-700 text-white shadow-lg" 
+                      ? "bg-gradient-to-r from-emerald-500 to-teal-500 text-white shadow-lg" 
                       : isActive 
-                        ? "bg-deeplake-500 text-white border-2 border-deeplake-700 shadow-lg md:scale-110" 
-                        : "bg-gray-100 text-gray-500 border border-gray-200"
+                        ? "bg-gradient-to-r from-emerald-400 to-teal-400 text-white shadow-xl border-2 border-white" 
+                        : "bg-white/70 text-slate-500 border-2 border-slate-200 shadow-md"
                   )}
-                  style={{
-                    boxShadow: isActive ? '0 0 0 4px rgba(8, 77, 78, 0.3)' : undefined
+                  whileHover={{ scale: 1.05 }}
+                  animate={isActive ? { 
+                    boxShadow: [
+                      '0 0 0 0px rgba(16, 185, 129, 0.4)',
+                      '0 0 0 8px rgba(16, 185, 129, 0.1)',
+                      '0 0 0 0px rgba(16, 185, 129, 0.4)'
+                    ]
+                  } : {}}
+                  transition={{
+                    boxShadow: {
+                      duration: 2,
+                      repeat: Infinity,
+                      ease: "easeInOut"
+                    }
                   }}
                 >
+                  {/* Background gradient for active/completed states */}
+                  {(isActive || isCompleted) && (
+                    <div className="absolute inset-0 bg-gradient-to-r from-emerald-400/20 to-teal-400/20 rounded-full animate-pulse"></div>
+                  )}
+                  
                   {isCompleted ? (
-                    <div className="w-4 h-4 md:w-5 md:h-5 flex items-center justify-center">
-                      <CheckIcon className="w-full h-full" />
-                    </div>
+                    <motion.div 
+                      className="w-6 h-6 md:w-7 md:h-7 flex items-center justify-center"
+                      initial={{ scale: 0 }}
+                      animate={{ scale: 1 }}
+                      transition={{ type: "spring", duration: 0.6 }}
+                    >
+                      <CheckIcon className="w-full h-full stroke-2" />
+                    </motion.div>
                   ) : (
-                    <div className="w-4 h-4 md:w-5 md:h-5 flex items-center justify-center">
+                    <div className="w-6 h-6 md:w-7 md:h-7 flex items-center justify-center">
                       {stepIcons[index]}
                     </div>
                   )}
-                </div>
-                <span 
+                </motion.div>
+                
+                <motion.span 
                   className={cn(
-                    "mt-2 md:mt-3 text-xs md:text-sm text-center max-w-16 md:max-w-20 leading-tight",
+                    "mt-3 md:mt-4 text-xs md:text-sm text-center max-w-20 md:max-w-24 leading-tight font-prompt font-medium",
                     isActive 
-                      ? "text-deeplake-700 font-semibold" 
+                      ? "text-emerald-700 font-bold" 
                       : isCompleted 
-                        ? "text-deeplake-500 font-medium" 
-                        : "text-gray-500"
+                        ? "text-emerald-600 font-semibold" 
+                        : "text-slate-500"
                   )}
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 1 }}
+                  transition={{ duration: 0.5, delay: index * 0.1 + 0.2 }}
                 >
                   {step}
-                </span>
-              </div>
+                </motion.span>
+              </motion.div>
               
               {/* Connecting Line */}
               {index < steps.length - 1 && (
-                <div 
-                  className={cn(
-                    "flex-1 h-0.5 mx-2 md:mx-4 transition-all duration-500",
-                    index < currentStep 
-                      ? "bg-deeplake-600" 
-                      : "bg-gray-200"
+                <motion.div 
+                  className="flex-1 h-1 mx-3 md:mx-6 rounded-full relative overflow-hidden"
+                  initial={{ width: 0 }}
+                  animate={{ width: "100%" }}
+                  transition={{ duration: 0.8, delay: index * 0.1 + 0.3 }}
+                >
+                  <div className="absolute inset-0 bg-slate-200 rounded-full"></div>
+                  <motion.div 
+                    className={cn(
+                      "absolute inset-0 rounded-full transition-all duration-700",
+                      index < currentStep 
+                        ? "bg-gradient-to-r from-emerald-500 to-teal-500" 
+                        : "bg-slate-200"
+                    )}
+                    initial={{ width: "0%" }}
+                    animate={{ 
+                      width: index < currentStep ? "100%" : "0%" 
+                    }}
+                    transition={{ 
+                      duration: 1, 
+                      delay: index < currentStep ? 0.5 : 0,
+                      ease: "easeInOut"
+                    }}
+                  />
+                  
+                  {/* Animated shimmer effect */}
+                  {index < currentStep && (
+                    <motion.div
+                      className="absolute inset-0 bg-gradient-to-r from-transparent via-white/40 to-transparent rounded-full"
+                      animate={{
+                        x: ['-100%', '100%']
+                      }}
+                      transition={{
+                        duration: 2,
+                        repeat: Infinity,
+                        ease: "easeInOut"
+                      }}
+                    />
                   )}
-                  style={{
-                    minWidth: '30px'
-                  }}
-                />
+                </motion.div>
               )}
             </React.Fragment>
           );
@@ -128,57 +165,103 @@ export default function StepIndicator({
             return (
               <React.Fragment key={index}>
                 {/* Step Circle and Label */}
-                <div className="flex flex-col items-center flex-1">
-                  <div 
+                <motion.div 
+                  className="flex flex-col items-center flex-1"
+                  initial={{ opacity: 0, scale: 0.8 }}
+                  animate={{ opacity: 1, scale: 1 }}
+                  transition={{ duration: 0.4, delay: index * 0.1 }}
+                >
+                  <motion.div 
                     className={cn(
-                      "w-8 h-8 rounded-full flex items-center justify-center text-xs font-medium transition-all duration-300 relative mb-2",
+                      "relative w-10 h-10 rounded-full flex items-center justify-center text-xs font-medium transition-all duration-300 mb-2 backdrop-blur-sm",
                       isCompleted 
-                        ? "bg-deeplake-700 text-white shadow-md" 
+                        ? "bg-gradient-to-r from-emerald-500 to-teal-500 text-white shadow-lg" 
                         : isActive 
-                          ? "bg-deeplake-500 text-white border-2 border-deeplake-700 shadow-md" 
-                          : "bg-gray-100 text-gray-500 border border-gray-200"
+                          ? "bg-gradient-to-r from-emerald-400 to-teal-400 text-white shadow-lg border-2 border-white" 
+                          : "bg-white/70 text-slate-500 border-2 border-slate-200 shadow-md"
                     )}
-                    style={{
-                      boxShadow: isActive ? '0 0 0 3px rgba(8, 77, 78, 0.3)' : undefined
+                    whileTap={{ scale: 0.95 }}
+                    animate={isActive ? { 
+                      boxShadow: [
+                        '0 0 0 0px rgba(16, 185, 129, 0.4)',
+                        '0 0 0 6px rgba(16, 185, 129, 0.1)',
+                        '0 0 0 0px rgba(16, 185, 129, 0.4)'
+                      ]
+                    } : {}}
+                    transition={{
+                      boxShadow: {
+                        duration: 2,
+                        repeat: Infinity,
+                        ease: "easeInOut"
+                      }
                     }}
                   >
+                    {/* Background gradient for active/completed states */}
+                    {(isActive || isCompleted) && (
+                      <div className="absolute inset-0 bg-gradient-to-r from-emerald-400/20 to-teal-400/20 rounded-full animate-pulse"></div>
+                    )}
+                    
                     {isCompleted ? (
-                      <div className="w-4 h-4 flex items-center justify-center">
-                        <CheckIcon className="w-full h-full" />
-                      </div>
+                      <motion.div 
+                        className="w-5 h-5 flex items-center justify-center"
+                        initial={{ scale: 0 }}
+                        animate={{ scale: 1 }}
+                        transition={{ type: "spring", duration: 0.6 }}
+                      >
+                        <CheckIcon className="w-full h-full stroke-2" />
+                      </motion.div>
                     ) : (
-                      <div className="w-4 h-4 flex items-center justify-center">
+                      <div className="w-5 h-5 flex items-center justify-center">
                         {stepIcons[index]}
                       </div>
                     )}
-                  </div>
-                  <span 
+                  </motion.div>
+                  
+                  <motion.span 
                     className={cn(
-                      "text-xs text-center leading-tight px-1",
+                      "text-xs text-center leading-tight px-1 font-prompt font-medium",
                       isActive 
-                        ? "text-deeplake-700 font-semibold" 
+                        ? "text-emerald-700 font-bold" 
                         : isCompleted 
-                          ? "text-deeplake-500 font-medium" 
-                          : "text-gray-500"
+                          ? "text-emerald-600 font-semibold" 
+                          : "text-slate-500"
                     )}
+                    initial={{ opacity: 0 }}
+                    animate={{ opacity: 1 }}
+                    transition={{ duration: 0.4, delay: index * 0.1 + 0.2 }}
                   >
                     {step}
-                  </span>
-                </div>
+                  </motion.span>
+                </motion.div>
                 
                 {/* Connecting Line for Mobile */}
                 {index < shortSteps.length - 1 && (
-                  <div 
-                    className={cn(
-                      "h-0.5 flex-1 mx-1 transition-all duration-500 -mt-4",
-                      index < currentStep 
-                        ? "bg-deeplake-600" 
-                        : "bg-gray-200"
-                    )}
-                    style={{
-                      maxWidth: '40px'
-                    }}
-                  />
+                  <motion.div 
+                    className="h-1 flex-1 mx-2 rounded-full relative overflow-hidden -mt-6"
+                    style={{ maxWidth: '50px' }}
+                    initial={{ width: 0 }}
+                    animate={{ width: "100%" }}
+                    transition={{ duration: 0.6, delay: index * 0.1 + 0.3 }}
+                  >
+                    <div className="absolute inset-0 bg-slate-200 rounded-full"></div>
+                    <motion.div 
+                      className={cn(
+                        "absolute inset-0 rounded-full transition-all duration-500",
+                        index < currentStep 
+                          ? "bg-gradient-to-r from-emerald-500 to-teal-500" 
+                          : "bg-slate-200"
+                      )}
+                      initial={{ width: "0%" }}
+                      animate={{ 
+                        width: index < currentStep ? "100%" : "0%" 
+                      }}
+                      transition={{ 
+                        duration: 0.8, 
+                        delay: index < currentStep ? 0.4 : 0,
+                        ease: "easeInOut"
+                      }}
+                    />
+                  </motion.div>
                 )}
               </React.Fragment>
             );

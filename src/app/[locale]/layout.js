@@ -1,10 +1,11 @@
 import Header from '@/components/layout/Header';
 import Footer from '@/components/layout/Footer';
 import CookieConsent from '@/components/layout/CookieConsent';
+import PopupBannerWrapper from '@/components/ui/PopupBannerWrapper';
 import { locales, defaultLocale } from '@/i18n';
 
 // แก้ไข warning เกี่ยวกับ params.locale ใน Next.js 15
-export const dynamic = 'force-static';
+export const dynamicParams = false;
 
 export async function generateStaticParams() {
   return locales.map((locale) => ({ locale }));
@@ -62,6 +63,7 @@ export default async function LocaleLayout({ children, params }) {
       </main>
       <Footer locale={locale} />
       <CookieConsent locale={locale} />
+      <PopupBannerWrapper locale={locale} />
     </div>
   );
 }

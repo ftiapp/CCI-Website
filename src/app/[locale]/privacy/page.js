@@ -251,7 +251,7 @@ export default function PrivacyPolicy({ params }) {
                       <p className="font-semibold text-slate-800">สถาบันการเปลี่ยนแปลงสภาพภูมิอากาศ (CCI)</p>
                       <p className="text-slate-600">สภาอุตสาหกรรมแห่งประเทศไทย</p>
                       <p className="text-slate-600">อีเมล: cci@fti.or.th</p>
-                      <p className="text-slate-600">โทรศัพท์: 02-345-1000</p>
+                      <p className="text-slate-600">โทรศัพท์: 02-345-1270</p>
                     </div>
                   </div>
                   

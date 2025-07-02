@@ -196,7 +196,7 @@ const ValidationHandler = {
         if (formData.transport_type === 'public') {
           if (!formData.public_transport_id) {
             newErrors.public_transport_id = t.common.required;
-          } else if (parseInt(formData.public_transport_id) === 999 && !formData.public_transport_other) {
+          } else if (parseInt(formData.public_transport_id) === 99 && !formData.public_transport_other) {
             newErrors.public_transport_other = t.common.required;
           }
         }

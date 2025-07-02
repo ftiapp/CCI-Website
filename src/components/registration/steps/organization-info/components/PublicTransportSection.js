@@ -116,6 +116,9 @@ export default function PublicTransportSection({
             otherValue={formData.public_transport_other || ''}
             otherName={otherFieldName}
             onOtherChange={handleOtherPublicTransportChange}
+            otherRequired={isOtherPublicTransportSelected}
+            otherError={errors.public_transport_other}
+            otherPlaceholder={locale === 'th' ? 'โปรดระบุประเภทขนส่งมวลชน *' : 'Please specify transportation type *'}
           />
         </div>
         

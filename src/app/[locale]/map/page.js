@@ -3,7 +3,6 @@ import Link from 'next/link';
 export default async function MapPage({ params }) {
   const resolvedParams = await params;
   const { locale = 'th' } = resolvedParams || {};
-  
   const translations = {
     th: {
       pageTitle: 'แผนที่และวิธีการเดินทาง',
@@ -23,8 +22,8 @@ export default async function MapPage({ params }) {
       address: 'เลขที่ 944 ถนนพระราม 4 แขวงพระโขนง เขตคลองเตย กรุงเทพฯ 10110',
       viewGoogleMap: 'ดูใน Google Maps',
       backToHome: 'กลับสู่หน้าหลัก',
-      welcome: 'ยินดีต้อนรับ',
-      welcomeMessage: 'ขอต้อนรับทุกท่านเข้าสู่งาน CCI Climate Change Forum 2025',
+      welcome: 'แผนที่และวิธีการเดินทาง',
+      welcomeMessage: 'CCI Climate Change Forum 2025',
       journeyStart: 'เริ่มต้นการเดินทางของคุณ',
       journeyMessage: 'ค้นพบข้อมูลสำคัญและเตรียมตัวเดินทางมาร่วมงานกับเรา',
       directions: 'วิธีการเดินทาง',
@@ -41,34 +40,33 @@ export default async function MapPage({ params }) {
       location: 'Location',
       locationDetail: '8th Floor, Bai Mai Room, M-Tower Building',
       bts: 'BTS Skytrain',
-      btsDetail: 'Alight at Bang Chak Station (Exit 4), inbound side of Sukhumvit Road (Sukhumvit Soi 62). Approximately 120-meter walk to M Tower',
+      btsDetail: 'Alight at Bang Chak Station (Exit 4), Sukhumvit Soi 62 side, then walk 120 meters to M Tower',
       bus: 'Public Bus',
       busDetail: 'Disembark at Bang Chak Bus Depot, approximately 100 meters from M Tower',
-      busRoutes: 'Bus routes: 2, 23, 25, 38, 45, 46, 48, 98, 116',
+      busRoutes: 'Bus routes available: 2, 23, 25, 38, 45, 46, 48, 98, 116',
       car: 'Private Vehicle',
       carDetail: 'Parking available at M Tower Building',
-      carExpressway: 'Via Expressway',
-      carExpresswayDetail: 'Take "Sukhumvit 62" exit from expressway, then proceed straight into Soi Sukhumvit 62/1, following signage to M Tower',
-      carNote: 'Note: Not recommended to turn left directly into Sukhumvit 62, as this may result in delays due to traffic signals and required U-turns',
+      carExpressway: 'For those traveling via expressway',
+      carExpresswayDetail: 'Take "Sukhumvit 62" exit from expressway, then proceed straight into Sukhumvit Soi 62/1 following signs to M Tower',
+      carNote: 'Note: Not recommended to turn left directly into Sukhumvit 62 as you may encounter traffic signals and U-turn requirements',
       mapTitle: 'Map of M-Tower Building',
       address: '944 Rama 4 Road, Phra Khanong, Khlong Toei, Bangkok 10110',
       viewGoogleMap: 'View on Google Maps',
       backToHome: 'Back to Home',
-      welcome: 'Welcome',
-      welcomeMessage: 'Welcome to CCI Climate Change Forum 2025',
+      welcome: 'Map & Directions',
+      welcomeMessage: 'CCI Climate Change Forum 2025',
       journeyStart: 'Start Your Journey',
-      journeyMessage: 'Discover important information and prepare for your trip to join us',
+      journeyMessage: 'Discover important information and prepare your trip to join us',
       directions: 'Directions',
       directionsDetail: 'Travel information and map for CCI Climate Change Forum 2025',
       viewDirections: 'View Directions',
       registerNow: 'Register Now',
-      registerDetail: 'Register for the CCI Climate Change Forum 2025 easily and receive the latest updates',
+      registerDetail: 'Register for CCI Climate Change Forum 2025 easily and receive the latest updates',
       eventInfo: 'Event Information',
       eventInfoDetail: 'Details about CCI Climate Change Forum 2025 and various schedules',
       viewEventInfo: 'View Event Info'
     }
   };
-  
   const t = translations[locale] || translations.th;
 
   return (

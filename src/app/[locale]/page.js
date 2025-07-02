@@ -265,18 +265,24 @@ function HomePageContent({ locale }) {
                     {/* Main card */}
                     <div className="relative bg-white p-8 rounded-3xl shadow-2xl border border-slate-200 backdrop-blur-sm">
                       {/* Icon area */}
-                      <div className="flex items-center justify-center h-48 bg-gradient-to-br from-emerald-50 to-teal-50 rounded-2xl mb-6 border border-emerald-100">
-                        <div className="relative">
-                          <div className="w-24 h-24 bg-gradient-to-br from-emerald-500 to-teal-500 rounded-full flex items-center justify-center shadow-lg">
-                            <svg className="w-12 h-12 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M3.055 11H5a2 2 0 012 2v1a2 2 0 002 2 2 2 0 012 2v2.945M8 3.935V5.5A2.5 2.5 0 0010.5 8h.5a2 2 0 012 2 2 2 0 104 0 2 2 0 012-2h1.064M15 20.488V18a2 2 0 012-2h3.064M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-                            </svg>
+                      <a 
+                        href="https://www.facebook.com/climatechange.fti/" 
+                        target="_blank" 
+                        rel="noopener noreferrer"
+                        className="block"
+                      >
+                        <div className="flex items-center justify-center h-48 bg-gradient-to-br from-emerald-50 to-teal-50 rounded-2xl mb-6 border border-emerald-100 hover:shadow-md transition-all duration-300">
+                          <div className="flex items-center justify-center">
+                            <div className="w-48 h-48 flex items-center justify-center p-4">
+                              <img 
+                                src="/fti-cci-logo-rgb.png" 
+                                alt="FTI-CCI Logo" 
+                                className="w-full h-auto object-contain"
+                              />
+                            </div>
                           </div>
-                          {/* Floating elements */}
-                          <div className="absolute -top-2 -right-2 w-6 h-6 bg-yellow-400 rounded-full animate-pulse"></div>
-                          <div className="absolute -bottom-1 -left-2 w-4 h-4 bg-blue-400 rounded-full animate-pulse delay-300"></div>
                         </div>
-                      </div>
+                      </a>
                       
                       <div className="text-center space-y-3">
                         <h3 className="text-2xl font-prompt font-bold text-slate-800">

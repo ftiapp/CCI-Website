@@ -17,6 +17,8 @@ export default function SearchableSelect({
   otherValue = '',
   otherName = '',
   otherRequired = false,
+  otherError = '',
+  otherPlaceholder = '',
   onOtherChange = () => {}
 }) {
   const [isOpen, setIsOpen] = useState(false);
@@ -262,20 +264,24 @@ export default function SearchableSelect({
         <div className="mt-2">
           <div className="flex items-center mb-1">
             {otherRequired && <span className="text-red-500 mr-1">*</span>}
-            <span className="text-sm text-gray-600 font-prompt">{placeholder || "โปรดระบุ"}</span>
+            <span className="text-sm text-gray-600 font-prompt">{otherPlaceholder || placeholder || "โปรดระบุ"}</span>
           </div>
           <input
             type="text"
             name={otherName}
             value={otherValue}
             onChange={onOtherChange}
-            placeholder={placeholder || "โปรดระบุ"}
+            placeholder={otherPlaceholder || placeholder || "โปรดระบุ"}
             className={`w-full px-3 py-2 border rounded-md shadow-sm focus:outline-none focus:ring-1 focus:ring-beige-500 ${
-              error ? 'border-red-500' : 'border-beige-300'
+              otherError ? 'border-red-500' : 'border-beige-300'
             }`}
             required={otherRequired}
             data-field={otherName}
           />
+          {/* Error message for other field */}
+          {otherError && (
+            <p className="mt-1 text-sm text-red-600" data-error-for={otherName}>{otherError}</p>
+          )}
         </div>
       )}
       

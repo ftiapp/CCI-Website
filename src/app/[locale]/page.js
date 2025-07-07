@@ -173,7 +173,7 @@ function HomePageContent({ locale }) {
                   <div className="text-slate-600">{locale === 'th' ? 'ปี แห่งการเปลี่ยนแปลง' : 'Year of Change'}</div>
                 </div>
                 <div className="bg-white/70 backdrop-blur-sm rounded-2xl p-6 shadow-lg border border-white/50">
-                  <div className="text-3xl font-bold text-teal-600 mb-2">500+</div>
+                  <div className="text-3xl font-bold text-teal-600 mb-2">300+</div>
                   <div className="text-slate-600">{locale === 'th' ? 'ผู้ร่วมขับเคลื่อนที่คาดหวัง' : 'Expected drivers of change '}</div>
                 </div>
                 <div className="bg-white/70 backdrop-blur-sm rounded-2xl p-6 shadow-lg border border-white/50">

@@ -18,7 +18,7 @@ export default function FormFooter({
   
   return (
     <FadeIn direction="up" delay={0.2}>
-      <div className="flex justify-between">
+      <div className="flex justify-between px-4 py-6 md:px-6">
         {currentStep > 0 ? (
           <Button 
             variant="outline" 

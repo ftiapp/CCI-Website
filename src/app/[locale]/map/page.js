@@ -70,18 +70,19 @@ export default async function MapPage({ params }) {
   const t = translations[locale] || translations.th;
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-50 to-slate-100">
+    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-emerald-50/30 to-teal-50/30">
       {/* Header */}
     
       {/* Main Content */}
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        <div className="bg-white rounded-2xl shadow-xl overflow-hidden">
+      <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        <div className="bg-white/80 backdrop-blur-sm rounded-2xl shadow-xl overflow-hidden border border-white/50">
           {/* Hero Section */}
           <div className="relative bg-gradient-to-r from-emerald-600 to-blue-600 px-6 py-12 md:px-8 md:py-16">
-            <div className="relative z-10">
+            <div className="relative z-10 text-center">
               <div className="inline-flex items-center justify-center w-16 h-16 bg-gradient-to-r from-emerald-500 to-teal-500 rounded-full mb-6 shadow-lg">
                 <svg className="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M3.055 11H5a2 2 0 012 2v1a2 2 0 002 2 2 2 0 012 2v2.945M8 3.935V5.5A2.5 2.5 0 0010.5 8h.5a2 2 0 012 2 2 2 0 104 0 2 2 0 012-2h1.064M15 20.488V18a2 2 0 012-2h3.064M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
                 </svg>
               </div>
               
@@ -89,21 +90,21 @@ export default async function MapPage({ params }) {
                 {t.welcome}
               </h2>
               
-              <p className="text-xl md:text-2xl text-emerald-100 max-w-4xl leading-relaxed mb-12">
+              <p className="text-xl md:text-2xl text-emerald-100 max-w-4xl leading-relaxed mb-12 mx-auto">
                 {t.welcomeMessage}
               </p>
 
               {/* Stats */}
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-6 max-w-3xl mb-8">
-                <div className="bg-white/70 backdrop-blur-sm rounded-2xl p-6 shadow-lg border border-white/50">
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-6 max-w-3xl mb-8 mx-auto">
+                <div className="bg-white/70 backdrop-blur-sm rounded-2xl p-6 shadow-lg border border-white/50 text-center">
                   <div className="text-3xl font-bold text-emerald-600 mb-2">ชั้น 8</div>
                   <div className="text-slate-600">{locale === 'th' ? 'ห้องประชุมใบไม้' : 'Floor, Bai Mai Room'}</div>
                 </div>
-                <div className="bg-white/70 backdrop-blur-sm rounded-2xl p-6 shadow-lg border border-white/50">
+                <div className="bg-white/70 backdrop-blur-sm rounded-2xl p-6 shadow-lg border border-white/50 text-center">
                   <div className="text-3xl font-bold text-teal-600 mb-2">BTS</div>
                   <div className="text-slate-600">{locale === 'th' ? 'สถานีบางจาก' : 'Bang Chak Station'}</div>
                 </div>
-                <div className="bg-white/70 backdrop-blur-sm rounded-2xl p-6 shadow-lg border border-white/50">
+                <div className="bg-white/70 backdrop-blur-sm rounded-2xl p-6 shadow-lg border border-white/50 text-center">
                   <div className="text-3xl font-bold text-blue-600 mb-2">944</div>
                   <div className="text-slate-600">{locale === 'th' ? 'ถนนพระราม 4' : 'Rama 4 Road'}</div>
                 </div>
@@ -202,7 +203,7 @@ export default async function MapPage({ params }) {
                 <div className="bg-slate-100 rounded-xl overflow-hidden shadow-inner">
                   <div className="aspect-video">
                     <iframe 
-                      src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3876.3747404152685!2d100.60823807573724!3d13.6858899896339!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x30e29fc2f2a9e0d5%3A0x9f133c97c83d73a!2sM%20Tower!5e0!3m2!1sen!2sth!4v1688193124803!5m2!1sen!2sth" 
+                      src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3875.7724587367687!2d100.60317877573784!3d13.694413189634088!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x30e29f8d20ea7e3f%3A0x350a82ea9b46f282!2sM%20Tower!5e0!3m2!1sen!2sth!4v1688193124803!5m2!1sen!2sth" 
                       width="100%" 
                       height="100%" 
                       style={{ border: 0 }} 
@@ -217,7 +218,7 @@ export default async function MapPage({ params }) {
                 {/* Google Maps Link */}
                 <div className="text-center">
                   <a 
-                    href="https://maps.app.goo.gl/Uw2Yvb8Ue3Ck9Ld77" 
+                    href="https://www.google.com/maps/place/M+Tower/@13.6945501,100.6056892,18.54z/data=!4m14!1m7!3m6!1s0x30e29f8d20ea7e3f:0x350a82ea9b46f282!2sM+Tower!8m2!3d13.6944132!4d100.605766!16s%2Fg%2F11bwmsyz7v!3m5!1s0x30e29f8d20ea7e3f:0x350a82ea9b46f282!8m2!3d13.6944132!4d100.605766!16s%2Fg%2F11bwmsyz7v?hl=en&entry=ttu" 
                     target="_blank" 
                     rel="noopener noreferrer"
                     className="inline-flex items-center px-6 py-3 bg-slate-800 hover:bg-slate-700 text-white rounded-xl transition-all duration-300 shadow-lg hover:shadow-xl transform hover:-translate-y-0.5"

@@ -138,9 +138,9 @@ function HomePageContent({ locale }) {
       {/* Main Content */}
       <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
       <div className="bg-white/80 backdrop-blur-sm rounded-2xl shadow-xl overflow-hidden border border-white/50">
-          {/* Hero Section */}
-          <div className="relative bg-gradient-to-r from-emerald-600 to-blue-600 px-6 py-12 md:px-8 md:py-16">
-            <div className="relative z-10">
+       {/* Hero Section */}
+       <div className="relative bg-gradient-to-r from-emerald-600 to-blue-600 px-6 py-12 md:px-8 md:py-16">
+            <div className="relative z-10 text-center">
               <div className="inline-flex items-center justify-center w-16 h-16 bg-gradient-to-r from-emerald-500 to-teal-500 rounded-full mb-6 shadow-lg">
                 <svg className="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M3.055 11H5a2 2 0 012 2v1a2 2 0 002 2 2 2 0 012 2v2.945M8 3.935V5.5A2.5 2.5 0 0010.5 8h.5a2 2 0 012 2 2 2 0 104 0 2 2 0 012-2h1.064M15 20.488V18a2 2 0 012-2h3.064M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
@@ -151,7 +151,7 @@ function HomePageContent({ locale }) {
                 {locale === 'th' ? 'ยินดีต้อนรับ' : 'Welcome'}
               </h2>
               
-              <p className="text-xl md:text-2xl text-emerald-100 max-w-4xl leading-relaxed mb-12">
+              <p className="text-xl md:text-2xl text-emerald-100 max-w-4xl leading-relaxed mb-12 mx-auto">
                 {locale === 'th' ? (
                   <>
                     ขอต้อนรับทุกท่านเข้าสู่งาน CCI Climate Change Forum 2025<br />
@@ -167,25 +167,26 @@ function HomePageContent({ locale }) {
               </p>
 
               {/* Stats */}
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-6 max-w-3xl mb-8">
-                <div className="bg-white/70 backdrop-blur-sm rounded-2xl p-6 shadow-lg border border-white/50">
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-6 max-w-3xl mb-8 mx-auto">
+                <div className="bg-white/70 backdrop-blur-sm rounded-2xl p-6 shadow-lg border border-white/50 text-center">
                   <div className="text-3xl font-bold text-emerald-600 mb-2">{locale === 'th' ? '2568' : '2025'}</div>
                   <div className="text-slate-600">{locale === 'th' ? 'ปี แห่งการเปลี่ยนแปลง' : 'Year of Change'}</div>
                 </div>
-                <div className="bg-white/70 backdrop-blur-sm rounded-2xl p-6 shadow-lg border border-white/50">
+                <div className="bg-white/70 backdrop-blur-sm rounded-2xl p-6 shadow-lg border border-white/50 text-center">
                   <div className="text-3xl font-bold text-teal-600 mb-2">300+</div>
                   <div className="text-slate-600">{locale === 'th' ? 'ผู้ร่วมขับเคลื่อนที่คาดหวัง' : 'Expected drivers of change '}</div>
                 </div>
-                <div className="bg-white/70 backdrop-blur-sm rounded-2xl p-6 shadow-lg border border-white/50">
+                <div className="bg-white/70 backdrop-blur-sm rounded-2xl p-6 shadow-lg border border-white/50 text-center">
                   <div className="text-3xl font-bold text-blue-600 mb-2">10+</div>
                   <div className="text-slate-600">{locale === 'th' ? 'ผู้นำขับเคลื่อน Climate Action' : 'Leaders Driving Climate Action'}</div>
                 </div>
               </div>
 
               {/* Compact Countdown Timer */}
-              <CompactCountdownTimer locale={locale} registrationDeadline={registrationDeadline} />
+              <div className="max-w-3xl mx-auto">
+                <CompactCountdownTimer locale={locale} registrationDeadline={registrationDeadline} />
+              </div>
             </div>
-            
             {/* Decorative elements */}
             <div className="absolute top-10 right-10 w-20 h-20 bg-white/10 rounded-full blur-xl"></div>
             <div className="absolute bottom-10 left-10 w-32 h-32 bg-white/10 rounded-full blur-xl"></div>

@@ -181,8 +181,13 @@ export default function QRScanner({ onDecode, title = 'สแกน QR Code' }) 
               document.body.appendChild(tempDiv);
               const reader = new Html5QrcodeModule.Html5Qrcode(tempId);
               const result = await reader.scanFile(file, true);
-              await reader.clear();
-              document.body.removeChild(tempDiv);
+              // Do NOT call clear() then remove child to avoid double-removal race
+              // Try to close the instance gracefully
+              try { await reader.stop(); } catch {}
+              // Remove temp div if still in DOM
+              if (document.body.contains(tempDiv)) {
+                document.body.removeChild(tempDiv);
+              }
               if (result) {
                 onDecode?.(String(result).trim());
               } else {

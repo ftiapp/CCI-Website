@@ -5,6 +5,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import CheckInSystem from '@/components/admin/CheckInSystem';
 import Dashboard from '@/components/admin/Dashboard';
 import ConsumableScan from '@/components/admin/ConsumableScan';
+import ErrorBoundary from '@/components/common/ErrorBoundary';
 // ParticipantManagement component removed temporarily
 import toast, { Toaster } from 'react-hot-toast';
 
@@ -104,19 +105,27 @@ export default function AdminPage() {
           </TabsList>
           
           <TabsContent value="check-in" className="mt-6">
-            <CheckInSystem />
+            <ErrorBoundary>
+              <CheckInSystem />
+            </ErrorBoundary>
           </TabsContent>
           
           <TabsContent value="dashboard" className="mt-6">
-            <Dashboard />
+            <ErrorBoundary>
+              <Dashboard />
+            </ErrorBoundary>
           </TabsContent>
           
           <TabsContent value="beverage" className="mt-6">
-            <ConsumableScan type="beverage" title="สแกนเครื่องดื่ม / Beverage Scan" />
+            <ErrorBoundary>
+              <ConsumableScan type="beverage" title="สแกนเครื่องดื่ม / Beverage Scan" />
+            </ErrorBoundary>
           </TabsContent>
           
           <TabsContent value="food" className="mt-6">
-            <ConsumableScan type="food" title="สแกนอาหาร / Food Scan" />
+            <ErrorBoundary>
+              <ConsumableScan type="food" title="สแกนอาหาร / Food Scan" />
+            </ErrorBoundary>
           </TabsContent>
           
           {/* ParticipantManagement component removed temporarily */}

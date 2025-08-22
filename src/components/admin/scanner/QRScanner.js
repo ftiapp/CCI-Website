@@ -95,13 +95,23 @@ export default function QRScanner({ onDecode, title = 'สแกน QR Code' }) 
       const stream = await navigator.mediaDevices.getUserMedia(constraints);
       streamRef.current = stream;
 
-      if (videoRef.current) {
-        videoRef.current.srcObject = stream;
-        videoRef.current.play();
-        setIsScanning(true);
-        setError(null);
-        startScanning();
-      }
+      // Ensure the <video> element is rendered by setting scanning state first
+      setIsScanning(true);
+      setError(null);
+
+      // Attach stream once the video element is available in the DOM
+      const attachStream = () => {
+        if (videoRef.current) {
+          videoRef.current.srcObject = streamRef.current;
+          // play() might return a promise; ignore errors from autoplay policies
+          try { videoRef.current.play(); } catch {}
+          startScanning();
+        } else {
+          // Try again on next animation frame until mounted
+          animationRef.current = requestAnimationFrame(attachStream);
+        }
+      };
+      attachStream();
     } catch (err) {
       console.error('Error starting camera:', err);
       let errorMessage = 'ไม่สามารถเปิดกล้องได้';

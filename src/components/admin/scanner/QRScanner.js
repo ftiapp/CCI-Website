@@ -2,7 +2,7 @@
 
 import { useEffect, useRef, useState, useCallback, useId } from 'react';
 import toast from 'react-hot-toast';
-import { Html5Qrcode } from 'html5-qrcode';
+import { Html5Qrcode, Html5QrcodeSupportedFormats } from 'html5-qrcode';
 
 export default function QRScanner({ onDecode, title = 'สแกน QR Code' }) {
   const html5QrCodeRef = useRef(null);
@@ -96,7 +96,11 @@ export default function QRScanner({ onDecode, title = 'สแกน QR Code' }) 
     // ไม่ต้อง log ทุกครั้ง เพราะจะ spam console
   }, []);
 
-  // Start scanning - ปรับ config ให้อ่าน QR ได้ดีขึ้น
+  // Helper to detect iOS Safari
+  const isIOS = typeof navigator !== 'undefined' && /iPad|iPhone|iPod/.test(navigator.userAgent);
+  const isSafari = typeof navigator !== 'undefined' && /Safari/.test(navigator.userAgent) && !/Chrome|CriOS|Edg|OPR/.test(navigator.userAgent);
+
+  // Start scanning - ปรับ config ให้อ่าน QR ได้ดีขึ้น และรองรับ Safari/iOS
   const startScanning = useCallback(async () => {
     if (isScanning || !selectedDeviceId) return;
     
@@ -111,21 +115,56 @@ export default function QRScanner({ onDecode, title = 'สแกน QR Code' }) 
       const html5QrCode = new Html5Qrcode(scannerIdRef.current);
       html5QrCodeRef.current = html5QrCode;
 
-      // Config ที่ทำงานได้ดี
-      const config = {
-        fps: 30, // เพิ่ม fps
-        qrbox: { width: 200, height: 200 }, // ลดขนาดกรอบ
-        aspectRatio: 1.0,
-        disableFlip: false,
-        rememberLastUsedCamera: true
+      // Config: ใช้กรอบสแกนแบบปรับตามจอ และรองรับ Safari/iOS ให้ดีขึ้น
+      const baseConfig = {
+        fps: 20,
+        qrbox: (viewfinderWidth, viewfinderHeight) => {
+          const size = Math.min(320, Math.floor(Math.min(viewfinderWidth, viewfinderHeight) * 0.7));
+          return { width: size, height: size };
+        },
+        aspectRatio: isIOS ? undefined : 1.3333, // ไม่กำหนดใน iOS เพื่อลดปัญหากล้อง
+        disableFlip: isIOS || isSafari, // ปิด mirror ใน Safari/iOS
+        rememberLastUsedCamera: true,
+        formatsToSupport: [Html5QrcodeSupportedFormats.QR_CODE],
+        // ใช้ Detector ถ้าบราวเซอร์รองรับ (ไม่กระทบ Safari เก่า)
+        experimentalFeatures: { useBarCodeDetectorIfSupported: true }
       };
 
-      await html5QrCode.start(
-        selectedDeviceId,
-        config,
-        onScanSuccess,
-        onScanFailure
-      );
+      // พยายาม start แบบปกติก่อนด้วย deviceId
+      let started = false;
+      try {
+        await html5QrCode.start(
+          selectedDeviceId,
+          baseConfig,
+          onScanSuccess,
+          onScanFailure
+        );
+        started = true;
+      } catch (e1) {
+        console.warn('Start with deviceId failed, retry with facingMode environment:', e1);
+      }
+
+      // ถ้าไม่สำเร็จ ลอง fallback สำหรับ Safari/iOS
+      if (!started) {
+        const fallbackConfig = {
+          ...baseConfig,
+          videoConstraints: {
+            facingMode: { exact: 'environment' }
+          }
+        };
+        try {
+          await html5QrCode.start(
+            fallbackConfig.videoConstraints,
+            fallbackConfig,
+            onScanSuccess,
+            onScanFailure
+          );
+          started = true;
+        } catch (e2) {
+          console.error('Fallback start failed:', e2);
+          throw e2;
+        }
+      }
 
       setIsScanning(true);
       setError(null);

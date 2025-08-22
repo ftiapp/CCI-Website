@@ -1,6 +1,6 @@
 'use client';
 
-import { useCallback, useMemo, useState } from 'react';
+import { useCallback, useMemo, useRef, useState } from 'react';
 import toast from 'react-hot-toast';
 import QRScanner from './scanner/QRScanner';
 import { XCircleIcon } from '@heroicons/react/24/solid';
@@ -10,6 +10,9 @@ export default function ConsumableScan({ type, title }) {
   const [lastUuid, setLastUuid] = useState('');
   const [updating, setUpdating] = useState(false);
   const [duplicateInfo, setDuplicateInfo] = useState(null); // { uuid, first_name, last_name }
+  const lastHandledUuidRef = useRef('');
+  const lastHandledAtRef = useRef(0);
+  const handleCooldownMsRef = useRef(1200);
 
   const toastStyle = {
     borderRadius: '10px',
@@ -44,6 +47,8 @@ export default function ConsumableScan({ type, title }) {
 
   const updateStatus = useCallback(async (uuid) => {
     if (!uuid) return;
+    // Guard: avoid concurrent updates
+    if (updating) return;
     setUpdating(true);
     try {
       const res = await fetch('/api/admin/update-consumable', {
@@ -87,6 +92,8 @@ export default function ConsumableScan({ type, title }) {
         duration: 2000 
       });
       setLastUuid(uuid);
+      lastHandledUuidRef.current = uuid;
+      lastHandledAtRef.current = Date.now();
       
       // Auto-clear after 2 seconds for faster scanning
       setTimeout(() => {
@@ -103,7 +110,7 @@ export default function ConsumableScan({ type, title }) {
     } finally {
       setUpdating(false);
     }
-  }, [type]);
+  }, [type, updating]);
 
   const handleDecode = useCallback((text) => {
     console.log('QR decoded raw text:', text); // Debug logging
@@ -117,9 +124,15 @@ export default function ConsumableScan({ type, title }) {
       });
       return;
     }
+    // Throttle: ignore if currently updating or same UUID within cooldown
+    const now = Date.now();
+    if (updating) return;
+    if (uuid === lastHandledUuidRef.current && (now - lastHandledAtRef.current) < handleCooldownMsRef.current) {
+      return;
+    }
     console.log('Normalized UUID:', uuid); // Debug logging
     updateStatus(uuid);
-  }, [updateStatus]);
+  }, [updateStatus, updating]);
 
   const [manualInput, setManualInput] = useState('');
 

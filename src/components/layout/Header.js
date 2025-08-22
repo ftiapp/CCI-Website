@@ -25,6 +25,7 @@ export default function Header({ locale }) {
     { href: '/schedule', label: t.nav.schedule },
     { href: '/register', label: t.nav.register },
     { href: '/contact', label: locale === 'th' ? 'ติดต่อเรา' : 'Contact Us' },
+    { href: '/ticket-lookup', label: locale === 'th' ? 'ดูตั๋ว' : 'Ticket Lookup' },
   ];
 
   // Handle scroll effect for sticky header

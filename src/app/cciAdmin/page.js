@@ -4,6 +4,7 @@ import { useState } from 'react';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import CheckInSystem from '@/components/admin/CheckInSystem';
 import Dashboard from '@/components/admin/Dashboard';
+import ConsumableScan from '@/components/admin/ConsumableScan';
 // ParticipantManagement component removed temporarily
 import toast, { Toaster } from 'react-hot-toast';
 
@@ -86,12 +87,18 @@ export default function AdminPage() {
           onValueChange={setActiveTab}
           className="w-full"
         >
-          <TabsList className="grid w-full grid-cols-3 mb-8">
+          <TabsList className="grid w-full grid-cols-5 mb-8">
             <TabsTrigger value="check-in" className="font-prompt">
               เช็คอิน / Check-in
             </TabsTrigger>
             <TabsTrigger value="dashboard" className="font-prompt">
               แดชบอร์ด / Dashboard
+            </TabsTrigger>
+            <TabsTrigger value="beverage" className="font-prompt">
+              เครื่องดื่ม / Beverage
+            </TabsTrigger>
+            <TabsTrigger value="food" className="font-prompt">
+              อาหาร / Food
             </TabsTrigger>
             {/* Participants tab removed temporarily */}
           </TabsList>
@@ -102,6 +109,14 @@ export default function AdminPage() {
           
           <TabsContent value="dashboard" className="mt-6">
             <Dashboard />
+          </TabsContent>
+          
+          <TabsContent value="beverage" className="mt-6">
+            <ConsumableScan type="beverage" title="สแกนเครื่องดื่ม / Beverage Scan" />
+          </TabsContent>
+          
+          <TabsContent value="food" className="mt-6">
+            <ConsumableScan type="food" title="สแกนอาหาร / Food Scan" />
           </TabsContent>
           
           {/* ParticipantManagement component removed temporarily */}

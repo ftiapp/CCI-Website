@@ -23,26 +23,37 @@ export async function POST(request) {
 
     const column = type === 'beverage' ? 'beverage_status' : 'food_status';
 
-    // Ensure only set to 1 (received). Idempotent update.
-    const result = await executeQuery(
-      `UPDATE CCI_registrants SET ${column} = 1 WHERE UPPER(uuid) = UPPER(?)`,
+    // Check current status first
+    const existing = await executeQuery(
+      `SELECT id, uuid, first_name, last_name, ${column} AS status FROM CCI_registrants WHERE UPPER(uuid) = UPPER(?)`,
       [uuid]
     );
 
-    if (result.affectedRows === 0) {
+    if (!existing || existing.length === 0) {
       return NextResponse.json(
         { success: false, error: 'Registrant not found' },
         { status: 404 }
       );
     }
 
-    // Return updated participant minimal info
-    const rows = await executeQuery(
+    const participant = existing[0];
+    if (participant.status === 1) {
+      return NextResponse.json({ success: true, participant, updated: column, alreadyReceived: true });
+    }
+
+    // Update to 1
+    await executeQuery(
+      `UPDATE CCI_registrants SET ${column} = 1 WHERE UPPER(uuid) = UPPER(?)`,
+      [uuid]
+    );
+
+    // Return updated participant
+    const updatedRows = await executeQuery(
       `SELECT id, uuid, first_name, last_name, ${column} AS status FROM CCI_registrants WHERE UPPER(uuid) = UPPER(?)`,
       [uuid]
     );
 
-    return NextResponse.json({ success: true, participant: rows[0], updated: column });
+    return NextResponse.json({ success: true, participant: updatedRows[0], updated: column, alreadyReceived: false });
   } catch (error) {
     console.error('Error updating consumable status:', error);
     return NextResponse.json({ success: false, error: 'Internal server error' }, { status: 500 });

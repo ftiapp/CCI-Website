@@ -63,11 +63,15 @@ export default function QRScanner({ onDecode, title = 'สแกน QR Code' }) 
         const config = { fps: 10, qrbox: { width: 250, height: 250 } };
 
         // Start with chosen deviceId
+        // Debounced continuous scanning (no stop), for fast repeated scans
+        let accepting = true;
         await html5QrCode.start({ deviceId: { exact: deviceId } }, config, (decodedText) => {
           if (!decodedText) return;
-          // Debounce: stop after first read
-          try { html5QrCode.stop(); } catch {}
+          if (!accepting) return;
+          accepting = false;
           onDecode?.(decodedText.trim());
+          // Re-accept after short delay
+          setTimeout(() => { accepting = true; }, 1200);
         });
 
         setReady(true);
@@ -121,10 +125,13 @@ export default function QRScanner({ onDecode, title = 'สแกน QR Code' }) 
                   await scannerRef.current.stop();
                 } catch {}
                 try {
+                  let accepting = true;
                   await scannerRef.current.start({ deviceId: { exact: newId } }, { fps: 10, qrbox: { width: 250, height: 250 } }, (decodedText) => {
                     if (!decodedText) return;
-                    try { scannerRef.current.stop(); } catch {}
+                    if (!accepting) return;
+                    accepting = false;
                     onDecode?.(decodedText.trim());
+                    setTimeout(() => { accepting = true; }, 1200);
                   });
                 } catch (err) {
                   console.error('Switch camera failed:', err);

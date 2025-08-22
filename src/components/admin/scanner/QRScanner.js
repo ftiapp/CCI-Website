@@ -1,229 +1,215 @@
 'use client';
 
-import { useEffect, useRef, useState, useCallback } from 'react';
+import { useEffect, useRef, useState, useCallback, useId } from 'react';
 import toast from 'react-hot-toast';
+import { Html5Qrcode } from 'html5-qrcode';
 
 /**
- * Completely rewritten QR scanner with better DOM management and camera handling
+ * QR scanner using html5-qrcode for instant scanning
  * Props:
  * - onDecode: (text) => void
  * - title: string
  */
 export default function QRScanner({ onDecode, title = 'สแกน QR Code' }) {
-  const videoRef = useRef(null);
-  const canvasRef = useRef(null);
-  const streamRef = useRef(null);
-  const animationRef = useRef(null);
+  const html5QrCodeRef = useRef(null);
+  const reactId = useId();
+  const scannerIdRef = useRef(`qr-reader-${reactId}-${Date.now()}`);
+  const fileScanIdRef = useRef(`file-scan-${reactId}-${Date.now()}`);
   const [isScanning, setIsScanning] = useState(false);
   const [error, setError] = useState(null);
   const [cameras, setCameras] = useState([]);
   const [selectedDeviceId, setSelectedDeviceId] = useState('');
-  const [permissionGranted, setPermissionGranted] = useState(false);
+  const [lastScanResult, setLastScanResult] = useState('');
+  const [scanCount, setScanCount] = useState(0);
+  const startRetryRef = useRef(null); // timer id
+  const startAttemptsRef = useRef(0);
+  const MAX_START_ATTEMPTS = 5;
+  const START_RETRY_DELAY = 600; // ms
 
-  // Request camera permission
-  const requestCameraPermission = useCallback(async () => {
+  // Get available cameras
+  const getCameras = useCallback(async () => {
     try {
-      const stream = await navigator.mediaDevices.getUserMedia({ video: true });
-      stream.getTracks().forEach(track => track.stop()); // Stop immediately after permission check
-      setPermissionGranted(true);
-      return true;
-    } catch (err) {
-      let errorMessage = 'ไม่สามารถเข้าถึงกล้องได้';
+      const devices = await Html5Qrcode.getCameras();
+      console.log('Available cameras:', devices);
+      setCameras(devices);
       
-      if (err.name === 'NotAllowedError') {
-        errorMessage = 'กรุณาอนุญาตการเข้าถึงกล้องในเบราว์เซอร์';
-      } else if (err.name === 'NotFoundError') {
-        errorMessage = 'ไม่พบกล้องบนอุปกรณ์นี้';
-      } else if (err.name === 'NotReadableError') {
-        errorMessage = 'กล้องถูกใช้งานโดยแอปพลิเคชันอื่น';
+      if (devices.length > 0) {
+        // Prefer back camera if available
+        const backCamera = devices.find(device => 
+          /back|rear|environment/i.test(device.label)
+        );
+        setSelectedDeviceId(backCamera?.id || devices[0].id);
       }
       
+      return devices;
+    } catch (err) {
+      console.error('Error getting cameras:', err);
+      setError('ไม่สามารถเข้าถึงกล้องได้');
+      return [];
+    }
+  }, []);
+
+  // Success callback when QR code is detected
+  const onScanSuccess = useCallback((decodedText, decodedResult) => {
+    console.log('QR Code detected instantly:', decodedText);
+    setScanCount(prev => prev + 1);
+    setLastScanResult(decodedText);
+    
+    // Call the parent callback
+    onDecode?.(decodedText);
+    
+    // Visual feedback
+    toast.success('🎯 สแกน QR สำเร็จ!', {
+      position: 'top-right',
+      duration: 1000,
+      style: {
+        borderRadius: '10px',
+        background: '#22c55e',
+        color: '#fff',
+        padding: '12px',
+        fontFamily: 'prompt, sans-serif',
+        fontWeight: '500',
+      },
+    });
+  }, [onDecode]);
+
+  // Error callback
+  const onScanFailure = useCallback((error) => {
+    // Don't log every scan attempt failure, only real errors
+    try {
+      const msg = typeof error === 'string' ? error : (error?.message || String(error));
+      if (!msg.includes('No QR code found')) {
+        console.warn('QR scan error:', msg);
+      }
+    } catch {}
+  }, []);
+
+  // Start scanning with html5-qrcode
+  const startScanning = useCallback(async () => {
+    if (isScanning) {
+      console.log('Scanner already running, skip start');
+      return;
+    }
+    if (!selectedDeviceId) {
+      console.log('No camera selected yet, skip start');
+      return;
+    }
+    const container = document.getElementById(scannerIdRef.current);
+    if (!container) {
+      console.warn('qr-reader element not found in DOM; delaying start...');
+      // Retry shortly in case DOM isn't painted yet
+      if (startAttemptsRef.current < MAX_START_ATTEMPTS) {
+        startAttemptsRef.current += 1;
+        startRetryRef.current = setTimeout(() => {
+          startScanning();
+        }, START_RETRY_DELAY);
+      } else {
+        toast.error('ไม่สามารถเริ่มสแกนได้ (DOM ไม่พร้อม)', {
+          position: 'top-right',
+          style: { borderRadius: '10px', background: '#ef4444', color: '#fff', padding: '16px', fontFamily: 'prompt, sans-serif', fontWeight: '500' },
+        });
+      }
+      return;
+    }
+    try {
+      console.log('Starting html5-qrcode scanner with camera:', selectedDeviceId);
+      const html5QrCode = new Html5Qrcode(scannerIdRef.current);
+      html5QrCodeRef.current = html5QrCode;
+
+      // Valid configuration for html5-qrcode when passing cameraId (deviceId string)
+      const config = {
+        fps: 30,
+        qrbox: { width: 300, height: 300 },
+        aspectRatio: 1.0,
+        disableFlip: false
+      };
+
+      // Security note
+      if (typeof window !== 'undefined' && !window.isSecureContext) {
+        console.warn('Page not in secure context (HTTPS). Camera may not work on some browsers.');
+        toast((t) => (
+          'โปรดใช้งานผ่าน HTTPS หรือ localhost เพื่อให้กล้องทำงานได้อย่างถูกต้อง'
+        ), {
+          position: 'top-right',
+          style: { borderRadius: '10px', background: '#f59e0b', color: '#111', padding: '16px', fontFamily: 'prompt, sans-serif', fontWeight: '500' },
+        });
+      }
+
+      await html5QrCode.start(
+        selectedDeviceId,
+        config,
+        onScanSuccess,
+        onScanFailure
+      );
+
+      setIsScanning(true);
+      setError(null);
+      console.log('Html5-qrcode scanner started successfully');
+      startAttemptsRef.current = 0;
+    } catch (err) {
+      console.error('Error starting scanner:', err);
+      let errorMessage = 'ไม่สามารถเริ่มสแกนได้';
+      const name = err?.name || '';
+      if (name === 'NotAllowedError') {
+        errorMessage = 'กรุณาอนุญาตการเข้าถึงกล้อง';
+      } else if (name === 'NotFoundError') {
+        errorMessage = 'ไม่พบกล้องที่เลือก';
+      } else if (name === 'NotReadableError') {
+        errorMessage = 'ไม่สามารถเข้าถึงสตรีมกล้องได้ อาจมีแอปใช้งานกล้องอยู่';
+      }
       setError(errorMessage);
       toast.error(errorMessage, {
         position: 'top-right',
         style: {
           borderRadius: '10px',
-          background: '#333',
+          background: '#ef4444',
           color: '#fff',
           padding: '16px',
           fontFamily: 'prompt, sans-serif',
           fontWeight: '500',
         },
       });
-      return false;
-    }
-  }, []);
 
-  // Get available cameras
-  const getCameras = useCallback(async () => {
-    try {
-      const devices = await navigator.mediaDevices.enumerateDevices();
-      const videoDevices = devices.filter(device => device.kind === 'videoinput');
-      setCameras(videoDevices);
-      
-      if (videoDevices.length > 0) {
-        // Prefer back camera if available
-        const backCamera = videoDevices.find(device => 
-          /back|rear|environment/i.test(device.label)
-        );
-        setSelectedDeviceId(backCamera?.deviceId || videoDevices[0].deviceId);
-      }
-      
-      return videoDevices;
-    } catch (err) {
-      console.error('Error getting cameras:', err);
-      return [];
-    }
-  }, []);
-
-  // Start camera stream
-  const startCamera = useCallback(async (deviceId) => {
-    try {
-      if (streamRef.current) {
-        streamRef.current.getTracks().forEach(track => track.stop());
-      }
-
-      const constraints = {
-        video: {
-          deviceId: deviceId ? { exact: deviceId } : undefined,
-          width: { ideal: 640 },
-          height: { ideal: 480 },
-          facingMode: deviceId ? undefined : { ideal: 'environment' }
-        }
-      };
-
-      const stream = await navigator.mediaDevices.getUserMedia(constraints);
-      streamRef.current = stream;
-
-      // Ensure the <video> element is rendered by setting scanning state first
-      setIsScanning(true);
-      setError(null);
-
-      // Attach stream once the video element is available in the DOM
-      const attachStream = () => {
-        if (videoRef.current) {
-          videoRef.current.srcObject = streamRef.current;
-          // play() might return a promise; ignore errors from autoplay policies
-          try { videoRef.current.play(); } catch {}
+      // Retry starting if it's a transient error and attempts remain
+      const transient = name === 'NotReadableError' || name === 'AbortError' || name === 'SecurityError';
+      if (transient && startAttemptsRef.current < MAX_START_ATTEMPTS) {
+        startAttemptsRef.current += 1;
+        console.log(`Retrying start in ${START_RETRY_DELAY}ms (attempt ${startAttemptsRef.current}/${MAX_START_ATTEMPTS})`);
+        startRetryRef.current = setTimeout(() => {
           startScanning();
-        } else {
-          // Try again on next animation frame until mounted
-          animationRef.current = requestAnimationFrame(attachStream);
-        }
-      };
-      attachStream();
-    } catch (err) {
-      console.error('Error starting camera:', err);
-      let errorMessage = 'ไม่สามารถเปิดกล้องได้';
-      
-      if (err.name === 'NotAllowedError') {
-        errorMessage = 'กรุณาอนุญาตการเข้าถึงกล้อง';
-      } else if (err.name === 'NotFoundError') {
-        errorMessage = 'ไม่พบกล้องที่เลือก';
-      } else if (err.name === 'NotReadableError') {
-        errorMessage = 'กล้องถูกใช้งานโดยแอปอื่น';
+        }, START_RETRY_DELAY);
       }
-      
-      setError(errorMessage);
-      setIsScanning(false);
     }
-  }, []);
+  }, [selectedDeviceId, isScanning, onScanSuccess, onScanFailure]);
 
-  // QR code scanning logic
-  const startScanning = useCallback(() => {
-    const scan = async () => {
-      if (!videoRef.current || !canvasRef.current || !isScanning) return;
-
-      const video = videoRef.current;
-      const canvas = canvasRef.current;
-      const ctx = canvas.getContext('2d');
-
-      if (video.readyState === video.HAVE_ENOUGH_DATA) {
-        canvas.width = video.videoWidth;
-        canvas.height = video.videoHeight;
-        ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
-
+  // Stop scanning
+  const stopScanning = useCallback(async () => {
+    if (html5QrCodeRef.current && isScanning) {
+      try {
+        console.log('Stopping html5-qrcode scanner...');
+        await html5QrCodeRef.current.stop();
+        // Clear the UI and release DOM elements to avoid React DOM conflicts
         try {
-          // Use jsQR library for QR detection
-          const { default: jsQR } = await import('jsqr');
-          const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
-          const code = jsQR(imageData.data, imageData.width, imageData.height);
-
-          if (code) {
-            onDecode?.(code.data.trim());
-            // Brief pause after successful scan
-            setTimeout(() => {
-              if (isScanning) {
-                animationRef.current = requestAnimationFrame(scan);
-              }
-            }, 1000);
-            return;
-          }
-        } catch (err) {
-          console.warn('QR scanning error:', err);
+          await html5QrCodeRef.current.clear();
+        } catch (clearErr) {
+          console.warn('Warning during scanner clear():', clearErr);
         }
+        html5QrCodeRef.current = null;
+        setIsScanning(false);
+        console.log('Scanner stopped successfully');
+      } catch (err) {
+        console.error('Error stopping scanner:', err);
       }
-
-      if (isScanning) {
-        animationRef.current = requestAnimationFrame(scan);
-      }
-    };
-
-    animationRef.current = requestAnimationFrame(scan);
-  }, [isScanning, onDecode]);
-
-  // Stop camera and scanning
-  const stopCamera = useCallback(() => {
-    setIsScanning(false);
-    
-    if (animationRef.current) {
-      cancelAnimationFrame(animationRef.current);
-      animationRef.current = null;
     }
-
-    if (streamRef.current) {
-      streamRef.current.getTracks().forEach(track => track.stop());
-      streamRef.current = null;
-    }
-
-    if (videoRef.current) {
-      videoRef.current.srcObject = null;
-    }
-  }, []);
-
-  // Initialize scanner
-  useEffect(() => {
-    let isMounted = true;
-
-    const init = async () => {
-      if (!isMounted) return;
-      
-      const hasPermission = await requestCameraPermission();
-      if (!hasPermission || !isMounted) return;
-
-      const availableCameras = await getCameras();
-      if (!isMounted || availableCameras.length === 0) {
-        setError('ไม่พบกล้องบนอุปกรณ์นี้');
-        return;
-      }
-
-      const deviceId = selectedDeviceId || availableCameras[0].deviceId;
-      await startCamera(deviceId);
-    };
-
-    init();
-
-    return () => {
-      isMounted = false;
-      stopCamera();
-    };
-  }, []);
+  }, [isScanning]);
 
   // Handle camera switch
   const handleCameraSwitch = useCallback(async (deviceId) => {
+    console.log('Switching to camera:', deviceId);
+    await stopScanning();
     setSelectedDeviceId(deviceId);
-    await startCamera(deviceId);
-  }, [startCamera]);
+    // Scanner will restart automatically via useEffect
+  }, [stopScanning]);
 
   // Handle file upload for QR scanning
   const handleFileUpload = useCallback(async (event) => {
@@ -231,56 +217,28 @@ export default function QRScanner({ onDecode, title = 'สแกน QR Code' }) 
     if (!file) return;
 
     try {
-      const { default: jsQR } = await import('jsqr');
+      const html5QrCode = new Html5Qrcode(fileScanIdRef.current);
+      const result = await html5QrCode.scanFile(file, true);
       
-      const canvas = document.createElement('canvas');
-      const ctx = canvas.getContext('2d');
-      const img = new Image();
-      
-      img.onload = () => {
-        canvas.width = img.width;
-        canvas.height = img.height;
-        ctx.drawImage(img, 0, 0);
-        
-        const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
-        const code = jsQR(imageData.data, imageData.width, imageData.height);
-        
-        if (code) {
-          onDecode?.(code.data.trim());
-          toast.success('สแกน QR จากรูปภาพสำเร็จ', {
-            position: 'top-right',
-            style: {
-              borderRadius: '10px',
-              background: '#333',
-              color: '#fff',
-              padding: '16px',
-              fontFamily: 'prompt, sans-serif',
-              fontWeight: '500',
-            },
-          });
-        } else {
-          toast.error('ไม่พบ QR Code ในรูปภาพ', {
-            position: 'top-right',
-            style: {
-              borderRadius: '10px',
-              background: '#333',
-              color: '#fff',
-              padding: '16px',
-              fontFamily: 'prompt, sans-serif',
-              fontWeight: '500',
-            },
-          });
-        }
-      };
-      
-      img.src = URL.createObjectURL(file);
-    } catch (err) {
-      console.error('File scan error:', err);
-      toast.error('ไม่สามารถสแกนจากรูปภาพได้', {
+      onDecode?.(result);
+      toast.success('🎯 สแกน QR จากรูปภาพสำเร็จ', {
         position: 'top-right',
         style: {
           borderRadius: '10px',
-          background: '#333',
+          background: '#22c55e',
+          color: '#fff',
+          padding: '16px',
+          fontFamily: 'prompt, sans-serif',
+          fontWeight: '500',
+        },
+      });
+    } catch (err) {
+      console.error('File scan error:', err);
+      toast.error('ไม่พบ QR Code ในรูปภาพ', {
+        position: 'top-right',
+        style: {
+          borderRadius: '10px',
+          background: '#ef4444',
           color: '#fff',
           padding: '16px',
           fontFamily: 'prompt, sans-serif',
@@ -289,6 +247,44 @@ export default function QRScanner({ onDecode, title = 'สแกน QR Code' }) 
       });
     }
   }, [onDecode]);
+
+  // Initialize scanner
+  useEffect(() => {
+    let isMounted = true;
+
+    const init = async () => {
+      if (!isMounted) return;
+      
+      console.log('Initializing QR scanner...');
+      const availableCameras = await getCameras();
+      
+      if (!isMounted || availableCameras.length === 0) {
+        setError('ไม่พบกล้องบนอุปกรณ์นี้');
+        return;
+      }
+      // Ensure the container is present for immediate start
+      if (!document.getElementById(scannerIdRef.current)) {
+        console.log('qr-reader not in DOM yet during init');
+      }
+    };
+
+    init();
+
+    return () => {
+      isMounted = false;
+      if (startRetryRef.current) {
+        clearTimeout(startRetryRef.current);
+      }
+      stopScanning();
+    };
+  }, [getCameras, stopScanning]);
+
+  // Auto-start scanning when camera is selected
+  useEffect(() => {
+    if (selectedDeviceId && !isScanning) {
+      startScanning();
+    }
+  }, [selectedDeviceId, isScanning, startScanning]);
 
   return (
     <div className="bg-white rounded-lg shadow p-4">
@@ -304,76 +300,73 @@ export default function QRScanner({ onDecode, title = 'สแกน QR Code' }) 
             onChange={(e) => handleCameraSwitch(e.target.value)}
           >
             {cameras.map((camera) => (
-              <option key={camera.deviceId} value={camera.deviceId}>
-                {camera.label || `กล้อง ${camera.deviceId.slice(0, 8)}`}
+              <option key={camera.id} value={camera.id}>
+                {camera.label || `กล้อง ${camera.id.slice(0, 8)}`}
               </option>
             ))}
           </select>
         </div>
       )}
 
-      {/* Video container */}
-      <div className="relative flex items-center justify-center min-h-[280px] bg-gray-100 rounded-lg overflow-hidden">
+      {/* Scanner container */}
+      <div className="relative">
         {!isScanning && !error && (
-          <div className="text-sm text-earth-700 font-prompt">กำลังเตรียมกล้องสำหรับสแกน...</div>
+          <div className="flex items-center justify-center min-h-[280px] bg-gray-100 rounded-lg">
+            <div className="text-sm text-earth-700 font-prompt">กำลังเตรียมกล้องสำหรับสแกน...</div>
+          </div>
         )}
         
         {error && (
-          <div className="text-sm text-red-600 bg-red-50 p-3 rounded-lg border border-red-200 m-4">
-            <div className="font-prompt font-medium mb-2">⚠️ ปัญหาการเข้าถึงกล้อง</div>
-            <div className="font-prompt mb-2">{error}</div>
-            <div className="flex gap-2">
-              <button 
-                onClick={() => window.location.reload()} 
-                className="bg-red-600 hover:bg-red-700 text-white px-3 py-1 rounded text-xs font-prompt"
-              >
-                รีเฟรชหน้าเว็บ
-              </button>
-              <button 
-                onClick={async () => {
-                  setError(null);
-                  const hasPermission = await requestCameraPermission();
-                  if (hasPermission) {
+          <div className="flex items-center justify-center min-h-[280px] bg-gray-100 rounded-lg">
+            <div className="text-sm text-red-600 bg-red-50 p-3 rounded-lg border border-red-200 m-4">
+              <div className="font-prompt font-medium mb-2">⚠️ ปัญหาการเข้าถึงกล้อง</div>
+              <div className="font-prompt mb-2">{error}</div>
+              <div className="flex gap-2">
+                <button 
+                  onClick={() => window.location.reload()} 
+                  className="bg-red-600 hover:bg-red-700 text-white px-3 py-1 rounded text-xs font-prompt"
+                >
+                  รีเฟรชหน้าเว็บ
+                </button>
+                <button 
+                  onClick={async () => {
+                    setError(null);
                     const availableCameras = await getCameras();
                     if (availableCameras.length > 0) {
-                      await startCamera(selectedDeviceId || availableCameras[0].deviceId);
+                      setSelectedDeviceId(availableCameras[0].id);
                     }
-                  }
-                }} 
-                className="bg-blue-600 hover:bg-blue-700 text-white px-3 py-1 rounded text-xs font-prompt"
-              >
-                ลองใหม่
-              </button>
+                  }} 
+                  className="bg-blue-600 hover:bg-blue-700 text-white px-3 py-1 rounded text-xs font-prompt"
+                >
+                  ลองใหม่
+                </button>
+              </div>
             </div>
           </div>
         )}
 
+        {/* Html5-qrcode scanner container */}
+        <div
+          id={scannerIdRef.current}
+          className="w-full"
+          style={{ minHeight: 300 }}
+        ></div>
+        
+        {/* Hidden div for file scanning */}
+        <div id={fileScanIdRef.current} className="hidden"></div>
+
+        {/* Status overlay */}
         {isScanning && (
-          <>
-            <video
-              ref={videoRef}
-              className="w-full h-full object-cover"
-              autoPlay
-              playsInline
-              muted
-            />
-            <canvas
-              ref={canvasRef}
-              className="hidden"
-            />
-            {/* Scanning overlay */}
-            <div className="absolute inset-0 pointer-events-none">
-              <div className="absolute inset-4 border-2 border-green-500 rounded-lg">
-                <div className="absolute top-0 left-0 w-6 h-6 border-l-4 border-t-4 border-green-500"></div>
-                <div className="absolute top-0 right-0 w-6 h-6 border-r-4 border-t-4 border-green-500"></div>
-                <div className="absolute bottom-0 left-0 w-6 h-6 border-l-4 border-b-4 border-green-500"></div>
-                <div className="absolute bottom-0 right-0 w-6 h-6 border-r-4 border-b-4 border-green-500"></div>
-              </div>
-              <div className="absolute bottom-4 left-1/2 transform -translate-x-1/2 bg-black bg-opacity-50 text-white px-3 py-1 rounded font-prompt text-sm">
-                วาง QR Code ในกรอบเพื่อสแกน
-              </div>
-            </div>
-          </>
+          <div className="absolute top-4 left-4 bg-black bg-opacity-50 text-white px-2 py-1 rounded font-prompt text-xs">
+            📹 สแกนอัตโนมัติ... ({scanCount} ครั้ง)
+          </div>
+        )}
+
+        {/* Last scan result */}
+        {lastScanResult && (
+          <div className="absolute bottom-4 left-4 right-4 bg-green-500 bg-opacity-90 text-white px-3 py-2 rounded font-prompt text-sm">
+            ✅ สแกนล่าสุด: {lastScanResult.substring(0, 20)}...
+          </div>
         )}
       </div>
 
@@ -381,7 +374,7 @@ export default function QRScanner({ onDecode, title = 'สแกน QR Code' }) 
       {isScanning && (
         <div className="mt-3 flex justify-center">
           <button
-            onClick={stopCamera}
+            onClick={stopScanning}
             className="bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded font-prompt text-sm"
           >
             หยุดสแกน

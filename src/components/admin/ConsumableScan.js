@@ -23,11 +23,22 @@ export default function ConsumableScan({ type, title }) {
   const normalizeUuid = (raw) => {
     if (!raw) return '';
     const s = String(raw).trim().toUpperCase();
-    // Extract code if URL-embedded, or if full UUID contains prefix
-    const match = s.match(/CCI-[A-Z0-9]{6}/);
-    if (match) return match[0];
+    
+    // More flexible pattern matching for various QR formats
+    // Handle URLs with embedded codes
+    const urlMatch = s.match(/CCI-[A-Z0-9]{6}/);
+    if (urlMatch) return urlMatch[0];
+    
+    // Handle direct UUID input
+    if (/^CCI-[A-Z0-9]{6}$/.test(s)) return s;
+    
     // If only 6 chars provided
     if (/^[A-Z0-9]{6}$/.test(s)) return `CCI-${s}`;
+    
+    // Handle common QR variations with different separators
+    const separatorMatch = s.match(/CCI[_\-\s]?([A-Z0-9]{6})/);
+    if (separatorMatch) return `CCI-${separatorMatch[1]}`;
+    
     return '';
   };
 
@@ -66,10 +77,15 @@ export default function ConsumableScan({ type, title }) {
 
       // Success new record
       playBeep(880, 0.1); // higher pitch quick beep
-      toast.success(
-        type === 'beverage' ? 'บันทึกการรับเครื่องดื่มสำเร็จ' : 'บันทึกการรับอาหารสำเร็จ',
-        { position: 'top-right', style: toastStyle, duration: 1500 }
-      );
+      const successMessage = type === 'beverage' ? 
+        `✅ บันทึกการรับเครื่องดื่มสำเร็จ (${uuid})` : 
+        `✅ บันทึกการรับอาหารสำเร็จ (${uuid})`;
+      
+      toast.success(successMessage, {
+        position: 'top-right', 
+        style: toastStyle, 
+        duration: 2000 
+      });
       setLastUuid(uuid);
       
       // Auto-clear after 2 seconds for faster scanning
@@ -78,18 +94,30 @@ export default function ConsumableScan({ type, title }) {
       }, 2000);
     } catch (e) {
       console.error('Update consumable error:', e);
-      toast.error('เกิดข้อผิดพลาดในการอัปเดตสถานะ', { position: 'top-right', style: toastStyle });
+      const errorMessage = e.message || 'เกิดข้อผิดพลาดในการอัปเดตสถานะ';
+      toast.error(`❌ ${errorMessage}`, { 
+        position: 'top-right', 
+        style: toastStyle,
+        duration: 4000 
+      });
     } finally {
       setUpdating(false);
     }
   }, [type]);
 
   const handleDecode = useCallback((text) => {
+    console.log('QR decoded raw text:', text); // Debug logging
     const uuid = normalizeUuid(text);
     if (!uuid) {
-      toast.error('รูปแบบ QR ไม่ถูกต้อง', { position: 'top-right', style: toastStyle });
+      console.log('Failed to normalize UUID from:', text); // Debug logging
+      toast.error(`รูปแบบ QR ไม่ถูกต้อง: ${text.substring(0, 20)}...`, { 
+        position: 'top-right', 
+        style: toastStyle,
+        duration: 3000 
+      });
       return;
     }
+    console.log('Normalized UUID:', uuid); // Debug logging
     updateStatus(uuid);
   }, [updateStatus]);
 

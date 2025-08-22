@@ -1,46 +1,243 @@
 'use client';
 
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useRef, useState, useCallback } from 'react';
 import toast from 'react-hot-toast';
 
 /**
- * Reusable QR scanner using html5-qrcode loaded dynamically on client.
+ * Completely rewritten QR scanner with better DOM management and camera handling
  * Props:
  * - onDecode: (text) => void
  * - title: string
  */
 export default function QRScanner({ onDecode, title = 'สแกน QR Code' }) {
-  const containerRef = useRef(null);
-  const scannerRef = useRef(null);
-  const [ready, setReady] = useState(false);
+  const videoRef = useRef(null);
+  const canvasRef = useRef(null);
+  const streamRef = useRef(null);
+  const animationRef = useRef(null);
+  const [isScanning, setIsScanning] = useState(false);
   const [error, setError] = useState(null);
   const [cameras, setCameras] = useState([]);
   const [selectedDeviceId, setSelectedDeviceId] = useState('');
-  const [Html5QrcodeModule, setHtml5QrcodeModule] = useState(null);
+  const [permissionGranted, setPermissionGranted] = useState(false);
 
+  // Request camera permission
+  const requestCameraPermission = useCallback(async () => {
+    try {
+      const stream = await navigator.mediaDevices.getUserMedia({ video: true });
+      stream.getTracks().forEach(track => track.stop()); // Stop immediately after permission check
+      setPermissionGranted(true);
+      return true;
+    } catch (err) {
+      let errorMessage = 'ไม่สามารถเข้าถึงกล้องได้';
+      
+      if (err.name === 'NotAllowedError') {
+        errorMessage = 'กรุณาอนุญาตการเข้าถึงกล้องในเบราว์เซอร์';
+      } else if (err.name === 'NotFoundError') {
+        errorMessage = 'ไม่พบกล้องบนอุปกรณ์นี้';
+      } else if (err.name === 'NotReadableError') {
+        errorMessage = 'กล้องถูกใช้งานโดยแอปพลิเคชันอื่น';
+      }
+      
+      setError(errorMessage);
+      toast.error(errorMessage, {
+        position: 'top-right',
+        style: {
+          borderRadius: '10px',
+          background: '#333',
+          color: '#fff',
+          padding: '16px',
+          fontFamily: 'prompt, sans-serif',
+          fontWeight: '500',
+        },
+      });
+      return false;
+    }
+  }, []);
+
+  // Get available cameras
+  const getCameras = useCallback(async () => {
+    try {
+      const devices = await navigator.mediaDevices.enumerateDevices();
+      const videoDevices = devices.filter(device => device.kind === 'videoinput');
+      setCameras(videoDevices);
+      
+      if (videoDevices.length > 0) {
+        // Prefer back camera if available
+        const backCamera = videoDevices.find(device => 
+          /back|rear|environment/i.test(device.label)
+        );
+        setSelectedDeviceId(backCamera?.deviceId || videoDevices[0].deviceId);
+      }
+      
+      return videoDevices;
+    } catch (err) {
+      console.error('Error getting cameras:', err);
+      return [];
+    }
+  }, []);
+
+  // Start camera stream
+  const startCamera = useCallback(async (deviceId) => {
+    try {
+      if (streamRef.current) {
+        streamRef.current.getTracks().forEach(track => track.stop());
+      }
+
+      const constraints = {
+        video: {
+          deviceId: deviceId ? { exact: deviceId } : undefined,
+          width: { ideal: 640 },
+          height: { ideal: 480 },
+          facingMode: deviceId ? undefined : { ideal: 'environment' }
+        }
+      };
+
+      const stream = await navigator.mediaDevices.getUserMedia(constraints);
+      streamRef.current = stream;
+
+      if (videoRef.current) {
+        videoRef.current.srcObject = stream;
+        videoRef.current.play();
+        setIsScanning(true);
+        setError(null);
+        startScanning();
+      }
+    } catch (err) {
+      console.error('Error starting camera:', err);
+      let errorMessage = 'ไม่สามารถเปิดกล้องได้';
+      
+      if (err.name === 'NotAllowedError') {
+        errorMessage = 'กรุณาอนุญาตการเข้าถึงกล้อง';
+      } else if (err.name === 'NotFoundError') {
+        errorMessage = 'ไม่พบกล้องที่เลือก';
+      } else if (err.name === 'NotReadableError') {
+        errorMessage = 'กล้องถูกใช้งานโดยแอปอื่น';
+      }
+      
+      setError(errorMessage);
+      setIsScanning(false);
+    }
+  }, []);
+
+  // QR code scanning logic
+  const startScanning = useCallback(() => {
+    const scan = async () => {
+      if (!videoRef.current || !canvasRef.current || !isScanning) return;
+
+      const video = videoRef.current;
+      const canvas = canvasRef.current;
+      const ctx = canvas.getContext('2d');
+
+      if (video.readyState === video.HAVE_ENOUGH_DATA) {
+        canvas.width = video.videoWidth;
+        canvas.height = video.videoHeight;
+        ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
+
+        try {
+          // Use jsQR library for QR detection
+          const { default: jsQR } = await import('jsqr');
+          const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+          const code = jsQR(imageData.data, imageData.width, imageData.height);
+
+          if (code) {
+            onDecode?.(code.data.trim());
+            // Brief pause after successful scan
+            setTimeout(() => {
+              if (isScanning) {
+                animationRef.current = requestAnimationFrame(scan);
+              }
+            }, 1000);
+            return;
+          }
+        } catch (err) {
+          console.warn('QR scanning error:', err);
+        }
+      }
+
+      if (isScanning) {
+        animationRef.current = requestAnimationFrame(scan);
+      }
+    };
+
+    animationRef.current = requestAnimationFrame(scan);
+  }, [isScanning, onDecode]);
+
+  // Stop camera and scanning
+  const stopCamera = useCallback(() => {
+    setIsScanning(false);
+    
+    if (animationRef.current) {
+      cancelAnimationFrame(animationRef.current);
+      animationRef.current = null;
+    }
+
+    if (streamRef.current) {
+      streamRef.current.getTracks().forEach(track => track.stop());
+      streamRef.current = null;
+    }
+
+    if (videoRef.current) {
+      videoRef.current.srcObject = null;
+    }
+  }, []);
+
+  // Initialize scanner
   useEffect(() => {
     let isMounted = true;
 
-    async function setup() {
-      try {
-        const { Html5Qrcode } = await import('html5-qrcode');
-        setHtml5QrcodeModule({ Html5Qrcode });
-        if (!isMounted) return;
-        if (!containerRef.current) return;
+    const init = async () => {
+      if (!isMounted) return;
+      
+      const hasPermission = await requestCameraPermission();
+      if (!hasPermission || !isMounted) return;
 
-        // Create a container div id for the scanner
-        const el = document.createElement('div');
-        el.id = 'qr-reader';
-        el.className = 'w-full aspect-square max-w-sm';
-        containerRef.current.innerHTML = '';
-        containerRef.current.appendChild(el);
+      const availableCameras = await getCameras();
+      if (!isMounted || availableCameras.length === 0) {
+        setError('ไม่พบกล้องบนอุปกรณ์นี้');
+        return;
+      }
 
-        // Get cameras first
-        const cams = await Html5Qrcode.getCameras();
-        if (!cams || cams.length === 0) {
-          setError('ไม่พบอุปกรณ์กล้อง');
-          setReady(false);
-          toast.error('ไม่พบอุปกรณ์กล้องบนเครื่องนี้', {
+      const deviceId = selectedDeviceId || availableCameras[0].deviceId;
+      await startCamera(deviceId);
+    };
+
+    init();
+
+    return () => {
+      isMounted = false;
+      stopCamera();
+    };
+  }, []);
+
+  // Handle camera switch
+  const handleCameraSwitch = useCallback(async (deviceId) => {
+    setSelectedDeviceId(deviceId);
+    await startCamera(deviceId);
+  }, [startCamera]);
+
+  // Handle file upload for QR scanning
+  const handleFileUpload = useCallback(async (event) => {
+    const file = event.target.files?.[0];
+    if (!file) return;
+
+    try {
+      const { default: jsQR } = await import('jsqr');
+      
+      const canvas = document.createElement('canvas');
+      const ctx = canvas.getContext('2d');
+      const img = new Image();
+      
+      img.onload = () => {
+        canvas.width = img.width;
+        canvas.height = img.height;
+        ctx.drawImage(img, 0, 0);
+        
+        const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+        const code = jsQR(imageData.data, imageData.width, imageData.height);
+        
+        if (code) {
+          onDecode?.(code.data.trim());
+          toast.success('สแกน QR จากรูปภาพสำเร็จ', {
             position: 'top-right',
             style: {
               borderRadius: '10px',
@@ -51,64 +248,42 @@ export default function QRScanner({ onDecode, title = 'สแกน QR Code' }) 
               fontWeight: '500',
             },
           });
-          return;
+        } else {
+          toast.error('ไม่พบ QR Code ในรูปภาพ', {
+            position: 'top-right',
+            style: {
+              borderRadius: '10px',
+              background: '#333',
+              color: '#fff',
+              padding: '16px',
+              fontFamily: 'prompt, sans-serif',
+              fontWeight: '500',
+            },
+          });
         }
-        setCameras(cams);
-        const deviceId = cams.find(c => /back|rear|environment/i.test(c.label))?.id || cams[0].id;
-        setSelectedDeviceId(deviceId);
-
-        const html5QrCode = new Html5Qrcode('qr-reader');
-        scannerRef.current = html5QrCode;
-
-        const config = { fps: 10, qrbox: { width: 250, height: 250 } };
-
-        // Start with chosen deviceId
-        // Debounced continuous scanning (no stop), for fast repeated scans
-        let accepting = true;
-        await html5QrCode.start({ deviceId: { exact: deviceId } }, config, (decodedText) => {
-          if (!decodedText) return;
-          if (!accepting) return;
-          accepting = false;
-          onDecode?.(decodedText.trim());
-          // Re-accept after short delay
-          setTimeout(() => { accepting = true; }, 1200);
-        });
-
-        setReady(true);
-      } catch (e) {
-        console.error('QR scanner init error:', e);
-        setError(e?.message || 'Unable to start camera');
-        toast.error('ไม่สามารถเปิดกล้องสำหรับสแกนได้', {
-          position: 'top-right',
-          style: {
-            borderRadius: '10px',
-            background: '#333',
-            color: '#fff',
-            padding: '16px',
-            fontFamily: 'prompt, sans-serif',
-            fontWeight: '500',
-          },
-        });
-      }
+      };
+      
+      img.src = URL.createObjectURL(file);
+    } catch (err) {
+      console.error('File scan error:', err);
+      toast.error('ไม่สามารถสแกนจากรูปภาพได้', {
+        position: 'top-right',
+        style: {
+          borderRadius: '10px',
+          background: '#333',
+          color: '#fff',
+          padding: '16px',
+          fontFamily: 'prompt, sans-serif',
+          fontWeight: '500',
+        },
+      });
     }
-
-    // Only run on client
-    if (typeof window !== 'undefined') {
-      setup();
-    }
-
-    return () => {
-      isMounted = false;
-      if (scannerRef.current) {
-        // Only stop stream; do not call clear() to avoid DOM race with React unmount
-        Promise.resolve(scannerRef.current.stop()).catch(() => {});
-      }
-    };
   }, [onDecode]);
 
   return (
     <div className="bg-white rounded-lg shadow p-4">
       <h3 className="font-prompt font-bold text-earth-800 mb-3">{title}</h3>
+      
       {/* Camera selector when multiple cameras */}
       {cameras.length > 1 && (
         <div className="mb-3 flex items-center gap-2">
@@ -116,88 +291,102 @@ export default function QRScanner({ onDecode, title = 'สแกน QR Code' }) 
           <select
             className="border rounded px-2 py-1 font-prompt text-sm"
             value={selectedDeviceId}
-            onChange={async (e) => {
-              const newId = e.target.value;
-              setSelectedDeviceId(newId);
-              if (scannerRef.current) {
-                try {
-                  // Stop current stream before switching
-                  await scannerRef.current.stop();
-                } catch {}
-                try {
-                  let accepting = true;
-                  await scannerRef.current.start({ deviceId: { exact: newId } }, { fps: 10, qrbox: { width: 250, height: 250 } }, (decodedText) => {
-                    if (!decodedText) return;
-                    if (!accepting) return;
-                    accepting = false;
-                    onDecode?.(decodedText.trim());
-                    setTimeout(() => { accepting = true; }, 1200);
-                  });
-                } catch (err) {
-                  console.error('Switch camera failed:', err);
-                  toast.error('สลับกล้องไม่สำเร็จ', { position: 'top-right', style: { borderRadius: '10px', background: '#333', color: '#fff', padding: '16px', fontFamily: 'prompt, sans-serif', fontWeight: '500' } });
-                }
-              }
-            }}
+            onChange={(e) => handleCameraSwitch(e.target.value)}
           >
-            {cameras.map((c) => (
-              <option key={c.id} value={c.id}>{c.label || c.id}</option>
+            {cameras.map((camera) => (
+              <option key={camera.deviceId} value={camera.deviceId}>
+                {camera.label || `กล้อง ${camera.deviceId.slice(0, 8)}`}
+              </option>
             ))}
           </select>
         </div>
       )}
 
-      <div ref={containerRef} className="flex items-center justify-center min-h-[280px]">
-        {!ready && !error && (
-          <div className="text-sm text-earth-700">กำลังเตรียมกล้องสำหรับสแกน...</div>
+      {/* Video container */}
+      <div className="relative flex items-center justify-center min-h-[280px] bg-gray-100 rounded-lg overflow-hidden">
+        {!isScanning && !error && (
+          <div className="text-sm text-earth-700 font-prompt">กำลังเตรียมกล้องสำหรับสแกน...</div>
         )}
+        
         {error && (
-          <div className="text-sm text-red-600">
-            ไม่สามารถใช้กล้องได้ โปรดอนุญาตการใช้งานกล้อง หรือลองใหม่อีกครั้ง
+          <div className="text-sm text-red-600 bg-red-50 p-3 rounded-lg border border-red-200 m-4">
+            <div className="font-prompt font-medium mb-2">⚠️ ปัญหาการเข้าถึงกล้อง</div>
+            <div className="font-prompt mb-2">{error}</div>
+            <div className="flex gap-2">
+              <button 
+                onClick={() => window.location.reload()} 
+                className="bg-red-600 hover:bg-red-700 text-white px-3 py-1 rounded text-xs font-prompt"
+              >
+                รีเฟรชหน้าเว็บ
+              </button>
+              <button 
+                onClick={async () => {
+                  setError(null);
+                  const hasPermission = await requestCameraPermission();
+                  if (hasPermission) {
+                    const availableCameras = await getCameras();
+                    if (availableCameras.length > 0) {
+                      await startCamera(selectedDeviceId || availableCameras[0].deviceId);
+                    }
+                  }
+                }} 
+                className="bg-blue-600 hover:bg-blue-700 text-white px-3 py-1 rounded text-xs font-prompt"
+              >
+                ลองใหม่
+              </button>
+            </div>
           </div>
+        )}
+
+        {isScanning && (
+          <>
+            <video
+              ref={videoRef}
+              className="w-full h-full object-cover"
+              autoPlay
+              playsInline
+              muted
+            />
+            <canvas
+              ref={canvasRef}
+              className="hidden"
+            />
+            {/* Scanning overlay */}
+            <div className="absolute inset-0 pointer-events-none">
+              <div className="absolute inset-4 border-2 border-green-500 rounded-lg">
+                <div className="absolute top-0 left-0 w-6 h-6 border-l-4 border-t-4 border-green-500"></div>
+                <div className="absolute top-0 right-0 w-6 h-6 border-r-4 border-t-4 border-green-500"></div>
+                <div className="absolute bottom-0 left-0 w-6 h-6 border-l-4 border-b-4 border-green-500"></div>
+                <div className="absolute bottom-0 right-0 w-6 h-6 border-r-4 border-b-4 border-green-500"></div>
+              </div>
+              <div className="absolute bottom-4 left-1/2 transform -translate-x-1/2 bg-black bg-opacity-50 text-white px-3 py-1 rounded font-prompt text-sm">
+                วาง QR Code ในกรอบเพื่อสแกน
+              </div>
+            </div>
+          </>
         )}
       </div>
 
+      {/* Control buttons */}
+      {isScanning && (
+        <div className="mt-3 flex justify-center">
+          <button
+            onClick={stopCamera}
+            className="bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded font-prompt text-sm"
+          >
+            หยุดสแกน
+          </button>
+        </div>
+      )}
+
       {/* Fallback: upload image to scan */}
-      <div className="mt-3">
-        <label className="font-prompt text-sm text-earth-800 mb-1 block">สแกนจากรูปภาพ</label>
+      <div className="mt-4 border-t pt-4">
+        <label className="font-prompt text-sm text-earth-800 mb-2 block">สแกนจากรูปภาพ</label>
         <input
           type="file"
           accept="image/*"
-          className="font-prompt text-sm"
-          onChange={async (e) => {
-            const file = e.target.files?.[0];
-            if (!file) return;
-            if (!Html5QrcodeModule || !Html5QrcodeModule.Html5Qrcode) {
-              toast.error('ไม่พร้อมสำหรับการสแกนไฟล์รูปภาพ', { position: 'top-right', style: { borderRadius: '10px', background: '#333', color: '#fff', padding: '16px', fontFamily: 'prompt, sans-serif', fontWeight: '500' } });
-              return;
-            }
-            try {
-              // Use a temporary instance for file scanning
-              const tempId = 'qr-file-reader-' + Date.now();
-              const tempDiv = document.createElement('div');
-              tempDiv.id = tempId;
-              tempDiv.style.display = 'none';
-              document.body.appendChild(tempDiv);
-              const reader = new Html5QrcodeModule.Html5Qrcode(tempId);
-              const result = await reader.scanFile(file, true);
-              // Do NOT call clear() then remove child to avoid double-removal race
-              // Try to close the instance gracefully
-              try { await reader.stop(); } catch {}
-              // Remove temp div if still in DOM
-              if (document.body.contains(tempDiv)) {
-                document.body.removeChild(tempDiv);
-              }
-              if (result) {
-                onDecode?.(String(result).trim());
-              } else {
-                toast.error('ไม่พบ QR ในรูปภาพ', { position: 'top-right', style: { borderRadius: '10px', background: '#333', color: '#fff', padding: '16px', fontFamily: 'prompt, sans-serif', fontWeight: '500' } });
-              }
-            } catch (err) {
-              console.error('Scan image error:', err);
-              toast.error('สแกนจากรูปภาพไม่สำเร็จ', { position: 'top-right', style: { borderRadius: '10px', background: '#333', color: '#fff', padding: '16px', fontFamily: 'prompt, sans-serif', fontWeight: '500' } });
-            }
-          }}
+          className="font-prompt text-sm w-full border rounded px-3 py-2"
+          onChange={handleFileUpload}
         />
         <p className="text-xs text-earth-600 mt-1 font-prompt">หากกล้องใช้ไม่ได้ สามารถเลือกรูป QR จากแกลเลอรีเพื่อสแกน</p>
       </div>

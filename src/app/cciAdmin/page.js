@@ -17,12 +17,12 @@ export default function AdminPage() {
       <Toaster position="top-right" />
       
       {/* Admin Header */}
-      <header className="bg-earth-800 text-white py-4 px-6 shadow-md">
+      <header className="bg-earth-800 text-white py-4 px-4 sm:px-6 shadow-md">
         <div className="container mx-auto">
           <div className="flex justify-between items-center">
-            <h1 className="text-2xl font-prompt font-bold">CCI Admin Portal</h1>
-            <div className="flex items-center gap-4">
-              <span className="opacity-75 text-sm">Climate Change Forum 2025</span>
+            <h1 className="text-lg sm:text-2xl font-prompt font-bold">CCI Admin Portal</h1>
+            <div className="flex items-center gap-2 sm:gap-4">
+              <span className="opacity-75 text-xs sm:text-sm hidden sm:block">Climate Change Forum 2025</span>
               <button 
                 onClick={async () => {
                   try {
@@ -68,12 +68,13 @@ export default function AdminPage() {
                     });
                   }
                 }}
-                className="bg-red-600 hover:bg-red-700 text-white font-prompt text-sm px-4 py-1.5 rounded transition-colors flex items-center"
+                className="bg-red-600 hover:bg-red-700 text-white font-prompt text-xs sm:text-sm px-2 sm:px-4 py-1.5 rounded transition-colors flex items-center"
               >
-                <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <svg xmlns="http://www.w3.org/2000/svg" className="h-3 w-3 sm:h-4 sm:w-4 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
                 </svg>
-                ออกจากระบบ
+                <span className="hidden sm:inline">ออกจากระบบ</span>
+                <span className="sm:hidden">ออก</span>
               </button>
             </div>
           </div>
@@ -88,18 +89,22 @@ export default function AdminPage() {
           onValueChange={setActiveTab}
           className="w-full"
         >
-          <TabsList className="grid w-full grid-cols-5 mb-8">
-            <TabsTrigger value="check-in" className="font-prompt">
-              เช็คอิน / Check-in
+          <TabsList className="grid w-full grid-cols-2 sm:grid-cols-4 mb-8">
+            <TabsTrigger value="check-in" className="font-prompt text-xs sm:text-sm">
+              <span className="hidden sm:inline">เช็คอิน / Check-in</span>
+              <span className="sm:hidden">เช็คอิน</span>
             </TabsTrigger>
-            <TabsTrigger value="dashboard" className="font-prompt">
-              แดชบอร์ด / Dashboard
+            <TabsTrigger value="dashboard" className="font-prompt text-xs sm:text-sm">
+              <span className="hidden sm:inline">แดชบอร์ด / Dashboard</span>
+              <span className="sm:hidden">แดชบอร์ด</span>
             </TabsTrigger>
-            <TabsTrigger value="beverage" className="font-prompt">
-              เครื่องดื่ม / Beverage
+            <TabsTrigger value="beverage" className="font-prompt text-xs sm:text-sm">
+              <span className="hidden sm:inline">เครื่องดื่ม / Beverage</span>
+              <span className="sm:hidden">เครื่องดื่ม</span>
             </TabsTrigger>
-            <TabsTrigger value="food" className="font-prompt">
-              อาหาร / Food
+            <TabsTrigger value="food" className="font-prompt text-xs sm:text-sm">
+              <span className="hidden sm:inline">อาหาร / Food</span>
+              <span className="sm:hidden">อาหาร</span>
             </TabsTrigger>
             {/* Participants tab removed temporarily */}
           </TabsList>

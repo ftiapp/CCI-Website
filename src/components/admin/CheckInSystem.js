@@ -176,8 +176,8 @@ export default function CheckInSystem() {
   };
 
   return (
-    <div className="bg-white rounded-lg shadow-md p-6">
-      <h2 className="text-2xl font-prompt font-bold text-earth-800 mb-6">ระบบเช็คอิน</h2>
+    <div className="space-y-6">
+      <h2 className="text-xl sm:text-2xl font-prompt font-bold text-earth-800 mb-6">ระบบเช็คอิน</h2>
       
       {/* Search Form */}
       <SearchForm

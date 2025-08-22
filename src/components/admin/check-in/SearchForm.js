@@ -20,7 +20,7 @@ export default function SearchForm({
 
   return (
     <form onSubmit={onSearch} className="mb-8">
-      <div className="flex gap-2">
+      <div className="flex flex-col sm:flex-row gap-2">
         <div className="relative flex-1">
           <input
             ref={searchInputRef}
@@ -28,15 +28,15 @@ export default function SearchForm({
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
             placeholder="ค้นหาด้วยรหัสลงทะเบียน (CCI-XXXXXX) หรือ ชื่อ-นามสกุล"
-            className="w-full px-4 py-3 pl-10 border border-gray-300 rounded-lg focus:ring-2 focus:ring-earth-500 focus:border-earth-500 font-prompt"
+            className="w-full px-4 py-3 pl-10 border border-gray-300 rounded-lg focus:ring-2 focus:ring-earth-500 focus:border-earth-500 font-prompt text-sm sm:text-base"
           />
-          <MagnifyingGlassIcon className="absolute left-3 top-3.5 h-5 w-5 text-gray-400" />
+          <MagnifyingGlassIcon className="absolute left-3 top-3.5 h-4 w-4 sm:h-5 sm:w-5 text-gray-400" />
         </div>
         
         <button
           type="submit"
           disabled={isSearching}
-          className="bg-earth-600 hover:bg-earth-700 text-white font-prompt font-medium px-6 py-3 rounded-lg transition-colors"
+          className="bg-earth-600 hover:bg-earth-700 text-white font-prompt font-medium px-4 sm:px-6 py-3 rounded-lg transition-colors text-sm sm:text-base whitespace-nowrap"
         >
           {isSearching ? 'กำลังค้นหา...' : 'ค้นหา'}
         </button>

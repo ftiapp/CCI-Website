@@ -116,14 +116,14 @@ export default function Dashboard() {
   // Stat Card Component
   const StatCard = ({ icon, title, value, subValue, color }) => {
     return (
-      <div className="bg-white rounded-lg shadow-md p-6 flex">
-        <div className={`rounded-full p-4 ${color} mr-4 self-start`}>
+      <div className="bg-white rounded-lg shadow-md p-4 sm:p-6 flex flex-col sm:flex-row">
+        <div className={`rounded-full p-3 sm:p-4 ${color} mb-3 sm:mb-0 sm:mr-4 self-center sm:self-start`}>
           {icon}
         </div>
-        <div>
-          <h3 className="text-gray-500 text-sm font-medium mb-1">{title}</h3>
-          <p className="text-3xl font-prompt font-bold text-gray-800 mb-1">{value}</p>
-          {subValue && <p className="text-sm text-gray-500">{subValue}</p>}
+        <div className="text-center sm:text-left">
+          <h3 className="text-gray-500 text-xs sm:text-sm font-medium mb-1">{title}</h3>
+          <p className="text-2xl sm:text-3xl font-prompt font-bold text-gray-800 mb-1">{value}</p>
+          {subValue && <p className="text-xs sm:text-sm text-gray-500">{subValue}</p>}
         </div>
       </div>
     );
@@ -132,47 +132,51 @@ export default function Dashboard() {
   return (
     <div className="space-y-8">
       {/* Tabs */}
-      <div className="border-b border-gray-200">
-        <nav className="-mb-px flex space-x-8" aria-label="Tabs">
+      <div className="border-b border-gray-200 overflow-x-auto">
+        <nav className="-mb-px flex space-x-2 sm:space-x-8 min-w-max px-4 sm:px-0" aria-label="Tabs">
           <button
             onClick={() => setActiveTab('dashboard')}
             className={`${activeTab === 'dashboard'
               ? 'border-earth-500 text-earth-600'
               : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
-            } whitespace-nowrap py-4 px-1 border-b-2 font-prompt font-medium text-sm flex items-center`}
+            } whitespace-nowrap py-4 px-1 border-b-2 font-prompt font-medium text-xs sm:text-sm flex items-center`}
           >
-            <ChartBarIcon className="h-5 w-5 mr-2" />
-            แดชบอร์ด
+            <ChartBarIcon className="h-4 w-4 sm:h-5 sm:w-5 mr-1 sm:mr-2" />
+            <span className="hidden sm:inline">แดชบอร์ด</span>
+            <span className="sm:hidden">ข้อมูล</span>
           </button>
           <button
             onClick={() => setActiveTab('schedule')}
             className={`${activeTab === 'schedule'
               ? 'border-earth-500 text-earth-600'
               : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
-            } whitespace-nowrap py-4 px-1 border-b-2 font-prompt font-medium text-sm flex items-center`}
+            } whitespace-nowrap py-4 px-1 border-b-2 font-prompt font-medium text-xs sm:text-sm flex items-center`}
           >
-            <CalendarIcon className="h-5 w-5 mr-2" />
-            จัดการตารางกิจกรรม
+            <CalendarIcon className="h-4 w-4 sm:h-5 sm:w-5 mr-1 sm:mr-2" />
+            <span className="hidden sm:inline">จัดการตารางกิจกรรม</span>
+            <span className="sm:hidden">ตาราง</span>
           </button>
           <button
             onClick={() => setActiveTab('registrants')}
             className={`${activeTab === 'registrants'
               ? 'border-earth-500 text-earth-600'
               : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
-            } whitespace-nowrap py-4 px-1 border-b-2 font-prompt font-medium text-sm flex items-center`}
+            } whitespace-nowrap py-4 px-1 border-b-2 font-prompt font-medium text-xs sm:text-sm flex items-center`}
           >
-            <ClipboardDocumentListIcon className="h-5 w-5 mr-2" />
-            จัดการข้อมูลผู้ลงทะเบียน
+            <ClipboardDocumentListIcon className="h-4 w-4 sm:h-5 sm:w-5 mr-1 sm:mr-2" />
+            <span className="hidden sm:inline">จัดการข้อมูลผู้ลงทะเบียน</span>
+            <span className="sm:hidden">ผู้ลงทะเบียน</span>
           </button>
           <button
             onClick={() => setActiveTab('organization-types')}
             className={`${activeTab === 'organization-types'
               ? 'border-earth-500 text-earth-600'
               : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
-            } whitespace-nowrap py-4 px-1 border-b-2 font-prompt font-medium text-sm flex items-center`}
+            } whitespace-nowrap py-4 px-1 border-b-2 font-prompt font-medium text-xs sm:text-sm flex items-center`}
           >
-            <BuildingOfficeIcon className="h-5 w-5 mr-2" />
-            จัดการประเภทธุรกิจ
+            <BuildingOfficeIcon className="h-4 w-4 sm:h-5 sm:w-5 mr-1 sm:mr-2" />
+            <span className="hidden sm:inline">จัดการประเภทธุรกิจ</span>
+            <span className="sm:hidden">ธุรกิจ</span>
           </button>
         </nav>
       </div>
@@ -181,19 +185,19 @@ export default function Dashboard() {
       {activeTab === 'dashboard' ? (
         <div className="space-y-8">
           <div className="flex justify-between items-center">
-            <h2 className="text-2xl font-prompt font-bold text-earth-800">แดชบอร์ด</h2>
+            <h2 className="text-xl sm:text-2xl font-prompt font-bold text-earth-800">แดชบอร์ด</h2>
           </div>
       
           {/* Filters Section */}
           <div className="bg-white rounded-lg shadow-md p-4 mb-8">
-            <h3 className="text-lg font-prompt font-semibold text-earth-800 mb-4 flex items-center">
-              <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 mr-2 text-earth-600" viewBox="0 0 20 20" fill="currentColor">
+            <h3 className="text-base sm:text-lg font-prompt font-semibold text-earth-800 mb-4 flex items-center">
+              <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 sm:h-5 sm:w-5 mr-2 text-earth-600" viewBox="0 0 20 20" fill="currentColor">
                 <path fillRule="evenodd" d="M3 3a1 1 0 011-1h12a1 1 0 011 1v3a1 1 0 01-.293.707L12 11.414V15a1 1 0 01-.293.707l-2 2A1 1 0 018 17v-5.586L3.293 6.707A1 1 0 013 6V3z" clipRule="evenodd" />
               </svg>
               ตัวกรองข้อมูล
             </h3>
             
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
               {/* Province Filter */}
               <div className="flex flex-col gap-2">
                 <label htmlFor="provinceFilter" className="text-sm font-medium text-gray-700 font-prompt">
@@ -295,7 +299,7 @@ export default function Dashboard() {
           ) : (
             <>
               {/* Stats Overview */}
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6">
                 <StatCard
                   icon={<UsersIcon className="h-6 w-6 text-blue-500" />}
                   title="ลงทะเบียนทั้งหมด"

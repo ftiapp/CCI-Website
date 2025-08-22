@@ -15,28 +15,30 @@ export default function ParticipantInfo({
   return (
     <div className="border border-gray-200 rounded-lg overflow-hidden">
       {/* Header */}
-      <div className="bg-gray-50 px-6 py-4 border-b border-gray-200 flex justify-between items-center">
-        <div>
-          <h3 className="text-xl font-prompt font-bold text-earth-800">
+      <div className="bg-gray-50 px-4 sm:px-6 py-4 border-b border-gray-200 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3">
+        <div className="flex-1">
+          <h3 className="text-lg sm:text-xl font-prompt font-bold text-earth-800">
             {participant.first_name} {participant.last_name}
           </h3>
-          <p className="text-sm text-gray-500">
+          <p className="text-xs sm:text-sm text-gray-500 break-all">
             รหัสลงทะเบียน: <span className="font-medium">{participant.uuid}</span>
           </p>
         </div>
         
-        <ActionButtons
-          participant={participant}
-          isCheckedIn={isCheckedIn}
-          isEligibleForGift={isEligibleForGift}
-          onCheckInToggle={onCheckInToggle}
-          onMarkNotAttending={onMarkNotAttending}
-        />
+        <div className="w-full sm:w-auto">
+          <ActionButtons
+            participant={participant}
+            isCheckedIn={isCheckedIn}
+            isEligibleForGift={isEligibleForGift}
+            onCheckInToggle={onCheckInToggle}
+            onMarkNotAttending={onMarkNotAttending}
+          />
+        </div>
       </div>
       
       {/* Content */}
-      <div className="p-6">
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+      <div className="p-4 sm:p-6">
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-6">
           {/* Left Column */}
           <div className="space-y-4">
             <div>

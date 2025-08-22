@@ -3,6 +3,7 @@
 import { useCallback, useMemo, useState } from 'react';
 import toast from 'react-hot-toast';
 import QRScanner from './scanner/QRScanner';
+import { XCircleIcon } from '@heroicons/react/24/solid';
 
 // Props: { type: 'beverage' | 'food', title: string }
 export default function ConsumableScan({ type, title }) {
@@ -50,9 +51,16 @@ export default function ConsumableScan({ type, title }) {
           first_name: data.participant?.first_name,
           last_name: data.participant?.last_name,
         });
-        toast((t) => (
-          'ผู้เข้าร่วมรายนี้ได้รับเรียบร้อยแล้ว'
-        ), { position: 'top-right', style: toastStyle, icon: 'ℹ️' });
+        toast.error('ลูกค้ารายนี้ได้รับไปแล้ว', {
+          position: 'top-right',
+          style: toastStyle,
+          duration: 1500,
+        });
+        
+        // Auto-close duplicate popup after 3 seconds for faster processing
+        setTimeout(() => {
+          setDuplicateInfo(null);
+        }, 3000);
         return;
       }
 
@@ -60,9 +68,14 @@ export default function ConsumableScan({ type, title }) {
       playBeep(880, 0.1); // higher pitch quick beep
       toast.success(
         type === 'beverage' ? 'บันทึกการรับเครื่องดื่มสำเร็จ' : 'บันทึกการรับอาหารสำเร็จ',
-        { position: 'top-right', style: toastStyle }
+        { position: 'top-right', style: toastStyle, duration: 1500 }
       );
       setLastUuid(uuid);
+      
+      // Auto-clear after 2 seconds for faster scanning
+      setTimeout(() => {
+        setLastUuid('');
+      }, 2000);
     } catch (e) {
       console.error('Update consumable error:', e);
       toast.error('เกิดข้อผิดพลาดในการอัปเดตสถานะ', { position: 'top-right', style: toastStyle });
@@ -90,60 +103,67 @@ export default function ConsumableScan({ type, title }) {
       return;
     }
     await updateStatus(uuid);
+    // Clear manual input after submission for faster processing
+    setManualInput('');
   };
 
   return (
-    <div className="grid gap-6 md:grid-cols-2">
-      <div>
+    <div className="grid gap-6 lg:grid-cols-2">
+      <div className="order-2 lg:order-1">
         <QRScanner title={title} onDecode={handleDecode} />
-        <form onSubmit={handleManualSubmit} className="mt-4 flex gap-2">
+        <form onSubmit={handleManualSubmit} className="mt-4 flex flex-col sm:flex-row gap-2">
           <input
             type="text"
             value={manualInput}
             onChange={(e) => setManualInput(e.target.value)}
-            className="flex-1 border rounded px-3 py-2 font-prompt"
+            className="flex-1 border rounded px-3 py-2 font-prompt text-sm"
             placeholder="กรอก CCI-XXXXXX หรือ 6 ตัวท้าย"
           />
           <button
             type="submit"
             disabled={updating}
-            className="bg-earth-700 hover:bg-earth-800 text-white font-prompt px-4 py-2 rounded disabled:opacity-60"
+            className="bg-earth-700 hover:bg-earth-800 text-white font-prompt px-4 py-2 rounded disabled:opacity-60 text-sm sm:text-base whitespace-nowrap"
           >
-            ยืนยัน
+            {updating ? 'กำลังบันทึก...' : 'ยืนยัน'}
           </button>
         </form>
       </div>
-      <div className="bg-white rounded-lg shadow p-4">
-        <h3 className="font-prompt font-bold text-earth-800 mb-3">ผลการสแกนล่าสุด</h3>
+      <div className="bg-white rounded-lg shadow p-4 order-1 lg:order-2">
+        <h3 className="font-prompt font-bold text-earth-800 mb-3 text-sm sm:text-base">ผลการสแกนล่าสุด</h3>
         {lastUuid ? (
           <div className="font-prompt">
-            <div className="text-sm text-earth-700">UUID</div>
-            <div className="text-xl font-semibold">{lastUuid}</div>
-            <div className="mt-2 text-green-700">
+            <div className="text-xs sm:text-sm text-earth-700">UUID</div>
+            <div className="text-lg sm:text-xl font-semibold break-all">{lastUuid}</div>
+            <div className="mt-2 text-green-700 text-sm">
               {type === 'beverage' ? 'บันทึกการรับเครื่องดื่มแล้ว' : 'บันทึกการรับอาหารแล้ว'}
             </div>
           </div>
         ) : (
-          <div className="text-sm text-earth-700">ยังไม่มีข้อมูลการสแกน</div>
+          <div className="text-xs sm:text-sm text-earth-700">ยังไม่มีข้อมูลการสแกน</div>
         )}
       </div>
 
       {/* Duplicate popup */}
       {duplicateInfo && (
-        <div className="fixed inset-0 bg-black/40 flex items-center justify-center z-50">
-          <div className="bg-white rounded-lg shadow-xl p-6 max-w-sm w-full">
-            <h4 className="font-prompt font-bold text-earth-900 mb-2">สแกนซ้ำ</h4>
-            <p className="font-prompt text-earth-800 mb-1">ผู้เข้าร่วมรายนี้ได้รับเรียบร้อยแล้ว</p>
-            <div className="font-prompt text-sm text-earth-700">
-              <div>UUID: <span className="font-semibold">{duplicateInfo.uuid}</span></div>
-              {(duplicateInfo.first_name || duplicateInfo.last_name) && (
-                <div>ชื่อ: {duplicateInfo.first_name || ''} {duplicateInfo.last_name || ''}</div>
-              )}
+        <div className="fixed inset-0 bg-black/40 flex items-center justify-center z-50 p-4">
+          <div className="bg-white rounded-lg shadow-xl p-4 sm:p-6 max-w-sm w-full mx-4 border border-red-200">
+            <div className="flex items-start gap-3">
+              <XCircleIcon className="h-6 w-6 text-red-600 mt-0.5" />
+              <div>
+                <h4 className="font-prompt font-bold text-red-700 mb-1 text-sm sm:text-base">สแกนซ้ำ</h4>
+                <p className="font-prompt text-red-700 mb-2 text-sm">ลูกค้ารายนี้ได้รับไปแล้ว</p>
+                <div className="font-prompt text-xs sm:text-sm text-earth-700">
+                  <div className="break-all">UUID: <span className="font-semibold">{duplicateInfo.uuid}</span></div>
+                  {(duplicateInfo.first_name || duplicateInfo.last_name) && (
+                    <div>ชื่อ: {duplicateInfo.first_name || ''} {duplicateInfo.last_name || ''}</div>
+                  )}
+                </div>
+              </div>
             </div>
             <div className="mt-4 flex justify-end gap-2">
               <button
                 onClick={() => setDuplicateInfo(null)}
-                className="bg-earth-700 hover:bg-earth-800 text-white font-prompt px-4 py-2 rounded"
+                className="bg-red-600 hover:bg-red-700 text-white font-prompt px-3 sm:px-4 py-2 rounded text-sm"
               >
                 ปิด
               </button>

@@ -33,24 +33,13 @@ export const metadata = {
   },
   icons: {
     icon: [
-      { url: '/fti-cci-logo-rgb.png' },
-      { url: '/favicon/favicon-16x16.png', sizes: '16x16', type: 'image/png' },
-      { url: '/favicon/favicon-32x32.png', sizes: '32x32', type: 'image/png' },
-      { url: '/favicon/favicon.ico', sizes: 'any' }
+      { url: '/Logo_FTI.webp?v=3', type: 'image/webp' },
     ],
-    shortcut: '/fti-cci-logo-rgb.png',
+    shortcut: '/Logo_FTI.webp?v=3',
     apple: [
-      { url: '/favicon/apple-touch-icon.png', sizes: '180x180', type: 'image/png' },
+      { url: '/Logo_FTI.webp?v=3', type: 'image/webp' },
     ],
-    other: [
-      {
-        rel: 'mask-icon',
-        url: '/favicon/safari-pinned-tab.svg',
-        color: '#5bbad5'
-      },
-    ]
   },
-  manifest: '/favicon/site.webmanifest',
   openGraph: {
     title: 'CCI Registration',
     description: 'Carbon Credit Initiative Seminar Registration by The Federation of Thai Industries',

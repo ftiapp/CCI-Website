@@ -11,12 +11,13 @@ export default function RegistrationForm({
   transportationTypes, 
   seminarRooms,
   bangkokDistricts,
-  provinces 
+  provinces,
+  privateAccess = false,
 }) {
   // Toggle to control registration availability
   const REGISTRATION_CLOSED = true; // set to false to re-open
 
-  if (REGISTRATION_CLOSED) {
+  if (REGISTRATION_CLOSED && !privateAccess) {
     return (
       <div className="max-w-3xl mx-auto px-4 py-10">
         <div className="bg-white/70 backdrop-blur rounded-xl shadow-sm border border-gray-200 overflow-hidden">
@@ -73,6 +74,7 @@ export default function RegistrationForm({
       seminarRooms={seminarRooms}
       bangkokDistricts={bangkokDistricts}
       provinces={provinces}
+      // private access only influences visibility here; the form logic remains the same
     />
   );
 }

@@ -5,12 +5,22 @@ import { EventStructuredData, BreadcrumbStructuredData } from '@/components/seo/
 import { generateMetadata } from './metadata';
 
 export { generateMetadata };
+export const dynamic = 'force-dynamic';
 
-export default async function RegisterPage({ params }) {
+export default async function RegisterPage({ params, searchParams }) {
   // ใช้ await กับ params ตามที่ Next.js 15 แนะนำ
   const _params = await Promise.resolve(params);
   const locale = _params?.locale || 'th';
   const t = getTranslations(locale);
+  // Determine private access via secret token (server-only)
+  const _searchParams = await Promise.resolve(searchParams);
+  const tokenFromUrl = _searchParams?.key || _searchParams?.token;
+  const privateAccess = Boolean(tokenFromUrl && process.env.PRIVATE_REG_TOKEN && tokenFromUrl === process.env.PRIVATE_REG_TOKEN);
+  if (privateAccess) {
+    console.log('[RegisterPage] Private registration access granted');
+  } else {
+    console.log('[RegisterPage] Private access not granted');
+  }
   
   // Fetch data for form dropdowns with error handling
   let organizationTypes = [];
@@ -97,6 +107,7 @@ export default async function RegisterPage({ params }) {
               seminarRooms={seminarRooms}
               bangkokDistricts={bangkokDistricts}
               provinces={provinces}
+              privateAccess={privateAccess}
             />
           </div>
         </div>

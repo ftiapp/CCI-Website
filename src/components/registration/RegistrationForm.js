@@ -74,7 +74,8 @@ export default function RegistrationForm({
       seminarRooms={seminarRooms}
       bangkokDistricts={bangkokDistricts}
       provinces={provinces}
-      // private access only influences visibility here; the form logic remains the same
+      // Pass through privateAccess so FormContainer can bypass deadline checks for staff access
+      privateAccess={privateAccess}
     />
   );
 }

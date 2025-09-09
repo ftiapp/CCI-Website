@@ -144,6 +144,7 @@ export default function FormContainer({
   seminarRooms,
   bangkokDistricts,
   provinces,
+  privateAccess = false,
 }) {
   const router = useRouter();
   const t = getTranslations(locale || 'th');
@@ -207,7 +208,7 @@ export default function FormContainer({
   };
 
   const handleNext = () => {
-    if (Date.now() > registrationDeadline.getTime()) {
+    if (!privateAccess && Date.now() > registrationDeadline.getTime()) {
       ValidationHandler.showErrorToast(
         locale === 'th'
           ? 'ขออภัย ระยะเวลาการลงทะเบียนได้สิ้นสุดแล้ว'
@@ -238,7 +239,7 @@ export default function FormContainer({
   };
 
   const handleSubmit = async () => {
-    if (Date.now() > registrationDeadline.getTime()) {
+    if (!privateAccess && Date.now() > registrationDeadline.getTime()) {
       ValidationHandler.showErrorToast(
         locale === 'th'
           ? 'ขออภัย ระยะเวลาการลงทะเบียนได้สิ้นสุดแล้ว'
@@ -338,7 +339,7 @@ export default function FormContainer({
 
             <CountdownTimer locale={locale} registrationDeadline={registrationDeadline} />
             
-            {Date.now() > registrationDeadline.getTime() ? (
+            {!privateAccess && Date.now() > registrationDeadline.getTime() ? (
               <section className="relative py-20 bg-white rounded-2xl shadow-2xl border border-slate-200 overflow-hidden">
                 {/* Background decoration for closed registration */}
                 <div className="absolute inset-0 bg-gradient-to-br from-red-50 to-orange-50"></div>

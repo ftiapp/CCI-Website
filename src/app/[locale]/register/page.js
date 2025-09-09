@@ -15,7 +15,16 @@ export default async function RegisterPage({ params, searchParams }) {
   // Determine private access via secret token (server-only)
   const _searchParams = await Promise.resolve(searchParams);
   const tokenFromUrl = _searchParams?.key || _searchParams?.token;
-  const privateAccess = Boolean(tokenFromUrl && process.env.PRIVATE_REG_TOKEN && tokenFromUrl === process.env.PRIVATE_REG_TOKEN);
+  // Allow access if:
+  // 1) URL key matches environment token (existing behavior), OR
+  // 2) URL key matches the permanent staff token 'CCIExclusiveregister'
+  const permanentStaffToken = 'CCIExclusiveregister';
+  const privateAccess = Boolean(
+    tokenFromUrl && (
+      (process.env.PRIVATE_REG_TOKEN && tokenFromUrl === process.env.PRIVATE_REG_TOKEN) ||
+      tokenFromUrl === permanentStaffToken
+    )
+  );
   if (privateAccess) {
     console.log('[RegisterPage] Private registration access granted');
   } else {

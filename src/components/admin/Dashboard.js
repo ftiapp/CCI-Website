@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useCallback } from 'react';
 import ErrorBoundary from '../ErrorBoundary';
-import { ChartBarIcon, MapPinIcon, TruckIcon, UsersIcon, CheckCircleIcon, CalendarIcon, UserIcon, ClipboardDocumentListIcon, BuildingOfficeIcon } from '@heroicons/react/24/outline';
+import { ChartBarIcon, MapPinIcon, TruckIcon, UsersIcon, CheckCircleIcon, XCircleIcon, CalendarIcon, UserIcon, ClipboardDocumentListIcon, BuildingOfficeIcon, ArrowDownTrayIcon } from '@heroicons/react/24/outline';
 import toast from 'react-hot-toast';
 import ScheduleManagement from './ScheduleManagement';
 import RegistrantManagement from './registrant/RegistrantManagement';
@@ -27,6 +27,15 @@ export default function Dashboard() {
   const [transportFilter, setTransportFilter] = useState('all');
   const [checkInFilter, setCheckInFilter] = useState('all');
   const [provinces, setProvinces] = useState([]);
+  const [roomFilter, setRoomFilter] = useState('all');
+  const [rooms, setRooms] = useState([]);
+
+  // Participants state
+  const [participants, setParticipants] = useState([]);
+  const [participantsLoading, setParticipantsLoading] = useState(false);
+  const [page, setPage] = useState(1);
+  const [limit] = useState(20);
+  const [totalPages, setTotalPages] = useState(1);
   
   const handleProvinceFilterChange = (e) => {
     setProvinceFilter(e.target.value);
@@ -39,13 +48,16 @@ export default function Dashboard() {
   const handleCheckInFilterChange = (e) => {
     setCheckInFilter(e.target.value);
   };
+  const handleRoomFilterChange = (e) => {
+    setRoomFilter(e.target.value);
+  };
   
   // Fetch dashboard data - wrapped in useCallback to prevent unnecessary re-renders
   const fetchDashboardData = useCallback(async () => {
     setIsLoading(true);
     
     try {
-      const response = await fetch(`/api/admin/dashboard?province=${provinceFilter}&transport=${transportFilter}&checkin=${checkInFilter}`);
+      const response = await fetch(`/api/admin/dashboard?province=${provinceFilter}&transport=${transportFilter}&checkin=${checkInFilter}&room=${roomFilter}`);
       const data = await response.json();
       
       if (data.success) {
@@ -74,12 +86,71 @@ export default function Dashboard() {
     } finally {
       setIsLoading(false);
     }
-  }, [provinceFilter, transportFilter, checkInFilter]);
+  }, [provinceFilter, transportFilter, checkInFilter, roomFilter]);
+
+  // Fetch seminar rooms for room filter
+  const fetchRooms = useCallback(async () => {
+    try {
+      const res = await fetch('/api/admin/seminar-rooms');
+      const data = await res.json();
+      if (data.success) {
+        setRooms(data.rooms || []);
+      }
+    } catch (err) {
+      console.error('Error fetching rooms:', err);
+    }
+  }, []);
+
+  // Fetch participants list for bottom table
+  const fetchParticipants = useCallback(async () => {
+    setParticipantsLoading(true);
+    try {
+      const params = new URLSearchParams();
+      params.set('page', String(page));
+      params.set('limit', String(limit));
+      // Map checkInFilter to status values: all | 0 | 1 | 2
+      if (provinceFilter !== 'all') params.set('province', provinceFilter);
+      if (roomFilter !== 'all') params.set('room', roomFilter);
+      if (checkInFilter !== 'all') {
+        const status = checkInFilter === 'checked_in' ? '1' : checkInFilter === 'not_checked_in' ? '0' : checkInFilter === 'not_attending' ? '2' : 'all';
+        if (status !== 'all') params.set('status', status);
+      }
+      const res = await fetch(`/api/admin/participants?${params.toString()}`);
+      const data = await res.json();
+      if (data.success) {
+        setParticipants(data.participants || []);
+        setTotalPages(data.pagination?.totalPages || 1);
+      }
+    } catch (err) {
+      console.error('Error fetching participants:', err);
+      toast.error('เกิดข้อผิดพลาดในการโหลดรายชื่อผู้ลงทะเบียน', {
+        position: 'top-right',
+        style: {
+          borderRadius: '10px',
+          background: '#333',
+          color: '#fff',
+          padding: '16px',
+          fontFamily: 'prompt, sans-serif',
+          fontWeight: '500',
+        },
+      });
+    } finally {
+      setParticipantsLoading(false);
+    }
+  }, [page, limit, provinceFilter, roomFilter, checkInFilter]);
   
   // Fetch data on component mount and when filters change
   useEffect(() => {
     fetchDashboardData();
   }, [fetchDashboardData]);
+
+  useEffect(() => {
+    fetchRooms();
+  }, [fetchRooms]);
+
+  useEffect(() => {
+    fetchParticipants();
+  }, [fetchParticipants]);
   
   // Calculate check-in percentage
   const checkInPercentage = stats.totalRegistrations > 0
@@ -197,7 +268,7 @@ export default function Dashboard() {
               ตัวกรองข้อมูล
             </h3>
             
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6">
               {/* Province Filter */}
               <div className="flex flex-col gap-2">
                 <label htmlFor="provinceFilter" className="text-sm font-medium text-gray-700 font-prompt">
@@ -269,6 +340,31 @@ export default function Dashboard() {
                     <option value="checked_in">เช็คอินแล้ว</option>
                     <option value="not_checked_in">ยังไม่ได้เช็คอิน</option>
                     <option value="not_attending">ไม่เข้าร่วม</option>
+                  </select>
+                  <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center px-2 text-gray-700">
+                    <svg className="fill-current h-4 w-4" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20">
+                      <path d="M9.293 12.95l.707.707L15.657 8l-1.414-1.414L10 10.828 5.757 6.586 4.343 8z" />
+                    </svg>
+                  </div>
+                </div>
+              </div>
+
+              {/* Room Filter */}
+              <div className="flex flex-col gap-2">
+                <label htmlFor="roomFilter" className="text-sm font-medium text-gray-700 font-prompt">
+                  กรองตามห้องสัมมนา
+                </label>
+                <div className="relative">
+                  <select
+                    id="roomFilter"
+                    value={roomFilter}
+                    onChange={handleRoomFilterChange}
+                    className="w-full border border-gray-300 rounded-lg px-4 py-2.5 font-prompt text-sm focus:ring-2 focus:ring-earth-500 focus:border-earth-500 appearance-none bg-white"
+                  >
+                    <option value="all">ทุกห้อง</option>
+                    {rooms.map(room => (
+                      <option key={room.id} value={room.id}>{room.name_th}</option>
+                    ))}
                   </select>
                   <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center px-2 text-gray-700">
                     <svg className="fill-current h-4 w-4" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20">
@@ -437,7 +533,6 @@ export default function Dashboard() {
                   <h3 className="text-lg font-prompt font-semibold text-earth-800 mb-4">
                     การเข้าร่วมตามจังหวัด (Top 5)
                   </h3>
-                  
                   {stats.provinceDistribution.length > 0 ? (
                     <div className="space-y-4">
                       {stats.provinceDistribution
@@ -456,19 +551,16 @@ export default function Dashboard() {
                     <p className="text-gray-500 text-center py-4">ไม่มีข้อมูลการเข้าร่วมตามจังหวัด</p>
                   )}
                 </div>
-                
                 {/* Transportation Distribution */}
                 <div className="bg-white rounded-lg shadow-md p-6">
                   <h3 className="text-lg font-prompt font-semibold text-earth-800 mb-4">
                     การเข้าร่วมตามวิธีการเดินทาง
                   </h3>
-                  
                   {stats.transportationDistribution.length > 0 ? (
                     <div className="space-y-4">
                       {stats.transportationDistribution.map((transport) => {
                         const colors = getTransportColors(transport.type);
                         const displayName = getTransportDisplayName(transport.type);
-                        
                         return (
                           <div key={transport.type} className="flex justify-between items-center">
                             <p className="font-prompt">{displayName}</p>
@@ -482,6 +574,93 @@ export default function Dashboard() {
                   ) : (
                     <p className="text-gray-500 text-center py-4">ไม่มีข้อมูลการเข้าร่วมตามวิธีการเดินทาง</p>
                   )}
+                </div>
+              </div>
+
+              {/* Participants List with Export */}
+              <div className="bg-white rounded-lg shadow-md p-6">
+                <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 mb-4">
+                  <h3 className="text-lg font-prompt font-semibold text-earth-800">รายชื่อผู้ลงทะเบียน</h3>
+                  <div className="flex items-center gap-2">
+                    <button
+                      onClick={() => {
+                        const params = new URLSearchParams();
+                        if (provinceFilter !== 'all') params.set('province', provinceFilter);
+                        if (roomFilter !== 'all') params.set('room', roomFilter);
+                        if (checkInFilter !== 'all') {
+                          const status = checkInFilter === 'checked_in' ? '1' : checkInFilter === 'not_checked_in' ? '0' : checkInFilter === 'not_attending' ? '2' : 'all';
+                          if (status !== 'all') params.set('status', status);
+                        }
+                        const url = `/api/admin/export-registrants?${params.toString()}`;
+                        window.open(url, '_blank');
+                      }}
+                      className="bg-earth-600 hover:bg-earth-700 text-white font-prompt text-sm px-4 py-2 rounded-lg transition-colors flex items-center"
+                    >
+                      <ArrowDownTrayIcon className="h-4 w-4 mr-2" />
+                      ส่งออกเป็น Excel
+                    </button>
+                  </div>
+                </div>
+                <div className="overflow-x-auto">
+                  <table className="min-w-full divide-y divide-gray-200">
+                    <thead className="bg-gray-50">
+                      <tr>
+                        <th className="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">รหัส</th>
+                        <th className="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">ชื่อ-นามสกุล</th>
+                        <th className="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">องค์กร</th>
+                        <th className="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">ห้องสัมมนา</th>
+                        <th className="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">สถานะเช็คอิน</th>
+                        <th className="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">วันที่ลงทะเบียน</th>
+                      </tr>
+                    </thead>
+                    <tbody className="bg-white divide-y divide-gray-200">
+                      {participantsLoading ? (
+                        <tr>
+                          <td colSpan={6} className="px-4 py-6 text-center">
+                            <div className="inline-block animate-spin rounded-full h-8 w-8 border-t-2 border-b-2 border-earth-600"></div>
+                          </td>
+                        </tr>
+                      ) : participants.length === 0 ? (
+                        <tr>
+                          <td colSpan={6} className="px-4 py-6 text-center text-gray-500">ไม่พบข้อมูล</td>
+                        </tr>
+                      ) : (
+                        participants.map((p) => (
+                          <tr key={p.id}>
+                            <td className="px-4 py-2 whitespace-nowrap font-mono text-sm">{p.uuid}</td>
+                            <td className="px-4 py-2 whitespace-nowrap">{p.first_name} {p.last_name}</td>
+                            <td className="px-4 py-2">{p.organization_name || '-'}</td>
+                            <td className="px-4 py-2">{p.room_name_th || '-'}</td>
+                            <td className="px-4 py-2">
+                            {p.check_in_status === 1 ? (
+                              <CheckCircleIcon className="h-5 w-5 text-green-600" title="เช็คอินแล้ว" />
+                            ) : p.check_in_status === 2 ? (
+                              <XCircleIcon className="h-5 w-5 text-red-500" title="ไม่เข้าร่วม" />
+                            ) : (
+                              <span className="text-gray-500 text-lg" title="ยังไม่ได้เช็คอิน">-</span>
+                            )}
+                          </td>
+                            <td className="px-4 py-2 whitespace-nowrap text-sm text-gray-600">{p.registration_date ? new Date(p.registration_date).toLocaleString('th-TH') : '-'}</td>
+                          </tr>
+                        ))
+                      )}
+                    </tbody>
+                  </table>
+                </div>
+                <div className="flex justify-between items-center mt-4">
+                  <p className="text-sm text-gray-600">หน้า {page} จาก {totalPages}</p>
+                  <div className="flex gap-2">
+                    <button
+                      className="px-3 py-1 text-sm rounded border border-gray-300 disabled:opacity-50"
+                      onClick={() => setPage((p) => Math.max(1, p - 1))}
+                      disabled={page <= 1}
+                    >ก่อนหน้า</button>
+                    <button
+                      className="px-3 py-1 text-sm rounded border border-gray-300 disabled:opacity-50"
+                      onClick={() => setPage((p) => Math.min(totalPages, p + 1))}
+                      disabled={page >= totalPages}
+                    >ถัดไป</button>
+                  </div>
                 </div>
               </div>
             </>

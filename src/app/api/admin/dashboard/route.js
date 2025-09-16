@@ -8,6 +8,7 @@ export async function GET(request) {
     const provinceFilter = searchParams.get('province') || 'all';
     const transportFilter = searchParams.get('transport') || 'all';
     const checkInFilter = searchParams.get('checkin') || 'all';
+    const roomFilter = searchParams.get('room') || 'all';
     
     // Build base WHERE clause for filters
     let whereClause = '';
@@ -47,6 +48,12 @@ export async function GET(request) {
         whereClause += ' AND r.check_in_status = ?';
         params.push(2);
       }
+    }
+
+    // Room filter
+    if (roomFilter !== 'all') {
+      whereClause += ' AND r.selected_room_id = ?';
+      params.push(parseInt(roomFilter));
     }
     
     // Get total registrations

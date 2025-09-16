@@ -8,7 +8,16 @@ export async function GET(request) {
     const { searchParams } = new URL(request.url);
     const search = searchParams.get('search') || '';
     const provinceFilter = searchParams.get('province') || 'all';
-    const statusFilter = searchParams.get('status') || 'all';
+    const statusFilterRaw = searchParams.get('status') || 'all';
+    const roomFilterRaw = searchParams.get('room') || 'all';
+    
+    // Normalize filters
+    const statusFilter = statusFilterRaw !== 'all' && !Number.isNaN(parseInt(statusFilterRaw))
+      ? String(parseInt(statusFilterRaw))
+      : 'all';
+    const roomFilter = roomFilterRaw !== 'all' && !Number.isNaN(parseInt(roomFilterRaw))
+      ? String(parseInt(roomFilterRaw))
+      : 'all';
     
     // Build WHERE clause for filters
     let whereClause = '1=1';
@@ -36,6 +45,12 @@ export async function GET(request) {
     if (statusFilter !== 'all') {
       whereClause += ' AND r.check_in_status = ?';
       params.push(parseInt(statusFilter));
+    }
+    
+    // Room filter
+    if (roomFilter !== 'all') {
+      whereClause += ' AND r.selected_room_id = ?';
+      params.push(parseInt(roomFilter));
     }
     
     // Get all registrants with their related data
@@ -158,11 +173,11 @@ export async function GET(request) {
     const workbook = XLSX.utils.book_new();
     XLSX.utils.book_append_sheet(workbook, worksheet, 'Registrants');
     
-    // Generate Excel file
-    const excelBuffer = XLSX.write(workbook, { bookType: 'xlsx', type: 'buffer' });
+    // Generate Excel file as Uint8Array for compatibility
+    const excelArray = XLSX.write(workbook, { bookType: 'xlsx', type: 'array' });
     
     // Return Excel file as response
-    return new NextResponse(excelBuffer, {
+    return new Response(excelArray, {
       headers: {
         'Content-Disposition': 'attachment; filename="registrants.xlsx"',
         'Content-Type': 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
@@ -170,7 +185,7 @@ export async function GET(request) {
     });
     
   } catch (error) {
-    console.error('Error exporting registrants:', error);
+    console.error('Error exporting registrants:', error?.message || error, error?.stack);
     return NextResponse.json(
       { success: false, error: 'Internal server error' },
       { status: 500 }

@@ -12,6 +12,7 @@ export async function GET(request) {
     const statusFilter = searchParams.get('status') || 'all';
     const organizationTypeFilter = searchParams.get('organization_type') || 'all';
     const industryTypeFilter = searchParams.get('industry_type') || 'all';
+    const roomFilter = searchParams.get('room') || 'all';
     
     // Calculate offset
     const offset = (page - 1) * limit;
@@ -54,6 +55,12 @@ export async function GET(request) {
     if (industryTypeFilter !== 'all') {
       whereClause += ' AND r.industry_type_id = ?';
       params.push(parseInt(industryTypeFilter));
+    }
+    
+    // Room filter
+    if (roomFilter !== 'all') {
+      whereClause += ' AND r.selected_room_id = ?';
+      params.push(parseInt(roomFilter));
     }
     
     // Get total count

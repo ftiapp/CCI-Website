@@ -1,4 +1,3 @@
-import { CheckCircleIcon, XCircleIcon } from '@heroicons/react/24/outline';
 import { CheckCircleIcon as CheckCircleSolidIcon } from '@heroicons/react/24/solid';
 import ActionButtons from './ActionButtons';
 import { formatTransportation, formatLocation, formatAttendanceType } from './utils';
@@ -88,7 +87,7 @@ export default function ParticipantInfo({
                   </>
                 ) : (
                   <>
-                    <XCircleIcon className="h-5 w-5 text-gray-400 mr-2" />
+                    <span className="text-gray-500 text-lg mr-2" aria-hidden="true">-</span>
                     <span className="font-prompt text-gray-600">ยังไม่ได้เช็คอิน</span>
                   </>
                 )}
